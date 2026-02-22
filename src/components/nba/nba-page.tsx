@@ -20,7 +20,7 @@ function Nba() {
   }, [filters]);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">NBA Schedule</h1>
         <div className="flex gap-2">

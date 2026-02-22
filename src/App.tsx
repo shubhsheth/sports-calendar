@@ -17,7 +17,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex justify-center p-4">
+      <div className="p-4">
         <F1 />
         {/* <Nba /> */}
       </div>
