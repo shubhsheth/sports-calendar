@@ -22,16 +22,18 @@ function F1() {
 
   return (
     <div className="max-w-3xl">
-      <div className="flex justify-between mb-4">
+      <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">F1 Schedule</h1>
-        <DownloadIcalButton<F1Event, F1EventFilters>
-          fetchEventRefsFn={fetchF1EventRefs}
-          transformEventsToIcsFn={transformF1EventsToIcs}
-          filterEvents={filterF1Events}
-          eventFilters={filters}
-          baseQueryKey={F1_BASE_QUERY_KEY}
-        />
-        <F1FilterSelector filters={filters} setFilters={setFilters} />
+        <div className="flex gap-2">
+          <DownloadIcalButton<F1Event, F1EventFilters>
+            fetchEventRefsFn={fetchF1EventRefs}
+            transformEventsToIcsFn={transformF1EventsToIcs}
+            filterEvents={filterF1Events}
+            eventFilters={filters}
+            baseQueryKey={F1_BASE_QUERY_KEY}
+          />
+          <F1FilterSelector filters={filters} setFilters={setFilters} />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4">
