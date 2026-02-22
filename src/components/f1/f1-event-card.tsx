@@ -1,6 +1,5 @@
-import type { F1Event, F1EventCompetition, F1EventFilters } from "@/types/f1";
+import type { F1Event, F1EventFilters } from "@/types/f1";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableRow } from "../ui/table";
 import dayjs from "dayjs";
 import { translateF1EventTypeAbbr } from "./utils/translateF1EventType";
 import { cleanUpSponsorName } from "./utils/cleanUpSponsorName";
