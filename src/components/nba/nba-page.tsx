@@ -1,7 +1,7 @@
 import NbaEventCard from "./nba-event-card";
 import { fetchNbaEventRefs } from "./utils/fetchNbaEventRefs";
 import InfiniteScrollEvents from "../base/infinite-scroll-events";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { NbaEvent, NbaEventFilters } from "@/types/nba";
 import NbaFilterSelector from "./nba-filter-selector";
 import DownloadIcalButton from "../base/download-ical-button";
@@ -14,10 +14,6 @@ function Nba() {
   const [filters, setFilters] = useState<NbaEventFilters>({
     showPastEvents: true,
   });
-
-  useEffect(() => {
-    console.log("Filters updated", filters);
-  }, [filters]);
 
   return (
     <div className="max-w-3xl mx-auto">

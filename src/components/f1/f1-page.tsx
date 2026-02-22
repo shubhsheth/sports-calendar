@@ -2,7 +2,7 @@ import { fetchF1EventRefs } from "./utils/fetchF1EventRefs";
 import F1EventCard from "./f1-event-card";
 import InfiniteScrollEvents from "../base/infinite-scroll-events";
 import F1FilterSelector from "./f1-filter-selector";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { F1Event, F1EventFilters } from "@/types/f1";
 import DownloadIcalButton from "../base/download-ical-button";
 import { transformF1EventsToIcs } from "./utils/transformF1EventsToIcs";
@@ -15,10 +15,6 @@ function F1() {
     showPastEvents: true,
     types: ["2", "3", "4", "6"],
   });
-
-  useEffect(() => {
-    console.log("Filters updated", filters);
-  }, [filters]);
 
   return (
     <div className="max-w-3xl mx-auto">
