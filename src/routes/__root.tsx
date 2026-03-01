@@ -7,7 +7,7 @@ export const Route = createRootRoute({
     <>
       <HeadContent />
       <Header />
-      <div className="py-8">
+      <div className="py-8 px-4">
         <Outlet />
       </div>
       <Footer />
