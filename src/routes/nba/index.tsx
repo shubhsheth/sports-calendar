@@ -1,16 +1,21 @@
-import NbaEventCard from "./nba-event-card";
-import { fetchNbaEventRefs } from "./utils/fetchNbaEventRefs";
-import InfiniteScrollEvents from "../base/infinite-scroll-events";
 import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import type { NbaEvent, NbaEventFilters } from "@/types/nba";
-import NbaFilterSelector from "./nba-filter-selector";
-import DownloadIcalButton from "../base/download-ical-button";
-import { transformNbaEventsToIcs } from "./utils/transformNbaEventsToIcs";
-import { filterNbaEvents } from "./utils/filterNbaEvents";
+import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
+import DownloadIcalButton from "@/components/base/download-ical-button";
+import NbaEventCard from "@/components/nba/nba-event-card";
+import NbaFilterSelector from "@/components/nba/nba-filter-selector";
+import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
+import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
+import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+
+export const Route = createFileRoute("/nba/")({
+  component: NbaPage,
+});
 
 const NBA_BASE_QUERY_KEY = "nba";
 
-function Nba() {
+function NbaPage() {
   const [filters, setFilters] = useState<NbaEventFilters>({
     showPastEvents: true,
   });
@@ -41,5 +46,3 @@ function Nba() {
     </div>
   );
 }
-
-export default Nba;
