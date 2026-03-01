@@ -11,6 +11,17 @@ import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
 
 export const Route = createFileRoute("/nba/")({
   component: NbaPage,
+  head: () => ({
+    meta: [
+      {
+        title:
+          "NBA Schedule - Sports Calendar: View schedules for your favorite sports in one place",
+        name: "description",
+        content:
+          "Stay up-to-date with the latest NBA schedule. Add events to your calendar with one click.",
+      },
+    ],
+  }),
 });
 
 const NBA_BASE_QUERY_KEY = "nba";

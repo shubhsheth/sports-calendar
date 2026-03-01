@@ -11,6 +11,17 @@ import { filterF1Events } from "@/components/f1/utils/filterF1Events";
 
 export const Route = createFileRoute("/f1/")({
   component: F1Page,
+  head: () => ({
+    meta: [
+      {
+        title:
+          "F1 Schedule - Sports Calendar: View schedules for your favorite sports in one place",
+        name: "description",
+        content:
+          "Stay up-to-date with the latest F1 schedule. Add events to your calendar with one click.",
+      },
+    ],
+  }),
 });
 
 const F1_BASE_QUERY_KEY = "f1";

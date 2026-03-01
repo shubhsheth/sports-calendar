@@ -2,6 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
+  head: () => ({
+    meta: [
+      {
+        title:
+          "Sports Calendar: View schedules for your favorite sports in one place",
+        name: "description",
+        content:
+          "Sports Calendar is your go-to destination for viewing schedules of your favorite sports in one convenient place. Stay up-to-date with the latest game times, matchups, and events across various sports leagues. Whether you're a fan of basketball, football, soccer, or any other sport, Sports Calendar has you covered with an easy-to-use interface and comprehensive schedule information.",
+      },
+    ],
+  }),
 });
 
 function IndexComponent() {
