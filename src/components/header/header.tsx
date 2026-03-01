@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { Github } from "lucide-react";
 
 function Header() {
   return (
@@ -9,16 +7,6 @@ function Header() {
         <h1 className="text-2xl font-bold">
           <Link to="/">Sports Cal</Link>
         </h1>
-        <div className="flex flex-row gap-2 justify-end">
-          <Button variant="ghost" size="icon-lg">
-            <a
-              href="https://github.com/shubhsheth/sports-calendar"
-              target="_blank"
-            >
-              <Github />
-            </a>
-          </Button>
-        </div>
       </div>
     </header>
   );
