@@ -9,58 +9,89 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NflRouteImport } from './routes/nfl'
+import { Route as NbaRouteImport } from './routes/nba'
+import { Route as F1RouteImport } from './routes/f1'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NbaIndexRouteImport } from './routes/nba/index'
-import { Route as F1IndexRouteImport } from './routes/f1/index'
 
+const NflRoute = NflRouteImport.update({
+  id: '/nfl',
+  path: '/nfl',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NbaRoute = NbaRouteImport.update({
+  id: '/nba',
+  path: '/nba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const F1Route = F1RouteImport.update({
+  id: '/f1',
+  path: '/f1',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NbaIndexRoute = NbaIndexRouteImport.update({
-  id: '/nba/',
-  path: '/nba/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const F1IndexRoute = F1IndexRouteImport.update({
-  id: '/f1/',
-  path: '/f1/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/f1/': typeof F1IndexRoute
-  '/nba/': typeof NbaIndexRoute
+  '/f1': typeof F1Route
+  '/nba': typeof NbaRoute
+  '/nfl': typeof NflRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/f1': typeof F1IndexRoute
-  '/nba': typeof NbaIndexRoute
+  '/f1': typeof F1Route
+  '/nba': typeof NbaRoute
+  '/nfl': typeof NflRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/f1/': typeof F1IndexRoute
-  '/nba/': typeof NbaIndexRoute
+  '/f1': typeof F1Route
+  '/nba': typeof NbaRoute
+  '/nfl': typeof NflRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/f1/' | '/nba/'
+  fullPaths: '/' | '/f1' | '/nba' | '/nfl'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/f1' | '/nba'
-  id: '__root__' | '/' | '/f1/' | '/nba/'
+  to: '/' | '/f1' | '/nba' | '/nfl'
+  id: '__root__' | '/' | '/f1' | '/nba' | '/nfl'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  F1IndexRoute: typeof F1IndexRoute
-  NbaIndexRoute: typeof NbaIndexRoute
+  F1Route: typeof F1Route
+  NbaRoute: typeof NbaRoute
+  NflRoute: typeof NflRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/nfl': {
+      id: '/nfl'
+      path: '/nfl'
+      fullPath: '/nfl'
+      preLoaderRoute: typeof NflRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nba': {
+      id: '/nba'
+      path: '/nba'
+      fullPath: '/nba'
+      preLoaderRoute: typeof NbaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f1': {
+      id: '/f1'
+      path: '/f1'
+      fullPath: '/f1'
+      preLoaderRoute: typeof F1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -68,27 +99,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/nba/': {
-      id: '/nba/'
-      path: '/nba'
-      fullPath: '/nba/'
-      preLoaderRoute: typeof NbaIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/f1/': {
-      id: '/f1/'
-      path: '/f1'
-      fullPath: '/f1/'
-      preLoaderRoute: typeof F1IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  F1IndexRoute: F1IndexRoute,
-  NbaIndexRoute: NbaIndexRoute,
+  F1Route: F1Route,
+  NbaRoute: NbaRoute,
+  NflRoute: NflRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -30,6 +30,12 @@ function IndexComponent() {
       >
         View F1 Schedule
       </Link>
+      <Link
+        to="/nfl"
+        className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+      >
+        View NFL Schedule
+      </Link>
     </div>
   );
 }

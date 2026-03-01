@@ -1,55 +1,55 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import type { NbaEvent, NbaEventFilters } from "@/types/nba";
+import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import NbaEventCard from "@/components/nba/nba-event-card";
 import NbaFilterSelector from "@/components/nba/nba-filter-selector";
-import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
-import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
 import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
+import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
 
-export const Route = createFileRoute("/nba/")({
-  component: NbaPage,
+export const Route = createFileRoute("/nfl")({
+  component: NflPage,
   head: () => ({
     meta: [
       {
         title:
-          "NBA Schedule - Sports Calendar: View schedules for your favorite sports in one place",
+          "NFL Schedule - Sports Calendar: View schedules for your favorite sports in one place",
         name: "description",
         content:
-          "Stay up-to-date with the latest NBA schedule. Add events to your calendar with one click.",
+          "Stay up-to-date with the latest NFL schedule. Add events to your calendar with one click.",
       },
     ],
   }),
 });
 
-const NBA_BASE_QUERY_KEY = "nba";
+const NFL_BASE_QUERY_KEY = "nfl";
 
-function NbaPage() {
-  const [filters, setFilters] = useState<NbaEventFilters>({
+function NflPage() {
+  const [filters, setFilters] = useState<NflEventFilters>({
     showPastEvents: true,
   });
 
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex w-full justify-between mb-4">
-        <h1 className="text-4xl font-extrabold tracking-tight">NBA Schedule</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight">NFL Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<NbaEvent, NbaEventFilters>
-            fetchEventRefsFn={fetchNbaEventRefs}
-            transformEventsToIcsFn={transformNbaEventsToIcs}
+          <DownloadIcalButton<NflEvent, NflEventFilters>
+            fetchEventRefsFn={fetchNflEventRefs}
+            transformEventsToIcsFn={transformNflEventsToIcs}
             filterEvents={filterNbaEvents}
             eventFilters={filters}
-            baseQueryKey={NBA_BASE_QUERY_KEY}
+            baseQueryKey={NFL_BASE_QUERY_KEY}
           />
           <NbaFilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
-          baseQueryKey={NBA_BASE_QUERY_KEY}
-          fetchEventRefsFn={fetchNbaEventRefs}
+          baseQueryKey={NFL_BASE_QUERY_KEY}
+          fetchEventRefsFn={fetchNflEventRefs}
           filters={filters}
           eventCard={NbaEventCard}
         />

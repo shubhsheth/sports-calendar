@@ -9,7 +9,7 @@ import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
 import { filterF1Events } from "@/components/f1/utils/filterF1Events";
 
-export const Route = createFileRoute("/f1/")({
+export const Route = createFileRoute("/f1")({
   component: F1Page,
   head: () => ({
     meta: [
