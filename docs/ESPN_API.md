@@ -350,23 +350,3 @@ The `fetchEventRefsBySeason()` + `fetchEventDetails()` pipeline is generic and w
 | IndyCar        | `racing`    | `irl`            | Session structure vs F1 is unknown |
 
 **Caution:** Team sports with non-standard period structures (baseball, soccer) will have different competition shapes. Other racing series may not use F1's multi-competition-per-event model.
-
----
-
-## 12. Open Questions
-
-1. **Full set of season type IDs per league** — All three leagues are hardcoded to `types/2`. What valid type IDs exist for each? Does the NFL API separate Wild Card, Divisional, Conference Championship, and Super Bowl into distinct type IDs under postseason? For F1, does `types/2` simply mean "the race calendar" or is there a meaningful distinction?
-
-2. **F1 competition type ID `"5"`** — This value is absent from `translateF1EventType.ts`. What session does it represent? Sprint weekends account for `"4"` and `"6"`, but the gap from `"3"` (Race) to `"6"` (Sprint Race) suggests `"4"` and `"5"` may have originally been used differently.
-
-3. **F1 `competition.session` field** — Stored in `F1EventCompetition` but never read in the UI or filters. How does it relate to `type.id`? Could it serve as a reliable sort key independent of `date` (e.g. if session times are TBD)?
-
-4. **`timeValid: false` handling** — When a game has no confirmed time, `timeValid` is `false` but `competition.date` is still present (likely midnight UTC or a placeholder). The ICS export uses this date as-is. Should TBD-time events be exported differently — e.g. as all-day events?
-
-5. **`bracketAvailable` and `recent` fields** — Present in every competition across all three leagues but never consumed. What do they indicate? `recent` may flag games within the past N days; `bracketAvailable` may flag playoff bracket eligibility.
-
-6. **`status.$ref` contents** — Never followed by this project. The status object likely contains fields like `type.name` ("scheduled" / "in-progress" / "final") that could power a future "game status" badge on event cards without requiring live score data.
-
-7. **Dynamic season discovery** — The Core API exposes a seasons list at `/v2/sports/{sportId}/leagues/{leagueId}/seasons`. Could this be queried at startup to resolve the current season ID instead of hardcoding it? The response likely includes a `year` field and a `type` indicating whether it is the active season.
-
-8. **Other racing leagues** — `nascar-premier` and `irl` (IndyCar) share the `racing` sportId with F1. Do they use F1's multi-competition-per-event model (one competition per session in a race weekend), or is that structure unique to F1?
