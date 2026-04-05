@@ -25,9 +25,19 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 
 ---
 
+## Documentation
+
+| File | Description |
+|------|-------------|
+| `docs/ESPN_API.md` | ESPN Core API reference — endpoints, `$ref` pattern, per-league event structures, fetch pipeline, ICS mapping, and candidate leagues for expansion |
+
+---
+
 ## Directory Structure
 
 ```
+docs/
+└── ESPN_API.md                  # ESPN Core API reference
 src/
 ├── api/espn/
 │   ├── fetchEventRefs.ts        # Paginated event references from ESPN
