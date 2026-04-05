@@ -18,8 +18,15 @@ function Footer() {
           </a>
         </p>
         <p className="text-sm mt-2 text-gray-500">
-          © {new Date().getFullYear()} Sports Cal. All sports trademarks are
-          copyright to respective owners.
+          © {new Date().getFullYear()} Sports Cal. All sports data provided by{" "}
+          <a
+            href="https://www.espn.com"
+            target="_blank"
+            className="underline"
+          >
+            ESPN
+          </a>
+          . All sports trademarks are copyright to respective owners.
         </p>
       </div>
     </footer>
