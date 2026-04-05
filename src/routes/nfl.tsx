@@ -4,8 +4,8 @@ import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import NbaEventCard from "@/components/nba/nba-event-card";
-import NbaFilterSelector from "@/components/nba/nba-filter-selector";
-import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
+import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
 import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
 
@@ -39,11 +39,11 @@ function NflPage() {
           <DownloadIcalButton<NflEvent, NflEventFilters>
             fetchEventRefsFn={fetchNflEventRefs}
             transformEventsToIcsFn={transformNflEventsToIcs}
-            filterEvents={filterNbaEvents}
+            filterEvents={filterNflEvents}
             eventFilters={filters}
             baseQueryKey={NFL_BASE_QUERY_KEY}
           />
-          <NbaFilterSelector filters={filters} setFilters={setFilters} />
+          <NflFilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>
       <div className="flex flex-wrap gap-4">
