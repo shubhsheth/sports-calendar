@@ -124,15 +124,3 @@ Download button:
   → Transform to iCalendar EventAttributes[]
   → Write .ics Blob → js-file-download
 ```
-
----
-
-## Open Questions
-
-1. **NFL has no dedicated card or filter** — `nfl.tsx` reuses `NbaEventCard` and `NbaFilterSelector`. Intentional or incomplete?
-2. **No tests** — Zero `.test.ts` / `.spec.tsx` files. Is coverage planned?
-3. **Hardcoded seasons** — NBA=2026, NFL=2025. How do these update year-over-year?
-4. **No error boundaries** — A single failed ESPN call crashes the whole route.
-5. **NBA/NFL type duplication** — Types are nearly identical; a shared `TeamSportEvent` base was not created.
-6. **Dark mode** — CSS variables suggest readiness, but no toggle UI exists.
-7. **More sports** — Architecture supports adding MLB, NHL, MLS, etc. Is that the roadmap?
