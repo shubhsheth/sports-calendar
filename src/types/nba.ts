@@ -52,4 +52,5 @@ export type NbaTeam = BaseTeam & {
 
 export type NbaEventFilters = {
   showPastEvents: boolean;
+  teamIds: string[]; // empty = no filter (all teams shown)
 };
