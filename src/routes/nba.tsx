@@ -29,6 +29,7 @@ const NBA_BASE_QUERY_KEY = "nba";
 function NbaPage() {
   const [filters, setFilters] = useState<NbaEventFilters>({
     showPastEvents: true,
+    teamIds: [],
   });
 
   return (
