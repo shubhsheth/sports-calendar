@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { NbaEventFilters, NbaTeam } from "@/types/nba";
+import type { NbaEventFilters } from "@/types/nba";
 import {
   Sheet,
   SheetClose,
@@ -32,20 +32,59 @@ type NbaFilterSelectorProps = {
   setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>;
 };
 
-type TeamFilterFieldSetProps = {
-  filters: NbaEventFilters;
-  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>;
-  teams: NbaTeam[] | undefined;
-  teamsLoading: boolean;
-};
+function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline">Filter</Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Filter Events</SheetTitle>
+        </SheetHeader>
+        <div className="px-4 grid gap-6">
+          <FieldSet>
+            <FieldLegend>Past events</FieldLegend>
+            <FieldDescription>
+              Whether to show events that have already occurred
+            </FieldDescription>
+            <FieldGroup>
+              <Field orientation={"horizontal"}>
+                <Checkbox
+                  id="show-past-events"
+                  checked={filters.showPastEvents}
+                  onCheckedChange={() =>
+                    toggleShowPastEvents(filters, setFilters)
+                  }
+                />
+                <FieldLabel htmlFor="show-past-events">
+                  Show past events
+                </FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
-function TeamFilterFieldSet({
-  filters,
-  setFilters,
-  teams,
-  teamsLoading,
-}: TeamFilterFieldSetProps) {
+          <TeamFilterFieldSet filters={filters} setFilters={setFilters} />
+        </div>
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button variant="outline">Close</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+export default NbaFilterSelector;
+
+function TeamFilterFieldSet({ filters, setFilters }: NbaFilterSelectorProps) {
   const [teamSearch, setTeamSearch] = useState("");
+
+  const { data: teams, isLoading: teamsLoading } = useQuery({
+    queryKey: ["nba", "teams"],
+    queryFn: fetchNbaTeams,
+  });
 
   const filteredTeams = (teams ?? []).filter((team) =>
     team.displayName.toLowerCase().includes(teamSearch.toLowerCase()),
@@ -115,59 +154,3 @@ function TeamFilterFieldSet({
     </FieldSet>
   );
 }
-
-function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
-  const { data: teams, isLoading: teamsLoading } = useQuery({
-    queryKey: ["nba", "teams"],
-    queryFn: fetchNbaTeams,
-  });
-
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline">Filter</Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Filter Events</SheetTitle>
-        </SheetHeader>
-        <div className="px-4 grid gap-6">
-          <FieldSet>
-            <FieldLegend>Past events</FieldLegend>
-            <FieldDescription>
-              Whether to show events that have already occurred
-            </FieldDescription>
-            <FieldGroup>
-              <Field orientation={"horizontal"}>
-                <Checkbox
-                  id="show-past-events"
-                  checked={filters.showPastEvents}
-                  onCheckedChange={() =>
-                    toggleShowPastEvents(filters, setFilters)
-                  }
-                />
-                <FieldLabel htmlFor="show-past-events">
-                  Show past events
-                </FieldLabel>
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-
-          <TeamFilterFieldSet
-            filters={filters}
-            setFilters={setFilters}
-            teams={teams}
-            teamsLoading={teamsLoading}
-          />
-        </div>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button variant="outline">Close</Button>
-          </SheetClose>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-export default NbaFilterSelector;
