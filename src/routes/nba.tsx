@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { NbaEvent, NbaEventFilters } from "@/types/nba";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/nba")({
 const NBA_BASE_QUERY_KEY = "nba";
 
 function NbaPage() {
-  const [filters, setFilters] = useState<NbaEventFilters>({
-    showPastEvents: true,
-    teamIds: [],
-  });
+  const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
+    "sports-calendar:nba-filters",
+    { showPastEvents: true, teamIds: [] }
+  );
 
   return (
     <div className="max-w-3xl mx-auto">

@@ -3,7 +3,7 @@ import { fetchF1EventRefs } from "@/components/f1/utils/fetchF1EventRefs";
 import F1EventCard from "@/components/f1/f1-event-card";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import F1FilterSelector from "@/components/f1/f1-filter-selector";
-import { useState } from "react";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { F1Event, F1EventFilters } from "@/types/f1";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/f1")({
 const F1_BASE_QUERY_KEY = "f1";
 
 function F1Page() {
-  const [filters, setFilters] = useState<F1EventFilters>({
-    showPastEvents: true,
-    types: ["2", "3", "4", "6"],
-  });
+  const [filters, setFilters] = useLocalStorageState<F1EventFilters>(
+    "sports-calendar:f1-filters",
+    { showPastEvents: true, types: ["2", "3", "4", "6"] }
+  );
 
   return (
     <div className="max-w-3xl mx-auto">
