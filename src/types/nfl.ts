@@ -52,4 +52,5 @@ export type NflTeam = BaseTeam & {
 
 export type NflEventFilters = {
   showPastEvents: boolean;
+  teamIds: string[]; // empty = no filter (all teams shown)
 };

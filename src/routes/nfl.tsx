@@ -29,6 +29,7 @@ const NFL_BASE_QUERY_KEY = "nfl";
 function NflPage() {
   const [filters, setFilters] = useState<NflEventFilters>({
     showPastEvents: true,
+    teamIds: [],
   });
 
   return (
