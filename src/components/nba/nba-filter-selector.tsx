@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { NbaEventFilters } from "@/types/nba";
+import type { NbaEventFilters, NbaTeam } from "@/types/nba";
 import {
   Sheet,
   SheetClose,
@@ -32,13 +32,20 @@ type NbaFilterSelectorProps = {
   setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>;
 };
 
-function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
-  const [teamSearch, setTeamSearch] = useState("");
+type TeamFilterFieldSetProps = {
+  filters: NbaEventFilters;
+  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>;
+  teams: NbaTeam[] | undefined;
+  teamsLoading: boolean;
+};
 
-  const { data: teams, isLoading: teamsLoading } = useQuery({
-    queryKey: ["nba", "teams"],
-    queryFn: fetchNbaTeams,
-  });
+function TeamFilterFieldSet({
+  filters,
+  setFilters,
+  teams,
+  teamsLoading,
+}: TeamFilterFieldSetProps) {
+  const [teamSearch, setTeamSearch] = useState("");
 
   const filteredTeams = (teams ?? []).filter((team) =>
     team.displayName.toLowerCase().includes(teamSearch.toLowerCase()),
@@ -47,22 +54,84 @@ function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
   const allTeamIds = teams?.map((t) => t.id) ?? [];
 
   return (
+    <FieldSet>
+      <FieldLegend>Teams</FieldLegend>
+      <FieldDescription>
+        Show only games featuring selected teams. No selection shows all.
+      </FieldDescription>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={teamsLoading}
+          onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
+        >
+          Select all
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setFilters({ ...filters, teamIds: [] })}
+        >
+          Clear
+        </Button>
+      </div>
+      <Input
+        placeholder="Search teams..."
+        value={teamSearch}
+        onChange={(e) => setTeamSearch(e.target.value)}
+      />
+      <div className="max-h-72 overflow-y-auto space-y-1">
+        {teamsLoading && (
+          <p className="text-sm text-muted-foreground py-2">
+            Loading teams...
+          </p>
+        )}
+        {filteredTeams.map((team) => {
+          const logo = team.logos?.find((l) => l.rel.includes("default"));
+          return (
+            <Field key={team.id} orientation="horizontal">
+              <Checkbox
+                id={`team-${team.id}`}
+                checked={filters.teamIds.includes(team.id)}
+                onCheckedChange={() =>
+                  toggleTeamFilter(team.id, filters, setFilters)
+                }
+              />
+              {logo && (
+                <img
+                  src={logo.href}
+                  alt=""
+                  className="h-5 w-5 object-contain shrink-0"
+                />
+              )}
+              <FieldLabel htmlFor={`team-${team.id}`}>
+                {team.displayName}
+              </FieldLabel>
+            </Field>
+          );
+        })}
+      </div>
+    </FieldSet>
+  );
+}
+
+function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
+  const { data: teams, isLoading: teamsLoading } = useQuery({
+    queryKey: ["nba", "teams"],
+    queryFn: fetchNbaTeams,
+  });
+
+  return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">
-          Filter
-          {filters.teamIds.length > 0 && (
-            <span className="ml-1 text-xs text-muted-foreground">
-              ({filters.teamIds.length})
-            </span>
-          )}
-        </Button>
+        <Button variant="outline">Filter</Button>
       </SheetTrigger>
-      <SheetContent className="flex flex-col">
+      <SheetContent>
         <SheetHeader>
           <SheetTitle>Filter Events</SheetTitle>
         </SheetHeader>
-        <div className="px-4 grid gap-6 overflow-y-auto flex-1">
+        <div className="px-4 grid gap-6">
           <FieldSet>
             <FieldLegend>Past events</FieldLegend>
             <FieldDescription>
@@ -84,65 +153,12 @@ function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
             </FieldGroup>
           </FieldSet>
 
-          <FieldSet>
-            <FieldLegend>Teams</FieldLegend>
-            <FieldDescription>
-              Show only games featuring selected teams. No selection shows all.
-            </FieldDescription>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={teamsLoading}
-                onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
-              >
-                Select all
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setFilters({ ...filters, teamIds: [] })}
-              >
-                Clear
-              </Button>
-            </div>
-            <Input
-              placeholder="Search teams..."
-              value={teamSearch}
-              onChange={(e) => setTeamSearch(e.target.value)}
-            />
-            <div className="max-h-72 overflow-y-auto space-y-1">
-              {teamsLoading && (
-                <p className="text-sm text-muted-foreground py-2">
-                  Loading teams...
-                </p>
-              )}
-              {filteredTeams.map((team) => {
-                const logo = team.logos?.find((l) => l.rel.includes("default"));
-                return (
-                  <Field key={team.id} orientation="horizontal">
-                    <Checkbox
-                      id={`team-${team.id}`}
-                      checked={filters.teamIds.includes(team.id)}
-                      onCheckedChange={() =>
-                        toggleTeamFilter(team.id, filters, setFilters)
-                      }
-                    />
-                    {logo && (
-                      <img
-                        src={logo.href}
-                        alt=""
-                        className="h-5 w-5 object-contain shrink-0"
-                      />
-                    )}
-                    <FieldLabel htmlFor={`team-${team.id}`}>
-                      {team.displayName}
-                    </FieldLabel>
-                  </Field>
-                );
-              })}
-            </div>
-          </FieldSet>
+          <TeamFilterFieldSet
+            filters={filters}
+            setFilters={setFilters}
+            teams={teams}
+            teamsLoading={teamsLoading}
+          />
         </div>
         <SheetFooter>
           <SheetClose asChild>
