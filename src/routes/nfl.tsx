@@ -8,6 +8,7 @@ import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
 import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
 import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
+import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
 
 export const Route = createFileRoute("/nfl")({
   component: NflPage,
@@ -47,6 +48,7 @@ function NflPage() {
           <NflFilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>
+      <NflFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={NFL_BASE_QUERY_KEY}

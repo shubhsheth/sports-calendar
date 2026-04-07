@@ -8,6 +8,7 @@ import type { F1Event, F1EventFilters } from "@/types/f1";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
 import { filterF1Events } from "@/components/f1/utils/filterF1Events";
+import { F1FilterPills } from "@/components/f1/f1-filter-pills";
 
 export const Route = createFileRoute("/f1")({
   component: F1Page,
@@ -47,7 +48,7 @@ function F1Page() {
           <F1FilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>
-
+      <F1FilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={F1_BASE_QUERY_KEY}
