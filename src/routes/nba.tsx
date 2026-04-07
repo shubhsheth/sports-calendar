@@ -30,7 +30,7 @@ const NBA_BASE_QUERY_KEY = "nba";
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
     "sports-calendar:nba-filters",
-    { showPastEvents: true, teamIds: [] }
+    { showPastEvents: false, teamIds: [] }
   );
 
   return (

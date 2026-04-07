@@ -30,7 +30,7 @@ const F1_BASE_QUERY_KEY = "f1";
 function F1Page() {
   const [filters, setFilters] = useLocalStorageState<F1EventFilters>(
     "sports-calendar:f1-filters",
-    { showPastEvents: true, types: ["2", "3", "4", "6"] }
+    { showPastEvents: false, types: ["2", "3", "4", "6"] }
   );
 
   return (
