@@ -6,17 +6,13 @@ import {
   toggleShowPastEvents,
 } from "./utils/filterF1Events";
 
-const ALL_F1_TYPES = ["1", "2", "3", "4", "6"];
-
 type F1FilterPillsProps = {
   filters: F1EventFilters;
   setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>;
 };
 
 export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
-  // Types from ALL_F1_TYPES that are not included in the current filter
-  const excludedTypes = ALL_F1_TYPES.filter((t) => !filters.types.includes(t));
-  const hasActivePills = filters.showPastEvents || excludedTypes.length > 0;
+  const hasActivePills = filters.showPastEvents || filters.types.length > 0;
   if (!hasActivePills) return null;
 
   return (
@@ -27,7 +23,7 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
           onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
-      {excludedTypes.map((typeId) => (
+      {filters.types.map((typeId) => (
         <FilterPill
           key={typeId}
           label={translateF1EventTypeId(typeId)}
