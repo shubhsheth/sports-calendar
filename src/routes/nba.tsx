@@ -8,6 +8,7 @@ import NbaFilterSelector from "@/components/nba/nba-filter-selector";
 import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
 import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+import { NbaFilterPills } from "@/components/nba/nba-filter-pills";
 
 export const Route = createFileRoute("/nba")({
   component: NbaPage,
@@ -47,6 +48,7 @@ function NbaPage() {
           <NbaFilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>
+      <NbaFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={NBA_BASE_QUERY_KEY}
