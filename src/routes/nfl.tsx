@@ -30,7 +30,7 @@ const NFL_BASE_QUERY_KEY = "nfl";
 function NflPage() {
   const [filters, setFilters] = useLocalStorageState<NflEventFilters>(
     "sports-calendar:nfl-filters",
-    { showPastEvents: true, teamIds: [] }
+    { showPastEvents: false, teamIds: [] }
   );
 
   return (

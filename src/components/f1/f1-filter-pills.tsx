@@ -19,7 +19,7 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
     <div className="flex flex-wrap gap-2 mb-4">
       {filters.showPastEvents && (
         <FilterPill
-          label="Showing past events"
+          label="Show past events"
           onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
