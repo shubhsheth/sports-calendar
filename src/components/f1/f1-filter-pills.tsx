@@ -1,6 +1,10 @@
 import type { F1EventFilters } from "@/types/f1";
 import { FilterPill } from "@/components/base/filter-pill";
 import { translateF1EventTypeId } from "./utils/translateF1EventType";
+import {
+  toggleEventType,
+  toggleShowPastEvents,
+} from "./utils/filterF1Events";
 
 const ALL_F1_TYPES = ["1", "2", "3", "4", "6"];
 
@@ -10,8 +14,9 @@ type F1FilterPillsProps = {
 };
 
 export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
-  const hiddenTypes = ALL_F1_TYPES.filter((t) => !filters.types.includes(t));
-  const hasActivePills = filters.showPastEvents || hiddenTypes.length > 0;
+  // Types from ALL_F1_TYPES that are not included in the current filter
+  const excludedTypes = ALL_F1_TYPES.filter((t) => !filters.types.includes(t));
+  const hasActivePills = filters.showPastEvents || excludedTypes.length > 0;
   if (!hasActivePills) return null;
 
   return (
@@ -19,16 +24,14 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Showing past events"
-          onRemove={() => setFilters({ ...filters, showPastEvents: false })}
+          onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
-      {hiddenTypes.map((typeId) => (
+      {excludedTypes.map((typeId) => (
         <FilterPill
           key={typeId}
           label={translateF1EventTypeId(typeId)}
-          onRemove={() =>
-            setFilters({ ...filters, types: [...filters.types, typeId] })
-          }
+          onRemove={() => toggleEventType(typeId, filters, setFilters)}
         />
       ))}
     </div>
