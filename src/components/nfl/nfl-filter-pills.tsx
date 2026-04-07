@@ -2,6 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { NflEventFilters } from "@/types/nfl";
 import { FilterPill } from "@/components/base/filter-pill";
 import { fetchNflTeams } from "./utils/fetchNflTeams";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterNflEvents";
 
 type NflFilterPillsProps = {
   filters: NflEventFilters;
@@ -23,7 +27,7 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Showing past events"
-          onRemove={() => setFilters({ ...filters, showPastEvents: false })}
+          onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
       {filters.teamIds.map((teamId) => {
@@ -33,12 +37,7 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
           <FilterPill
             key={teamId}
             label={label}
-            onRemove={() =>
-              setFilters({
-                ...filters,
-                teamIds: filters.teamIds.filter((id) => id !== teamId),
-              })
-            }
+            onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
           />
         );
       })}

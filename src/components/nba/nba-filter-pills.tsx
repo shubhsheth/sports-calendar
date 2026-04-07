@@ -2,6 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { NbaEventFilters } from "@/types/nba";
 import { FilterPill } from "@/components/base/filter-pill";
 import { fetchNbaTeams } from "./utils/fetchNbaTeams";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterNbaEvents";
 
 type NbaFilterPillsProps = {
   filters: NbaEventFilters;
@@ -23,7 +27,7 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Showing past events"
-          onRemove={() => setFilters({ ...filters, showPastEvents: false })}
+          onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
       {filters.teamIds.map((teamId) => {
@@ -33,12 +37,7 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
           <FilterPill
             key={teamId}
             label={label}
-            onRemove={() =>
-              setFilters({
-                ...filters,
-                teamIds: filters.teamIds.filter((id) => id !== teamId),
-              })
-            }
+            onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
           />
         );
       })}
