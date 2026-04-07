@@ -26,21 +26,24 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
     <div className="flex flex-wrap gap-2 mb-4">
       {filters.showPastEvents && (
         <FilterPill
-          label="Showing past events"
+          label="Show past events"
           onRemove={() => toggleShowPastEvents(filters, setFilters)}
         />
       )}
-      {filters.teamIds.map((teamId) => {
-        const team = teams?.find((t) => t.id === teamId);
-        const label = team?.displayName ?? teamId;
-        return (
-          <FilterPill
-            key={teamId}
-            label={label}
-            onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
-          />
-        );
-      })}
+      {teams &&
+        filters.teamIds.map((teamId) => {
+          const team = teams.find((t) => t.id === teamId);
+          if (!team) return null;
+          const logo = team.logos?.find((l) => l.rel.includes("default"));
+          return (
+            <FilterPill
+              key={teamId}
+              label={team.displayName}
+              imgSrc={logo?.href}
+              onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
+            />
+          );
+        })}
     </div>
   );
 }
