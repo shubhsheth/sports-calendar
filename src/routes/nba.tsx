@@ -7,7 +7,6 @@ import NbaEventCard from "@/components/nba/nba-event-card";
 import NbaFilterSelector from "@/components/nba/nba-filter-selector";
 import {
   fetchNbaEventRefs,
-  getNbaNextPageParam,
   NBA_SEASON_TYPES,
 } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
@@ -30,10 +29,10 @@ export const Route = createFileRoute("/nba")({
 });
 
 const NBA_BASE_QUERY_KEY = "nba";
-const NBA_INITIAL_PAGE_PARAM = { seasonTypeIdx: 0, page: 1 };
+const NBA_SEASON_TYPE_IDS = NBA_SEASON_TYPES.map((t) => t.id);
 
-const fetchNbaPage = (cursor: { seasonTypeIdx: number; page: number }) =>
-  fetchNbaEventRefs(cursor.page, NBA_SEASON_TYPES[cursor.seasonTypeIdx].id);
+const fetchNbaPage = (cursor: { seasonTypeId: number; pageNumber: number }) =>
+  fetchNbaEventRefs(cursor.pageNumber, cursor.seasonTypeId);
 
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
@@ -46,10 +45,9 @@ function NbaPage() {
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">NBA Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<NbaEvent, NbaEventFilters, typeof NBA_INITIAL_PAGE_PARAM>
+          <DownloadIcalButton<NbaEvent, NbaEventFilters>
+            seasonTypeIds={NBA_SEASON_TYPE_IDS}
             fetchEventRefsFn={fetchNbaPage}
-            initialPageParam={NBA_INITIAL_PAGE_PARAM}
-            getNextPageParamFn={getNbaNextPageParam}
             transformEventsToIcsFn={transformNbaEventsToIcs}
             filterEvents={filterNbaEvents}
             eventFilters={filters}
@@ -62,9 +60,8 @@ function NbaPage() {
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={NBA_BASE_QUERY_KEY}
+          seasonTypeIds={NBA_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchNbaPage}
-          initialPageParam={NBA_INITIAL_PAGE_PARAM}
-          getNextPageParamFn={getNbaNextPageParam}
           filters={filters}
           eventCard={NbaEventCard}
         />

@@ -8,13 +8,11 @@ import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useState } from "react";
 
-type DownloadIcalButtonProps<T extends BaseEvent, F, TPageParam> = {
-  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>;
-  initialPageParam: TPageParam;
-  getNextPageParamFn: (
-    lastPage: FetchEventRefsResponse,
-    lastPageParam: TPageParam,
-  ) => TPageParam | undefined;
+type SeasonCursor = { seasonTypeId: number; pageNumber: number };
+
+type DownloadIcalButtonProps<T extends BaseEvent, F> = {
+  seasonTypeIds: number[];
+  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>;
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
   eventFilters: F;
@@ -22,16 +20,15 @@ type DownloadIcalButtonProps<T extends BaseEvent, F, TPageParam> = {
   filename?: string;
 };
 
-function DownloadIcalButton<T extends BaseEvent, F, TPageParam>({
+function DownloadIcalButton<T extends BaseEvent, F>({
+  seasonTypeIds,
   fetchEventRefsFn,
-  initialPageParam,
-  getNextPageParamFn,
   transformEventsToIcsFn,
   filterEvents,
   eventFilters,
   baseQueryKey,
   filename = "calendar.ics",
-}: DownloadIcalButtonProps<T, F, TPageParam>) {
+}: DownloadIcalButtonProps<T, F>) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
@@ -39,12 +36,11 @@ function DownloadIcalButton<T extends BaseEvent, F, TPageParam>({
     setLoading(true);
 
     // Fetch all event details
-    const allEvents = await fetchAllEvents<T, TPageParam>(
+    const allEvents = await fetchAllEvents<T>(
       queryClient,
       baseQueryKey,
       fetchEventRefsFn,
-      initialPageParam,
-      getNextPageParamFn,
+      seasonTypeIds,
     );
 
     // Filter, Transform and Create ICS File
@@ -73,22 +69,30 @@ function DownloadIcalButton<T extends BaseEvent, F, TPageParam>({
 
 export default DownloadIcalButton;
 
-async function fetchAllEvents<T, TPageParam>(
+function getNextCursor(
+  lastPage: FetchEventRefsResponse,
+  lastCursor: SeasonCursor,
+  seasonTypeIds: number[],
+): SeasonCursor | undefined {
+  if (lastPage.pageIndex < lastPage.pageCount) {
+    return { seasonTypeId: lastCursor.seasonTypeId, pageNumber: lastCursor.pageNumber + 1 };
+  }
+  const currentIdx = seasonTypeIds.indexOf(lastCursor.seasonTypeId);
+  const nextId = seasonTypeIds[currentIdx + 1];
+  return nextId !== undefined ? { seasonTypeId: nextId, pageNumber: 1 } : undefined;
+}
+
+async function fetchAllEvents<T>(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>,
-  initialPageParam: TPageParam,
-  getNextPageParamFn: (
-    lastPage: FetchEventRefsResponse,
-    lastPageParam: TPageParam,
-  ) => TPageParam | undefined,
+  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>,
+  seasonTypeIds: number[],
 ): Promise<T[]> {
   const allEventRefs = await fetchAllEventRefs(
     queryClient,
     baseQueryKey,
     fetchEventRefsFn,
-    initialPageParam,
-    getNextPageParamFn,
+    seasonTypeIds,
   );
   const allEventDetails = await fetchAllEventDetails<T>(
     queryClient,
@@ -99,34 +103,30 @@ async function fetchAllEvents<T, TPageParam>(
   return allEventDetails;
 }
 
-async function fetchAllEventRefs<TPageParam>(
+async function fetchAllEventRefs(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>,
-  initialPageParam: TPageParam,
-  getNextPageParamFn: (
-    lastPage: FetchEventRefsResponse,
-    lastPageParam: TPageParam,
-  ) => TPageParam | undefined,
+  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>,
+  seasonTypeIds: number[],
 ): Promise<EventRef[]> {
   const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
 
   // Fetch all event refs from cache
   const infiniteData = queryClient.getQueryData<{
     pages: FetchEventRefsResponse[];
-    pageParams: TPageParam[];
+    pageParams: SeasonCursor[];
   }>(infiniteQueryKey);
   const cachedPages = infiniteData?.pages ?? [];
   const cachedPageParams = infiniteData?.pageParams ?? [];
 
   // Determine starting cursor for uncached pages
-  let cursor: TPageParam | undefined;
+  let cursor: SeasonCursor | undefined;
   if (cachedPages.length > 0) {
     const lastCachedPage = cachedPages[cachedPages.length - 1];
     const lastCachedCursor = cachedPageParams[cachedPageParams.length - 1];
-    cursor = getNextPageParamFn(lastCachedPage, lastCachedCursor);
+    cursor = getNextCursor(lastCachedPage, lastCachedCursor, seasonTypeIds);
   } else {
-    cursor = initialPageParam;
+    cursor = { seasonTypeId: seasonTypeIds[0], pageNumber: 1 };
   }
 
   // Fetch remaining event refs from API
@@ -134,7 +134,7 @@ async function fetchAllEventRefs<TPageParam>(
   while (cursor !== undefined) {
     const pageData = await fetchEventRefsFn(cursor);
     remainingPages.push(pageData);
-    cursor = getNextPageParamFn(pageData, cursor);
+    cursor = getNextCursor(pageData, cursor, seasonTypeIds);
   }
 
   // Convert pages to flat map of refs

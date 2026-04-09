@@ -4,14 +4,12 @@ import { useInView } from "react-intersection-observer";
 import type { EventRef } from "@/types/base";
 import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
-interface InfiniteScrollEventsProps<TPageParam> {
+type SeasonCursor = { seasonTypeId: number; pageNumber: number };
+
+interface InfiniteScrollEventsProps {
   baseQueryKey: string;
-  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>;
-  initialPageParam: TPageParam;
-  getNextPageParamFn: (
-    lastPage: FetchEventRefsResponse,
-    lastPageParam: TPageParam,
-  ) => TPageParam | undefined;
+  seasonTypeIds: number[];
+  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>;
   filters: unknown;
   eventCard: React.ComponentType<{
     baseQueryKey: string;
@@ -21,14 +19,13 @@ interface InfiniteScrollEventsProps<TPageParam> {
   }>;
 }
 
-function InfiniteScrollEvents<TPageParam>({
+function InfiniteScrollEvents({
   baseQueryKey,
+  seasonTypeIds,
   fetchEventRefsFn,
-  initialPageParam,
-  getNextPageParamFn,
   filters,
   eventCard: EventCard,
-}: InfiniteScrollEventsProps<TPageParam>) {
+}: InfiniteScrollEventsProps) {
   const { ref, inView } = useInView({ rootMargin: "500px" });
 
   const {
@@ -41,10 +38,17 @@ function InfiniteScrollEvents<TPageParam>({
     error,
   } = useInfiniteQuery({
     queryKey: [baseQueryKey, "events", "infinite"],
-    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam as TPageParam),
-    initialPageParam,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      getNextPageParamFn(lastPage, lastPageParam as TPageParam),
+    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam as SeasonCursor),
+    initialPageParam: { seasonTypeId: seasonTypeIds[0], pageNumber: 1 } as SeasonCursor,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const cursor = lastPageParam as SeasonCursor;
+      if (lastPage.pageIndex < lastPage.pageCount) {
+        return { seasonTypeId: cursor.seasonTypeId, pageNumber: cursor.pageNumber + 1 };
+      }
+      const currentIdx = seasonTypeIds.indexOf(cursor.seasonTypeId);
+      const nextId = seasonTypeIds[currentIdx + 1];
+      return nextId !== undefined ? { seasonTypeId: nextId, pageNumber: 1 } : undefined;
+    },
   });
 
   useEffect(() => {

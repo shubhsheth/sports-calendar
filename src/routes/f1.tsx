@@ -9,7 +9,6 @@ import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
 import { filterF1Events } from "@/components/f1/utils/filterF1Events";
 import { F1FilterPills } from "@/components/f1/f1-filter-pills";
-import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
 export const Route = createFileRoute("/f1")({
   component: F1Page,
@@ -27,13 +26,10 @@ export const Route = createFileRoute("/f1")({
 });
 
 const F1_BASE_QUERY_KEY = "f1";
+const F1_SEASON_TYPE_IDS = [2];
 
-function getF1NextPageParam(
-  lastPage: FetchEventRefsResponse,
-  page: number,
-): number | undefined {
-  return lastPage.pageIndex < lastPage.pageCount ? page + 1 : undefined;
-}
+const fetchF1Page = (cursor: { seasonTypeId: number; pageNumber: number }) =>
+  fetchF1EventRefs(cursor.pageNumber);
 
 function F1Page() {
   const [filters, setFilters] = useLocalStorageState<F1EventFilters>(
@@ -46,10 +42,9 @@ function F1Page() {
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">F1 Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<F1Event, F1EventFilters, number>
-            fetchEventRefsFn={fetchF1EventRefs}
-            initialPageParam={1}
-            getNextPageParamFn={getF1NextPageParam}
+          <DownloadIcalButton<F1Event, F1EventFilters>
+            seasonTypeIds={F1_SEASON_TYPE_IDS}
+            fetchEventRefsFn={fetchF1Page}
             transformEventsToIcsFn={transformF1EventsToIcs}
             filterEvents={filterF1Events}
             eventFilters={filters}
@@ -60,11 +55,10 @@ function F1Page() {
       </div>
       <F1FilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
-        <InfiniteScrollEvents<number>
+        <InfiniteScrollEvents
           baseQueryKey={F1_BASE_QUERY_KEY}
-          fetchEventRefsFn={fetchF1EventRefs}
-          initialPageParam={1}
-          getNextPageParamFn={getF1NextPageParam}
+          seasonTypeIds={F1_SEASON_TYPE_IDS}
+          fetchEventRefsFn={fetchF1Page}
           filters={filters}
           eventCard={F1EventCard}
         />
