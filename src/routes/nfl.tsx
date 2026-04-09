@@ -9,10 +9,10 @@ import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import {
   fetchNflEventRefs,
   getNflNextPageParam,
+  NFL_SEASON_TYPES,
 } from "@/components/nfl/utils/fetchNflEventRefs";
 import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
 import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
-import type { SeasonCursor } from "@/api/espn/fetchEventRefs";
 
 export const Route = createFileRoute("/nfl")({
   component: NflPage,
@@ -30,7 +30,10 @@ export const Route = createFileRoute("/nfl")({
 });
 
 const NFL_BASE_QUERY_KEY = "nfl";
-const NFL_INITIAL_PAGE_PARAM: SeasonCursor = { seasonTypeIdx: 0, page: 1 };
+const NFL_INITIAL_PAGE_PARAM = { seasonTypeIdx: 0, page: 1 };
+
+const fetchNflPage = (cursor: { seasonTypeIdx: number; page: number }) =>
+  fetchNflEventRefs(cursor.page, NFL_SEASON_TYPES[cursor.seasonTypeIdx].id);
 
 function NflPage() {
   const [filters, setFilters] = useLocalStorageState<NflEventFilters>(
@@ -43,8 +46,8 @@ function NflPage() {
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">NFL Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<NflEvent, NflEventFilters, SeasonCursor>
-            fetchEventRefsFn={fetchNflEventRefs}
+          <DownloadIcalButton<NflEvent, NflEventFilters, typeof NFL_INITIAL_PAGE_PARAM>
+            fetchEventRefsFn={fetchNflPage}
             initialPageParam={NFL_INITIAL_PAGE_PARAM}
             getNextPageParamFn={getNflNextPageParam}
             transformEventsToIcsFn={transformNflEventsToIcs}
@@ -57,9 +60,9 @@ function NflPage() {
       </div>
       <NflFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
-        <InfiniteScrollEvents<SeasonCursor>
+        <InfiniteScrollEvents
           baseQueryKey={NFL_BASE_QUERY_KEY}
-          fetchEventRefsFn={fetchNflEventRefs}
+          fetchEventRefsFn={fetchNflPage}
           initialPageParam={NFL_INITIAL_PAGE_PARAM}
           getNextPageParamFn={getNflNextPageParam}
           filters={filters}

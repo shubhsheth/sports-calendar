@@ -8,11 +8,11 @@ import NbaFilterSelector from "@/components/nba/nba-filter-selector";
 import {
   fetchNbaEventRefs,
   getNbaNextPageParam,
+  NBA_SEASON_TYPES,
 } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
 import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
 import { NbaFilterPills } from "@/components/nba/nba-filter-pills";
-import type { SeasonCursor } from "@/api/espn/fetchEventRefs";
 
 export const Route = createFileRoute("/nba")({
   component: NbaPage,
@@ -30,7 +30,10 @@ export const Route = createFileRoute("/nba")({
 });
 
 const NBA_BASE_QUERY_KEY = "nba";
-const NBA_INITIAL_PAGE_PARAM: SeasonCursor = { seasonTypeIdx: 0, page: 1 };
+const NBA_INITIAL_PAGE_PARAM = { seasonTypeIdx: 0, page: 1 };
+
+const fetchNbaPage = (cursor: { seasonTypeIdx: number; page: number }) =>
+  fetchNbaEventRefs(cursor.page, NBA_SEASON_TYPES[cursor.seasonTypeIdx].id);
 
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
@@ -43,8 +46,8 @@ function NbaPage() {
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">NBA Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<NbaEvent, NbaEventFilters, SeasonCursor>
-            fetchEventRefsFn={fetchNbaEventRefs}
+          <DownloadIcalButton<NbaEvent, NbaEventFilters, typeof NBA_INITIAL_PAGE_PARAM>
+            fetchEventRefsFn={fetchNbaPage}
             initialPageParam={NBA_INITIAL_PAGE_PARAM}
             getNextPageParamFn={getNbaNextPageParam}
             transformEventsToIcsFn={transformNbaEventsToIcs}
@@ -57,9 +60,9 @@ function NbaPage() {
       </div>
       <NbaFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
-        <InfiniteScrollEvents<SeasonCursor>
+        <InfiniteScrollEvents
           baseQueryKey={NBA_BASE_QUERY_KEY}
-          fetchEventRefsFn={fetchNbaEventRefs}
+          fetchEventRefsFn={fetchNbaPage}
           initialPageParam={NBA_INITIAL_PAGE_PARAM}
           getNextPageParamFn={getNbaNextPageParam}
           filters={filters}

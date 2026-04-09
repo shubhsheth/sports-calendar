@@ -1,27 +1,29 @@
 import { fetchEventRefsBySeason } from "@/api/espn/fetchEventRefs";
-import type { SeasonCursor, FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
+import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
+
+const SPORT = "football";
+const LEAGUE = "nfl";
+const SEASON = "2025";
+const PAGE_SIZE = 30;
 
 export const NFL_SEASON_TYPES = [
-  { id: "1", name: "Preseason" },
-  { id: "2", name: "Regular Season" },
-  { id: "3", name: "Playoffs" },
-] as const;
+  { id: 1, name: "Preseason" },
+  { id: 2, name: "Regular Season" },
+  { id: 3, name: "Playoffs" },
+];
 
-export async function fetchNflEventRefs(
-  cursor: SeasonCursor,
-): Promise<FetchEventRefsResponse> {
-  const seasonType = NFL_SEASON_TYPES[cursor.seasonTypeIdx];
-  return fetchEventRefsBySeason("football", "nfl", "2025", {
-    seasonTypeId: seasonType.id,
-    pageSize: 30,
-    pageNumber: cursor.page,
+export async function fetchNflEventRefs(pageNumber?: number, seasonTypeId?: number) {
+  return fetchEventRefsBySeason(SPORT, LEAGUE, SEASON, {
+    pageSize: PAGE_SIZE,
+    pageNumber,
+    seasonTypeId,
   });
 }
 
 export function getNflNextPageParam(
   lastPage: FetchEventRefsResponse,
-  lastCursor: SeasonCursor,
-): SeasonCursor | undefined {
+  lastCursor: { seasonTypeIdx: number; page: number },
+): { seasonTypeIdx: number; page: number } | undefined {
   if (lastPage.pageIndex < lastPage.pageCount) {
     return { seasonTypeIdx: lastCursor.seasonTypeIdx, page: lastCursor.page + 1 };
   }
