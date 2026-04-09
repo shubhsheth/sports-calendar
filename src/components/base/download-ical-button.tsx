@@ -8,8 +8,13 @@ import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useState } from "react";
 
-type DownloadIcalButtonProps<T extends BaseEvent, F> = {
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>;
+type DownloadIcalButtonProps<T extends BaseEvent, F, TPageParam> = {
+  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>;
+  initialPageParam: TPageParam;
+  getNextPageParamFn: (
+    lastPage: FetchEventRefsResponse,
+    lastPageParam: TPageParam,
+  ) => TPageParam | undefined;
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
   eventFilters: F;
@@ -17,14 +22,16 @@ type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   filename?: string;
 };
 
-function DownloadIcalButton<T extends BaseEvent, F>({
+function DownloadIcalButton<T extends BaseEvent, F, TPageParam>({
   fetchEventRefsFn,
+  initialPageParam,
+  getNextPageParamFn,
   transformEventsToIcsFn,
   filterEvents,
   eventFilters,
   baseQueryKey,
   filename = "calendar.ics",
-}: DownloadIcalButtonProps<T, F>) {
+}: DownloadIcalButtonProps<T, F, TPageParam>) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
@@ -32,10 +39,12 @@ function DownloadIcalButton<T extends BaseEvent, F>({
     setLoading(true);
 
     // Fetch all event details
-    const allEvents = await fetchAllEvents<T>(
+    const allEvents = await fetchAllEvents<T, TPageParam>(
       queryClient,
       baseQueryKey,
       fetchEventRefsFn,
+      initialPageParam,
+      getNextPageParamFn,
     );
 
     // Filter, Transform and Create ICS File
@@ -64,15 +73,22 @@ function DownloadIcalButton<T extends BaseEvent, F>({
 
 export default DownloadIcalButton;
 
-async function fetchAllEvents<T>(
+async function fetchAllEvents<T, TPageParam>(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>,
+  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>,
+  initialPageParam: TPageParam,
+  getNextPageParamFn: (
+    lastPage: FetchEventRefsResponse,
+    lastPageParam: TPageParam,
+  ) => TPageParam | undefined,
 ): Promise<T[]> {
   const allEventRefs = await fetchAllEventRefs(
     queryClient,
     baseQueryKey,
     fetchEventRefsFn,
+    initialPageParam,
+    getNextPageParamFn,
   );
   const allEventDetails = await fetchAllEventDetails<T>(
     queryClient,
@@ -83,29 +99,42 @@ async function fetchAllEvents<T>(
   return allEventDetails;
 }
 
-async function fetchAllEventRefs(
+async function fetchAllEventRefs<TPageParam>(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>,
+  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>,
+  initialPageParam: TPageParam,
+  getNextPageParamFn: (
+    lastPage: FetchEventRefsResponse,
+    lastPageParam: TPageParam,
+  ) => TPageParam | undefined,
 ): Promise<EventRef[]> {
   const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
 
   // Fetch all event refs from cache
   const infiniteData = queryClient.getQueryData<{
     pages: FetchEventRefsResponse[];
+    pageParams: TPageParam[];
   }>(infiniteQueryKey);
   const cachedPages = infiniteData?.pages ?? [];
+  const cachedPageParams = infiniteData?.pageParams ?? [];
+
+  // Determine starting cursor for uncached pages
+  let cursor: TPageParam | undefined;
+  if (cachedPages.length > 0) {
+    const lastCachedPage = cachedPages[cachedPages.length - 1];
+    const lastCachedCursor = cachedPageParams[cachedPageParams.length - 1];
+    cursor = getNextPageParamFn(lastCachedPage, lastCachedCursor);
+  } else {
+    cursor = initialPageParam;
+  }
 
   // Fetch remaining event refs from API
   const remainingPages: FetchEventRefsResponse[] = [];
-  let currentPage = cachedPages.length ? cachedPages.length + 1 : 1;
-  let hasMorePages = true;
-
-  while (hasMorePages) {
-    const pageData = await fetchEventRefsFn(currentPage);
+  while (cursor !== undefined) {
+    const pageData = await fetchEventRefsFn(cursor);
     remainingPages.push(pageData);
-    hasMorePages = pageData.pageIndex < pageData.pageCount;
-    currentPage++;
+    cursor = getNextPageParamFn(pageData, cursor);
   }
 
   // Convert pages to flat map of refs

@@ -4,9 +4,14 @@ import { useInView } from "react-intersection-observer";
 import type { EventRef } from "@/types/base";
 import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
-interface InfiniteScrollEventsProps {
+interface InfiniteScrollEventsProps<TPageParam> {
   baseQueryKey: string;
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>;
+  fetchEventRefsFn: (pageParam: TPageParam) => Promise<FetchEventRefsResponse>;
+  initialPageParam: TPageParam;
+  getNextPageParamFn: (
+    lastPage: FetchEventRefsResponse,
+    lastPageParam: TPageParam,
+  ) => TPageParam | undefined;
   filters: unknown;
   eventCard: React.ComponentType<{
     baseQueryKey: string;
@@ -16,12 +21,14 @@ interface InfiniteScrollEventsProps {
   }>;
 }
 
-function InfiniteScrollEvents({
+function InfiniteScrollEvents<TPageParam>({
   baseQueryKey,
   fetchEventRefsFn,
+  initialPageParam,
+  getNextPageParamFn,
   filters,
   eventCard: EventCard,
-}: InfiniteScrollEventsProps) {
+}: InfiniteScrollEventsProps<TPageParam>) {
   const { ref, inView } = useInView({ rootMargin: "500px" });
 
   const {
@@ -34,13 +41,10 @@ function InfiniteScrollEvents({
     error,
   } = useInfiniteQuery({
     queryKey: [baseQueryKey, "events", "infinite"],
-    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const nextPageNumber = lastPage.pageIndex + 1;
-      const hasMorePages = !!(lastPage.pageIndex < lastPage.pageCount);
-      return hasMorePages ? nextPageNumber : undefined;
-    },
+    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam as TPageParam),
+    initialPageParam,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      getNextPageParamFn(lastPage, lastPageParam as TPageParam),
   });
 
   useEffect(() => {

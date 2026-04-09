@@ -6,9 +6,13 @@ import DownloadIcalButton from "@/components/base/download-ical-button";
 import NbaEventCard from "@/components/nba/nba-event-card";
 import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
 import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
-import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
+import {
+  fetchNflEventRefs,
+  getNflNextPageParam,
+} from "@/components/nfl/utils/fetchNflEventRefs";
 import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
 import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
+import type { SeasonCursor } from "@/api/espn/fetchEventRefs";
 
 export const Route = createFileRoute("/nfl")({
   component: NflPage,
@@ -26,6 +30,7 @@ export const Route = createFileRoute("/nfl")({
 });
 
 const NFL_BASE_QUERY_KEY = "nfl";
+const NFL_INITIAL_PAGE_PARAM: SeasonCursor = { seasonTypeIdx: 0, page: 1 };
 
 function NflPage() {
   const [filters, setFilters] = useLocalStorageState<NflEventFilters>(
@@ -38,8 +43,10 @@ function NflPage() {
       <div className="flex w-full justify-between mb-4">
         <h1 className="text-4xl font-extrabold tracking-tight">NFL Schedule</h1>
         <div className="flex gap-2">
-          <DownloadIcalButton<NflEvent, NflEventFilters>
+          <DownloadIcalButton<NflEvent, NflEventFilters, SeasonCursor>
             fetchEventRefsFn={fetchNflEventRefs}
+            initialPageParam={NFL_INITIAL_PAGE_PARAM}
+            getNextPageParamFn={getNflNextPageParam}
             transformEventsToIcsFn={transformNflEventsToIcs}
             filterEvents={filterNflEvents}
             eventFilters={filters}
@@ -50,9 +57,11 @@ function NflPage() {
       </div>
       <NflFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
-        <InfiniteScrollEvents
+        <InfiniteScrollEvents<SeasonCursor>
           baseQueryKey={NFL_BASE_QUERY_KEY}
           fetchEventRefsFn={fetchNflEventRefs}
+          initialPageParam={NFL_INITIAL_PAGE_PARAM}
+          getNextPageParamFn={getNflNextPageParam}
           filters={filters}
           eventCard={NbaEventCard}
         />

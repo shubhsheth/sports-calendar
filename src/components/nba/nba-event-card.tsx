@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNbaEvent } from "./utils/filterNbaEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
+import { translateNbaEventTypeAbbr } from "./utils/translateNbaEventType";
 
 type NbaEventCardProps = {
   eventRef: EventRef;
@@ -59,6 +60,9 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
           <span className="font-medium text-foreground">{eventDate}</span>
           <span> - </span>
           {mainCompetition.venue.fullName}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {translateNbaEventTypeAbbr(mainCompetition.type.abbreviation)}
         </p>
       </CardFooter>
     </Card>
