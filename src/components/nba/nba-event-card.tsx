@@ -58,8 +58,12 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
-          <span> - </span>
-          {mainCompetition.venue.fullName}
+          {mainCompetition.venue && (
+            <>
+              <span> - </span>
+              {mainCompetition.venue.fullName}
+            </>
+          )}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {translateNbaEventTypeAbbr(mainCompetition.type.abbreviation)}
