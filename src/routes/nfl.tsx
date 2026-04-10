@@ -3,7 +3,7 @@ import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
-import NbaEventCard from "@/components/nba/nba-event-card";
+import NflEventCard from "@/components/nfl/nfl-event-card";
 import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
 import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
@@ -57,7 +57,7 @@ function NflPage() {
           seasonTypeIds={NFL_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchNflEventRefs}
           filters={filters}
-          eventCard={NbaEventCard}
+          eventCard={NflEventCard}
         />
       </div>
     </div>
