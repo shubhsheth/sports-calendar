@@ -103,10 +103,11 @@ The `types/` segment filters which **phase** of the season is returned. All thre
 
 | ID | Meaning | Used |
 |----|---------|------|
-| `1` | Preseason | No |
+| `1` | Preseason | **Yes** |
 | `2` | Regular Season | **Yes** |
-| `3` | Postseason / Playoffs | No |
+| `3` | Postseason / Playoffs | **Yes** |
 | `4` | All-Star / Special Events | No |
+| `5` | Play-In Tournament (NBA only) | **Yes** |
 
 These IDs are hardcoded because their full range of valid values is not well-understood and differs by league. For example, F1 likely does not have a meaningful distinction between season types the way team sports do — a single `types/2` call returns the full race calendar. The NBA has a distinct In-Season Tournament and Play-In Tournament that may map to their own type IDs. NFL Conference Championship games may or may not be separated from other Playoff games.
 
