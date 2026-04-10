@@ -1,5 +1,5 @@
-import type { NbaEvent, NbaEventFilters } from "@/types/nba";
-import dayjs from "dayjs";
+import type {NbaEvent, NbaEventFilters} from '@/types/nba';
+import dayjs from 'dayjs';
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
@@ -16,15 +16,15 @@ export function filterNbaEvents(events: NbaEvent[], filters: NbaEventFilters) {
 
 export function filterNbaEvent(
   event: NbaEvent,
-  filters: NbaEventFilters,
+  filters: NbaEventFilters
 ): NbaEvent | null {
-  const filteredCompetitions = event.competitions.filter((competition) => {
+  const filteredCompetitions = event.competitions.filter(competition => {
     if (!filters.showPastEvents && dayjs(competition.date).isBefore(dayjs())) {
       return false;
     }
 
     if (filters.teamIds.length > 0) {
-      const hasSelectedTeam = competition.competitors.some((c) => {
+      const hasSelectedTeam = competition.competitors.some(c => {
         const id = getTeamIdFromRef(c.team.$ref);
         return id !== undefined && filters.teamIds.includes(id);
       });
@@ -44,18 +44,18 @@ export function filterNbaEvent(
 
 export function toggleShowPastEvents(
   filters: NbaEventFilters,
-  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>,
+  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>
 ) {
-  setFilters({ ...filters, showPastEvents: !filters.showPastEvents });
+  setFilters({...filters, showPastEvents: !filters.showPastEvents});
 }
 
 export function toggleTeamFilter(
   teamId: string,
   filters: NbaEventFilters,
-  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>,
+  setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>
 ) {
   const teamIds = filters.teamIds.includes(teamId)
-    ? filters.teamIds.filter((id) => id !== teamId)
+    ? filters.teamIds.filter(id => id !== teamId)
     : [...filters.teamIds, teamId];
-  setFilters({ ...filters, teamIds });
+  setFilters({...filters, teamIds});
 }

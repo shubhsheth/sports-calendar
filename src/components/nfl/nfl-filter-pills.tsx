@@ -1,20 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import type { NflEventFilters } from "@/types/nfl";
-import { FilterPill } from "@/components/base/filter-pill";
-import { fetchNflTeams } from "./utils/fetchNflTeams";
-import {
-  toggleShowPastEvents,
-  toggleTeamFilter,
-} from "./utils/filterNflEvents";
+import {useQuery} from '@tanstack/react-query';
+import type {NflEventFilters} from '@/types/nfl';
+import {FilterPill} from '@/components/base/filter-pill';
+import {fetchNflTeams} from './utils/fetchNflTeams';
+import {toggleShowPastEvents, toggleTeamFilter} from './utils/filterNflEvents';
 
 type NflFilterPillsProps = {
   filters: NflEventFilters;
   setFilters: React.Dispatch<React.SetStateAction<NflEventFilters>>;
 };
 
-export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
-  const { data: teams } = useQuery({
-    queryKey: ["nfl", "teams"],
+export function NflFilterPills({filters, setFilters}: NflFilterPillsProps) {
+  const {data: teams} = useQuery({
+    queryKey: ['nfl', 'teams'],
     queryFn: fetchNflTeams,
     enabled: filters.teamIds.length > 0,
   });
@@ -31,10 +28,10 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
         />
       )}
       {teams &&
-        filters.teamIds.map((teamId) => {
-          const team = teams.find((t) => t.id === teamId);
+        filters.teamIds.map(teamId => {
+          const team = teams.find(t => t.id === teamId);
           if (!team) return null;
-          const logo = team.logos?.find((l) => l.rel.includes("default"));
+          const logo = team.logos?.find(l => l.rel.includes('default'));
           return (
             <FilterPill
               key={teamId}

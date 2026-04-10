@@ -1,4 +1,4 @@
-import type { F1EventFilters } from "@/types/f1";
+import type {F1EventFilters} from '@/types/f1';
 import {
   Sheet,
   SheetClose,
@@ -7,9 +7,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../ui/sheet";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
+} from '../ui/sheet';
+import {Button} from '../ui/button';
+import {Checkbox} from '../ui/checkbox';
 import {
   Field,
   FieldDescription,
@@ -17,21 +17,18 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "../ui/field";
-import { Separator } from "../ui/separator";
-import {
-  toggleEventType,
-  toggleShowPastEvents,
-} from "./utils/filterF1Events";
-import { translateF1EventTypeId } from "./utils/translateF1EventType";
+} from '../ui/field';
+import {Separator} from '../ui/separator';
+import {toggleEventType, toggleShowPastEvents} from './utils/filterF1Events';
+import {translateF1EventTypeId} from './utils/translateF1EventType';
 
 type F1FilterSelectorProps = {
   filters: F1EventFilters;
   setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>;
 };
 
-function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
-  const eventTypeIds = ["1", "2", "3", "4", "6"];
+function F1FilterSelector({filters, setFilters}: F1FilterSelectorProps) {
+  const eventTypeIds = ['1', '2', '3', '4', '6'];
 
   return (
     <Sheet>
@@ -49,7 +46,7 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
               Whether to show events that have already occurred
             </FieldDescription>
             <FieldGroup>
-              <Field orientation={"horizontal"}>
+              <Field orientation={'horizontal'}>
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
@@ -70,8 +67,8 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
               The different types of events to be shown
             </FieldDescription>
             <FieldGroup className="gap-3">
-              {eventTypeIds.map((type) => (
-                <Field key={type} orientation={"horizontal"}>
+              {eventTypeIds.map(type => (
+                <Field key={type} orientation={'horizontal'}>
                   <Checkbox
                     id={`event-type-${type}`}
                     checked={filters.types.includes(type)}

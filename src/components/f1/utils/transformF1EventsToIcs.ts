@@ -1,8 +1,8 @@
-import type { F1Event } from "@/types/f1";
-import dayjs from "dayjs";
-import type { EventAttributes } from "ics";
-import { translateF1EventTypeAbbr } from "./translateF1EventType";
-import { cleanUpSponsorName } from "./cleanUpSponsorName";
+import type {F1Event} from '@/types/f1';
+import dayjs from 'dayjs';
+import type {EventAttributes} from 'ics';
+import {translateF1EventTypeAbbr} from './translateF1EventType';
+import {cleanUpSponsorName} from './cleanUpSponsorName';
 
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
@@ -21,7 +21,7 @@ export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
           start.hour(),
           start.minute(),
         ],
-        duration: { hours: 1 },
+        duration: {hours: 1},
       });
     }
   }

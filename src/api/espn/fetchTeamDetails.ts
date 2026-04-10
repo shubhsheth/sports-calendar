@@ -1,9 +1,9 @@
-import type { BaseTeam } from "../../types/base";
+import type {BaseTeam} from '../../types/base';
 
 export async function fetchTeamDetails<T = BaseTeam>(
-  refUrl: string,
+  refUrl: string
 ): Promise<T> {
-  refUrl = refUrl.replace("http://", "https://");
+  refUrl = refUrl.replace('http://', 'https://');
   const response = await fetch(refUrl);
   const data = await response.json();
   return data as T;

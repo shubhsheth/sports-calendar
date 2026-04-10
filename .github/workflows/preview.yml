@@ -24,11 +24,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: 'npm'
 
       - name: Install dependencies
         if: github.event.action != 'closed'
         run: npm install
+
+      - name: Lint and format check
+        if: github.event.action != 'closed'
+        run: npm run lint && npm run format:check
 
       - name: Build with preview base path
         if: github.event.action != 'closed'
