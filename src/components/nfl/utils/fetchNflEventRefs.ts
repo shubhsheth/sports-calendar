@@ -1,13 +1,20 @@
 import { fetchEventRefsBySeason } from "@/api/espn/fetchEventRefs";
 
-export const fetchNflEventRefs = async (pageNumber?: number) => {
-  const sport = "football";
-  const league = "nfl";
-  const season = "2025";
-  const pageSize = 30;
+const SPORT = "football";
+const LEAGUE = "nfl";
+const SEASON = "2025";
+const PAGE_SIZE = 30;
 
-  return await fetchEventRefsBySeason(sport, league, season, {
-    pageSize,
+export const NFL_SEASON_TYPES = [
+  { id: 1, name: "Preseason" },
+  { id: 2, name: "Regular Season" },
+  { id: 3, name: "Playoffs" },
+];
+
+export async function fetchNflEventRefs(pageNumber?: number, seasonTypeId?: number) {
+  return fetchEventRefsBySeason(SPORT, LEAGUE, SEASON, {
+    pageSize: PAGE_SIZE,
     pageNumber,
+    seasonTypeId,
   });
-};
+}

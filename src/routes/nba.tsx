@@ -26,6 +26,7 @@ export const Route = createFileRoute("/nba")({
 });
 
 const NBA_BASE_QUERY_KEY = "nba";
+const NBA_SEASON_TYPE_IDS = [1, 2, 3];
 
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
@@ -39,6 +40,7 @@ function NbaPage() {
         <h1 className="text-4xl font-extrabold tracking-tight">NBA Schedule</h1>
         <div className="flex gap-2">
           <DownloadIcalButton<NbaEvent, NbaEventFilters>
+            seasonTypeIds={NBA_SEASON_TYPE_IDS}
             fetchEventRefsFn={fetchNbaEventRefs}
             transformEventsToIcsFn={transformNbaEventsToIcs}
             filterEvents={filterNbaEvents}
@@ -52,6 +54,7 @@ function NbaPage() {
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={NBA_BASE_QUERY_KEY}
+          seasonTypeIds={NBA_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchNbaEventRefs}
           filters={filters}
           eventCard={NbaEventCard}

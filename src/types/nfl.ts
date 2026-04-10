@@ -24,7 +24,7 @@ export type NflEventCompetition = {
     state: string;
   };
   status?: { $ref: string };
-  venue: {
+  venue?: {
     $ref: string;
     fullName: string;
     address: {

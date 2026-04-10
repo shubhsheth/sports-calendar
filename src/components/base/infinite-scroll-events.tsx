@@ -6,7 +6,11 @@ import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
 interface InfiniteScrollEventsProps {
   baseQueryKey: string;
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>;
+  seasonTypeIds: number[];
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number,
+  ) => Promise<FetchEventRefsResponse>;
   filters: unknown;
   eventCard: React.ComponentType<{
     baseQueryKey: string;
@@ -18,6 +22,7 @@ interface InfiniteScrollEventsProps {
 
 function InfiniteScrollEvents({
   baseQueryKey,
+  seasonTypeIds,
   fetchEventRefsFn,
   filters,
   eventCard: EventCard,
@@ -34,12 +39,26 @@ function InfiniteScrollEvents({
     error,
   } = useInfiniteQuery({
     queryKey: [baseQueryKey, "events", "infinite"],
-    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const nextPageNumber = lastPage.pageIndex + 1;
-      const hasMorePages = !!(lastPage.pageIndex < lastPage.pageCount);
-      return hasMorePages ? nextPageNumber : undefined;
+    queryFn: ({ pageParam }) => {
+      const { seasonTypeId, pageNumber } = pageParam as {
+        seasonTypeId: number;
+        pageNumber: number;
+      };
+      return fetchEventRefsFn(pageNumber, seasonTypeId);
+    },
+    initialPageParam: { seasonTypeId: seasonTypeIds[0], pageNumber: 1 },
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      const { seasonTypeId, pageNumber } = lastPageParam as {
+        seasonTypeId: number;
+        pageNumber: number;
+      };
+      if (lastPage.pageIndex < lastPage.pageCount) {
+        return { seasonTypeId, pageNumber: pageNumber + 1 };
+      }
+      const nextIdx = seasonTypeIds.indexOf(seasonTypeId) + 1;
+      return nextIdx < seasonTypeIds.length
+        ? { seasonTypeId: seasonTypeIds[nextIdx], pageNumber: 1 }
+        : undefined;
     },
   });
 

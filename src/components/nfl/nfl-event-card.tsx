@@ -1,35 +1,35 @@
-import type { NbaEvent, NbaEventFilters, NbaTeam } from "@/types/nba";
+import type { NflEvent, NflEventFilters, NflTeam } from "@/types/nfl";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import type { EventRef } from "@/types/base";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
-import { filterNbaEvent } from "./utils/filterNbaEvents";
+import { filterNflEvent } from "./utils/filterNflEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 
-type NbaEventCardProps = {
+type NflEventCardProps = {
   eventRef: EventRef;
-  filters: NbaEventFilters;
+  filters: NflEventFilters;
 };
 
-function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
+function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   const {
-    data: nbaEvent,
+    data: nflEvent,
     isPending,
     error,
   } = useQuery({
-    queryKey: ["nba-event", eventRef],
-    queryFn: () => fetchEventDetails<NbaEvent>(eventRef.$ref),
+    queryKey: ["nfl-event", eventRef],
+    queryFn: () => fetchEventDetails<NflEvent>(eventRef.$ref),
   });
 
   if (isPending) return null;
-  if (!nbaEvent) return <div>Error looking for event</div>;
+  if (!nflEvent) return <div>Error looking for event</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const filteredNbaEvent = filterNbaEvent(nbaEvent, filters);
-  if (!filteredNbaEvent) return null;
+  const filteredNflEvent = filterNflEvent(nflEvent, filters);
+  if (!filteredNflEvent) return null;
 
-  const mainCompetition = filteredNbaEvent.competitions[0];
+  const mainCompetition = filteredNflEvent.competitions[0];
   const homeCompetitor = mainCompetition.competitors.find(
     (c) => c.homeAway === "home",
   );
@@ -75,8 +75,8 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
 
 function TeamLogo({ teamRef }: { teamRef: string }) {
   const { data: team, isLoading } = useQuery({
-    queryKey: ["nba", "team", teamRef],
-    queryFn: () => fetchTeamDetails<NbaTeam>(teamRef),
+    queryKey: ["nfl", "team", teamRef],
+    queryFn: () => fetchTeamDetails<NflTeam>(teamRef),
   });
 
   if (isLoading) return <div className="h-10 w-10 animate-pulse bg-muted" />;
@@ -111,4 +111,4 @@ function TbdTeam() {
   );
 }
 
-export default NbaEventCard;
+export default NflEventCard;
