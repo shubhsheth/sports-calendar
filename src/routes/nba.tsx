@@ -5,10 +5,7 @@ import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import NbaEventCard from "@/components/nba/nba-event-card";
 import NbaFilterSelector from "@/components/nba/nba-filter-selector";
-import {
-  fetchNbaEventRefs,
-  NBA_SEASON_TYPES,
-} from "@/components/nba/utils/fetchNbaEventRefs";
+import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
 import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
 import { NbaFilterPills } from "@/components/nba/nba-filter-pills";
@@ -29,10 +26,7 @@ export const Route = createFileRoute("/nba")({
 });
 
 const NBA_BASE_QUERY_KEY = "nba";
-const NBA_SEASON_TYPE_IDS = NBA_SEASON_TYPES.map((t) => t.id);
-
-const fetchNbaPage = (cursor: { seasonTypeId: number; pageNumber: number }) =>
-  fetchNbaEventRefs(cursor.pageNumber, cursor.seasonTypeId);
+const NBA_SEASON_TYPE_IDS = [1, 2, 3];
 
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
@@ -47,7 +41,7 @@ function NbaPage() {
         <div className="flex gap-2">
           <DownloadIcalButton<NbaEvent, NbaEventFilters>
             seasonTypeIds={NBA_SEASON_TYPE_IDS}
-            fetchEventRefsFn={fetchNbaPage}
+            fetchEventRefsFn={fetchNbaEventRefs}
             transformEventsToIcsFn={transformNbaEventsToIcs}
             filterEvents={filterNbaEvents}
             eventFilters={filters}
@@ -61,7 +55,7 @@ function NbaPage() {
         <InfiniteScrollEvents
           baseQueryKey={NBA_BASE_QUERY_KEY}
           seasonTypeIds={NBA_SEASON_TYPE_IDS}
-          fetchEventRefsFn={fetchNbaPage}
+          fetchEventRefsFn={fetchNbaEventRefs}
           filters={filters}
           eventCard={NbaEventCard}
         />

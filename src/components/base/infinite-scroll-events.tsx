@@ -4,12 +4,13 @@ import { useInView } from "react-intersection-observer";
 import type { EventRef } from "@/types/base";
 import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
-type SeasonCursor = { seasonTypeId: number; pageNumber: number };
-
 interface InfiniteScrollEventsProps {
   baseQueryKey: string;
   seasonTypeIds: number[];
-  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>;
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number,
+  ) => Promise<FetchEventRefsResponse>;
   filters: unknown;
   eventCard: React.ComponentType<{
     baseQueryKey: string;
@@ -38,16 +39,26 @@ function InfiniteScrollEvents({
     error,
   } = useInfiniteQuery({
     queryKey: [baseQueryKey, "events", "infinite"],
-    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam as SeasonCursor),
-    initialPageParam: { seasonTypeId: seasonTypeIds[0], pageNumber: 1 } as SeasonCursor,
+    queryFn: ({ pageParam }) => {
+      const { seasonTypeId, pageNumber } = pageParam as {
+        seasonTypeId: number;
+        pageNumber: number;
+      };
+      return fetchEventRefsFn(pageNumber, seasonTypeId);
+    },
+    initialPageParam: { seasonTypeId: seasonTypeIds[0], pageNumber: 1 },
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      const cursor = lastPageParam as SeasonCursor;
+      const { seasonTypeId, pageNumber } = lastPageParam as {
+        seasonTypeId: number;
+        pageNumber: number;
+      };
       if (lastPage.pageIndex < lastPage.pageCount) {
-        return { seasonTypeId: cursor.seasonTypeId, pageNumber: cursor.pageNumber + 1 };
+        return { seasonTypeId, pageNumber: pageNumber + 1 };
       }
-      const currentIdx = seasonTypeIds.indexOf(cursor.seasonTypeId);
-      const nextId = seasonTypeIds[currentIdx + 1];
-      return nextId !== undefined ? { seasonTypeId: nextId, pageNumber: 1 } : undefined;
+      const nextIdx = seasonTypeIds.indexOf(seasonTypeId) + 1;
+      return nextIdx < seasonTypeIds.length
+        ? { seasonTypeId: seasonTypeIds[nextIdx], pageNumber: 1 }
+        : undefined;
     },
   });
 

@@ -8,11 +8,12 @@ import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useState } from "react";
 
-type SeasonCursor = { seasonTypeId: number; pageNumber: number };
-
 type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   seasonTypeIds: number[];
-  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>;
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number,
+  ) => Promise<FetchEventRefsResponse>;
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
   eventFilters: F;
@@ -69,23 +70,13 @@ function DownloadIcalButton<T extends BaseEvent, F>({
 
 export default DownloadIcalButton;
 
-function getNextCursor(
-  lastPage: FetchEventRefsResponse,
-  lastCursor: SeasonCursor,
-  seasonTypeIds: number[],
-): SeasonCursor | undefined {
-  if (lastPage.pageIndex < lastPage.pageCount) {
-    return { seasonTypeId: lastCursor.seasonTypeId, pageNumber: lastCursor.pageNumber + 1 };
-  }
-  const currentIdx = seasonTypeIds.indexOf(lastCursor.seasonTypeId);
-  const nextId = seasonTypeIds[currentIdx + 1];
-  return nextId !== undefined ? { seasonTypeId: nextId, pageNumber: 1 } : undefined;
-}
-
 async function fetchAllEvents<T>(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>,
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number,
+  ) => Promise<FetchEventRefsResponse>,
   seasonTypeIds: number[],
 ): Promise<T[]> {
   const allEventRefs = await fetchAllEventRefs(
@@ -106,40 +97,53 @@ async function fetchAllEvents<T>(
 async function fetchAllEventRefs(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (cursor: SeasonCursor) => Promise<FetchEventRefsResponse>,
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number,
+  ) => Promise<FetchEventRefsResponse>,
   seasonTypeIds: number[],
 ): Promise<EventRef[]> {
   const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
 
-  // Fetch all event refs from cache
+  // Read already-fetched refs from infinite scroll cache
   const infiniteData = queryClient.getQueryData<{
     pages: FetchEventRefsResponse[];
-    pageParams: SeasonCursor[];
+    pageParams: { seasonTypeId: number; pageNumber: number }[];
   }>(infiniteQueryKey);
   const cachedPages = infiniteData?.pages ?? [];
   const cachedPageParams = infiniteData?.pageParams ?? [];
 
-  // Determine starting cursor for uncached pages
-  let cursor: SeasonCursor | undefined;
+  // Determine where to resume from after cached pages
+  let seasonTypeIdx = 0;
+  let pageNumber = 1;
+
   if (cachedPages.length > 0) {
-    const lastCachedPage = cachedPages[cachedPages.length - 1];
-    const lastCachedCursor = cachedPageParams[cachedPageParams.length - 1];
-    cursor = getNextCursor(lastCachedPage, lastCachedCursor, seasonTypeIds);
-  } else {
-    cursor = { seasonTypeId: seasonTypeIds[0], pageNumber: 1 };
+    const lastPage = cachedPages[cachedPages.length - 1];
+    const lastParam = cachedPageParams[cachedPageParams.length - 1];
+    if (lastPage.pageIndex < lastPage.pageCount) {
+      seasonTypeIdx = seasonTypeIds.indexOf(lastParam.seasonTypeId);
+      pageNumber = lastParam.pageNumber + 1;
+    } else {
+      seasonTypeIdx = seasonTypeIds.indexOf(lastParam.seasonTypeId) + 1;
+      pageNumber = 1;
+    }
   }
 
-  // Fetch remaining event refs from API
+  // Fetch remaining pages across all remaining season types
   const remainingPages: FetchEventRefsResponse[] = [];
-  while (cursor !== undefined) {
-    const pageData = await fetchEventRefsFn(cursor);
+  while (seasonTypeIdx < seasonTypeIds.length) {
+    const seasonTypeId = seasonTypeIds[seasonTypeIdx];
+    const pageData = await fetchEventRefsFn(pageNumber, seasonTypeId);
     remainingPages.push(pageData);
-    cursor = getNextCursor(pageData, cursor, seasonTypeIds);
+    if (pageData.pageIndex < pageData.pageCount) {
+      pageNumber++;
+    } else {
+      seasonTypeIdx++;
+      pageNumber = 1;
+    }
   }
 
-  // Convert pages to flat map of refs
-  const allEventRefPages = [...cachedPages, ...remainingPages];
-  return allEventRefPages.flatMap((page) => page.items);
+  return [...cachedPages, ...remainingPages].flatMap((page) => page.items);
 }
 
 async function fetchAllEventDetails<T>(

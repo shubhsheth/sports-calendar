@@ -28,9 +28,6 @@ export const Route = createFileRoute("/f1")({
 const F1_BASE_QUERY_KEY = "f1";
 const F1_SEASON_TYPE_IDS = [2];
 
-const fetchF1Page = (cursor: { seasonTypeId: number; pageNumber: number }) =>
-  fetchF1EventRefs(cursor.pageNumber);
-
 function F1Page() {
   const [filters, setFilters] = useLocalStorageState<F1EventFilters>(
     "sports-calendar:f1-filters",
@@ -44,7 +41,7 @@ function F1Page() {
         <div className="flex gap-2">
           <DownloadIcalButton<F1Event, F1EventFilters>
             seasonTypeIds={F1_SEASON_TYPE_IDS}
-            fetchEventRefsFn={fetchF1Page}
+            fetchEventRefsFn={fetchF1EventRefs}
             transformEventsToIcsFn={transformF1EventsToIcs}
             filterEvents={filterF1Events}
             eventFilters={filters}
@@ -58,7 +55,7 @@ function F1Page() {
         <InfiniteScrollEvents
           baseQueryKey={F1_BASE_QUERY_KEY}
           seasonTypeIds={F1_SEASON_TYPE_IDS}
-          fetchEventRefsFn={fetchF1Page}
+          fetchEventRefsFn={fetchF1EventRefs}
           filters={filters}
           eventCard={F1EventCard}
         />
