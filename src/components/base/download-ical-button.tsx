@@ -143,7 +143,9 @@ async function fetchAllEventRefs(
     }
   }
 
-  return [...cachedPages, ...remainingPages].flatMap((page) => page.items);
+  // Convert pages to flat map of refs
+  const allEventRefPages = [...cachedPages, ...remainingPages];
+  return allEventRefPages.flatMap((page) => page.items);
 }
 
 async function fetchAllEventDetails<T>(
