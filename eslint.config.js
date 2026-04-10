@@ -39,4 +39,13 @@ export default defineConfig([
       '@typescript-eslint/no-floating-promises': 'warn',
     },
   },
+  // shadcn/ui components intentionally co-export variant helpers (e.g. badgeVariants,
+  // buttonVariants) and hooks alongside React components. Downgrade the react-refresh
+  // rule to warn for these generated files so CI is not blocked.
+  {
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'warn',
+    },
+  },
 ]);
