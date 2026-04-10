@@ -26,7 +26,7 @@ export const Route = createFileRoute("/nba")({
 });
 
 const NBA_BASE_QUERY_KEY = "nba";
-const NBA_SEASON_TYPE_IDS = [1, 2, 3];
+const NBA_SEASON_TYPE_IDS = [1, 2, 5, 3];
 
 function NbaPage() {
   const [filters, setFilters] = useLocalStorageState<NbaEventFilters>(
