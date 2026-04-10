@@ -89,7 +89,10 @@ describe('filterNbaEvent', () => {
 
   it('keeps event when a selected team is a competitor (home)', () => {
     const event = makeEvent();
-    const result = filterNbaEvent(event, {showPastEvents: true, teamIds: ['2']});
+    const result = filterNbaEvent(event, {
+      showPastEvents: true,
+      teamIds: ['2'],
+    });
     expect(result).not.toBeNull();
   });
 
@@ -163,7 +166,10 @@ describe('toggleShowPastEvents', () => {
     const setFilters = vi.fn();
     const filters: NbaEventFilters = {showPastEvents: false, teamIds: []};
     toggleShowPastEvents(filters, setFilters);
-    expect(setFilters).toHaveBeenCalledWith({showPastEvents: true, teamIds: []});
+    expect(setFilters).toHaveBeenCalledWith({
+      showPastEvents: true,
+      teamIds: [],
+    });
   });
 
   it('flips showPastEvents from true to false', () => {
@@ -190,7 +196,10 @@ describe('toggleTeamFilter', () => {
 
   it('removes a team when it is already selected', () => {
     const setFilters = vi.fn();
-    const filters: NbaEventFilters = {showPastEvents: true, teamIds: ['1', '2']};
+    const filters: NbaEventFilters = {
+      showPastEvents: true,
+      teamIds: ['1', '2'],
+    };
     toggleTeamFilter('1', filters, setFilters);
     expect(setFilters).toHaveBeenCalledWith({
       showPastEvents: true,

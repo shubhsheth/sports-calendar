@@ -103,11 +103,10 @@ describe('filterF1Event', () => {
   });
 
   it('returns null when all competitions are filtered out', () => {
-    const event = makeEvent([
-      {date: PAST_DATE},
-      {id: '2', date: PAST_DATE},
-    ]);
-    expect(filterF1Event(event, {showPastEvents: false, types: ['3']})).toBeNull();
+    const event = makeEvent([{date: PAST_DATE}, {id: '2', date: PAST_DATE}]);
+    expect(
+      filterF1Event(event, {showPastEvents: false, types: ['3']})
+    ).toBeNull();
   });
 });
 
@@ -137,7 +136,10 @@ describe('toggleShowPastEvents', () => {
     const setFilters = vi.fn();
     const filters: F1EventFilters = {showPastEvents: false, types: ['3']};
     toggleShowPastEvents(filters, setFilters);
-    expect(setFilters).toHaveBeenCalledWith({showPastEvents: true, types: ['3']});
+    expect(setFilters).toHaveBeenCalledWith({
+      showPastEvents: true,
+      types: ['3'],
+    });
   });
 
   it('flips showPastEvents from true to false', () => {

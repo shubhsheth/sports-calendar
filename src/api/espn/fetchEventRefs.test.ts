@@ -5,8 +5,12 @@ import {fetchEventRefsBySeason} from './fetchEventRefs';
 
 const MOCK_RESPONSE = {
   items: [
-    {$ref: 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/1'},
-    {$ref: 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/2'},
+    {
+      $ref: 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/1',
+    },
+    {
+      $ref: 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/2',
+    },
   ],
   pageCount: 5,
   pageIndex: 1,
@@ -38,7 +42,9 @@ describe('fetchEventRefsBySeason', () => {
 
   it('constructs URL with correct sport, league, and season', async () => {
     await fetchEventRefsBySeason('basketball', 'nba', '2026');
-    expect(capturedUrl).toContain('/sports/basketball/leagues/nba/seasons/2026/');
+    expect(capturedUrl).toContain(
+      '/sports/basketball/leagues/nba/seasons/2026/'
+    );
   });
 
   it('defaults to seasonTypeId=2, pageSize=30, pageNumber=1', async () => {

@@ -60,9 +60,7 @@ describe('useLocalStorageState', () => {
 
   it('works with object values', () => {
     const defaultVal = {a: 1, b: 'hello'};
-    const {result} = renderHook(() =>
-      useLocalStorageState(KEY, defaultVal)
-    );
+    const {result} = renderHook(() => useLocalStorageState(KEY, defaultVal));
     act(() => {
       result.current[1]({a: 99, b: 'world'});
     });

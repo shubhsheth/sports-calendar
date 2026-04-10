@@ -3,7 +3,11 @@ import {http, HttpResponse} from 'msw';
 import {setupServer} from 'msw/node';
 import {fetchEventDetails} from './fetchEventDetails';
 
-const MOCK_EVENT = {id: '123', name: 'Test Event', date: '2026-01-01T00:00:00Z'};
+const MOCK_EVENT = {
+  id: '123',
+  name: 'Test Event',
+  date: '2026-01-01T00:00:00Z',
+};
 
 let capturedUrl: string | null = null;
 

@@ -75,7 +75,9 @@ describe('filterNflEvent', () => {
 
   it('removes past competitions when showPastEvents is false', () => {
     const event = makeEvent([{date: PAST_DATE}]);
-    expect(filterNflEvent(event, {showPastEvents: false, teamIds: []})).toBeNull();
+    expect(
+      filterNflEvent(event, {showPastEvents: false, teamIds: []})
+    ).toBeNull();
   });
 
   it('keeps past competitions when showPastEvents is true', () => {
@@ -112,14 +114,13 @@ describe('filterNflEvent', () => {
 
   it('shows all events when teamIds is empty', () => {
     const event = makeEvent();
-    expect(filterNflEvent(event, {showPastEvents: true, teamIds: []})).not.toBeNull();
+    expect(
+      filterNflEvent(event, {showPastEvents: true, teamIds: []})
+    ).not.toBeNull();
   });
 
   it('only returns competitions that pass both filters', () => {
-    const event = makeEvent([
-      {date: FUTURE_DATE},
-      {id: '2', date: PAST_DATE},
-    ]);
+    const event = makeEvent([{date: FUTURE_DATE}, {id: '2', date: PAST_DATE}]);
     const result = filterNflEvent(event, {showPastEvents: false, teamIds: []});
     expect(result).not.toBeNull();
     expect(result!.competitions).toHaveLength(1);
@@ -149,7 +150,10 @@ describe('toggleShowPastEvents', () => {
     const setFilters = vi.fn();
     const filters: NflEventFilters = {showPastEvents: false, teamIds: []};
     toggleShowPastEvents(filters, setFilters);
-    expect(setFilters).toHaveBeenCalledWith({showPastEvents: true, teamIds: []});
+    expect(setFilters).toHaveBeenCalledWith({
+      showPastEvents: true,
+      teamIds: [],
+    });
   });
 
   it('flips showPastEvents from true to false', () => {
