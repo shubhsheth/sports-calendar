@@ -1,5 +1,5 @@
-import type { F1Event, F1EventFilters } from "@/types/f1";
-import dayjs from "dayjs";
+import type {F1Event, F1EventFilters} from '@/types/f1';
+import dayjs from 'dayjs';
 
 export function filterF1Events(events: F1Event[], filters: F1EventFilters) {
   const filteredEvents: F1Event[] = [];
@@ -13,9 +13,9 @@ export function filterF1Events(events: F1Event[], filters: F1EventFilters) {
 
 export function filterF1Event(
   event: F1Event,
-  filters: F1EventFilters,
+  filters: F1EventFilters
 ): F1Event | null {
-  const filteredCompetitions = event.competitions.filter((competition) => {
+  const filteredCompetitions = event.competitions.filter(competition => {
     if (!filters.showPastEvents && dayjs(competition.date).isBefore(dayjs())) {
       return false;
     }
@@ -35,18 +35,18 @@ export function filterF1Event(
 
 export function toggleShowPastEvents(
   filters: F1EventFilters,
-  setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>,
+  setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>
 ) {
-  setFilters({ ...filters, showPastEvents: !filters.showPastEvents });
+  setFilters({...filters, showPastEvents: !filters.showPastEvents});
 }
 
 export function toggleEventType(
   type: string,
   filters: F1EventFilters,
-  setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>,
+  setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>
 ) {
   const types = filters.types.includes(type)
-    ? filters.types.filter((t) => t !== type)
+    ? filters.types.filter(t => t !== type)
     : [...filters.types, type];
-  setFilters({ ...filters, types });
+  setFilters({...filters, types});
 }

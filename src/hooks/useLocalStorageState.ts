@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import {useState, useCallback} from 'react';
 
 export function useLocalStorageState<T>(
   key: string,
@@ -15,11 +15,9 @@ export function useLocalStorageState<T>(
 
   const setStateAndPersist = useCallback(
     (value: React.SetStateAction<T>) => {
-      setState((prev) => {
+      setState(prev => {
         const next =
-          typeof value === "function"
-            ? (value as (prev: T) => T)(prev)
-            : value;
+          typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
         try {
           localStorage.setItem(key, JSON.stringify(next));
         } catch {

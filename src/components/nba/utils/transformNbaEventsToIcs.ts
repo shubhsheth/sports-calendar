@@ -1,6 +1,6 @@
-import type { NbaEvent } from "@/types/nba";
-import dayjs from "dayjs";
-import type { EventAttributes } from "ics";
+import type {NbaEvent} from '@/types/nba';
+import dayjs from 'dayjs';
+import type {EventAttributes} from 'ics';
 
 export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
@@ -19,7 +19,7 @@ export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
           start.hour(),
           start.minute(),
         ],
-        duration: { hours: 2, minutes: 30 },
+        duration: {hours: 2, minutes: 30},
       });
     }
   }
