@@ -68,8 +68,7 @@ function IplEventList({ filters }: { filters: IplEventFilters }) {
     error,
   } = useInfiniteQuery({
     queryKey: [IPL_BASE_QUERY_KEY, "events", "infinite"],
-    queryFn: ({ pageParam }) =>
-      fetchIplEventsByDate(pageParam as string),
+    queryFn: ({ pageParam }) => fetchIplEventsByDate(pageParam as string),
     initialPageParam: IPL_SEASON_DATES[0],
     getNextPageParam: (_lastPage, _allPages, lastPageParam) => {
       const idx = IPL_SEASON_DATES.indexOf(lastPageParam as string);

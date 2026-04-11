@@ -4,7 +4,10 @@ import fileDownload from "js-file-download";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { IplEvent, IplEventFilters } from "@/types/ipl";
-import { fetchIplEventsByDate, getIplSeasonDates } from "./utils/fetchIplEvents";
+import {
+  fetchIplEventsByDate,
+  getIplSeasonDates,
+} from "./utils/fetchIplEvents";
 import { filterIplEvents } from "./utils/filterIplEvents";
 import { transformIplEventsToIcs } from "./utils/transformIplEventsToIcs";
 

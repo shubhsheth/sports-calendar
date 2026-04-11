@@ -2,9 +2,7 @@ import type { IplEvent } from "@/types/ipl";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
-export function transformIplEventsToIcs(
-  events: IplEvent[]
-): EventAttributes[] {
+export function transformIplEventsToIcs(events: IplEvent[]): EventAttributes[] {
   return events.map(event => {
     const start = dayjs(event.date);
     return {

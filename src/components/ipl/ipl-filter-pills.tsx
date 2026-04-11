@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { IplEventFilters } from "@/types/ipl";
 import { FilterPill } from "@/components/base/filter-pill";
 import { fetchIplTeams } from "./utils/fetchIplTeams";
-import { toggleShowPastEvents, toggleTeamFilter } from "./utils/filterIplEvents";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterIplEvents";
 
 type IplFilterPillsProps = {
   filters: IplEventFilters;

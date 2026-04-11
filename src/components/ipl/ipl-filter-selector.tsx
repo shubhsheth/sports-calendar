@@ -21,7 +21,10 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { toggleShowPastEvents, toggleTeamFilter } from "./utils/filterIplEvents";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterIplEvents";
 import { fetchIplTeams } from "./utils/fetchIplTeams";
 
 type IplFilterSelectorProps = {
