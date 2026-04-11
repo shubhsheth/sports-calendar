@@ -8,7 +8,7 @@ export type BaseEvent = {
   date: string;
   name: string;
   shortName: string;
-  season: {$ref: string};
+  season: { $ref: string };
 };
 
 export type BaseTeam = {

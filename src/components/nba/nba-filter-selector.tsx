@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import type {NbaEventFilters} from '@/types/nba';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { NbaEventFilters } from "@/types/nba";
 import {
   Sheet,
   SheetClose,
@@ -9,10 +9,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
-import {Button} from '../ui/button';
-import {Checkbox} from '../ui/checkbox';
-import {Input} from '../ui/input';
+} from "../ui/sheet";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import { Input } from "../ui/input";
 import {
   Field,
   FieldDescription,
@@ -20,16 +20,19 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from '../ui/field';
-import {toggleShowPastEvents, toggleTeamFilter} from './utils/filterNbaEvents';
-import {fetchNbaTeams} from './utils/fetchNbaTeams';
+} from "../ui/field";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterNbaEvents";
+import { fetchNbaTeams } from "./utils/fetchNbaTeams";
 
 type NbaFilterSelectorProps = {
   filters: NbaEventFilters;
   setFilters: React.Dispatch<React.SetStateAction<NbaEventFilters>>;
 };
 
-function NbaFilterSelector({filters, setFilters}: NbaFilterSelectorProps) {
+function NbaFilterSelector({ filters, setFilters }: NbaFilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -46,7 +49,7 @@ function NbaFilterSelector({filters, setFilters}: NbaFilterSelectorProps) {
               Whether to show events that have already occurred
             </FieldDescription>
             <FieldGroup>
-              <Field orientation={'horizontal'}>
+              <Field orientation={"horizontal"}>
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
@@ -75,11 +78,11 @@ function NbaFilterSelector({filters, setFilters}: NbaFilterSelectorProps) {
 
 export default NbaFilterSelector;
 
-function TeamFilterFieldSet({filters, setFilters}: NbaFilterSelectorProps) {
-  const [teamSearch, setTeamSearch] = useState('');
+function TeamFilterFieldSet({ filters, setFilters }: NbaFilterSelectorProps) {
+  const [teamSearch, setTeamSearch] = useState("");
 
-  const {data: teams, isLoading: teamsLoading} = useQuery({
-    queryKey: ['nba', 'teams'],
+  const { data: teams, isLoading: teamsLoading } = useQuery({
+    queryKey: ["nba", "teams"],
     queryFn: fetchNbaTeams,
   });
 
@@ -100,14 +103,14 @@ function TeamFilterFieldSet({filters, setFilters}: NbaFilterSelectorProps) {
           size="sm"
           variant="outline"
           disabled={teamsLoading}
-          onClick={() => setFilters({...filters, teamIds: allTeamIds})}
+          onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
         >
           Select all
         </Button>
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setFilters({...filters, teamIds: []})}
+          onClick={() => setFilters({ ...filters, teamIds: [] })}
         >
           Clear
         </Button>
@@ -122,7 +125,7 @@ function TeamFilterFieldSet({filters, setFilters}: NbaFilterSelectorProps) {
           <p className="text-sm text-muted-foreground py-2">Loading teams...</p>
         )}
         {filteredTeams.map(team => {
-          const logo = team.logos?.find(l => l.rel.includes('default'));
+          const logo = team.logos?.find(l => l.rel.includes("default"));
           return (
             <Field key={team.id} orientation="horizontal">
               <Checkbox

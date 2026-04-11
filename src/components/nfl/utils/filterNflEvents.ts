@@ -1,5 +1,5 @@
-import type {NflEvent, NflEventFilters} from '@/types/nfl';
-import dayjs from 'dayjs';
+import type { NflEvent, NflEventFilters } from "@/types/nfl";
+import dayjs from "dayjs";
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
@@ -46,7 +46,7 @@ export function toggleShowPastEvents(
   filters: NflEventFilters,
   setFilters: React.Dispatch<React.SetStateAction<NflEventFilters>>
 ) {
-  setFilters({...filters, showPastEvents: !filters.showPastEvents});
+  setFilters({ ...filters, showPastEvents: !filters.showPastEvents });
 }
 
 export function toggleTeamFilter(
@@ -57,5 +57,5 @@ export function toggleTeamFilter(
   const teamIds = filters.teamIds.includes(teamId)
     ? filters.teamIds.filter(id => id !== teamId)
     : [...filters.teamIds, teamId];
-  setFilters({...filters, teamIds});
+  setFilters({ ...filters, teamIds });
 }

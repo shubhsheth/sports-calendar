@@ -12,7 +12,7 @@ function Footer() {
           </a>
         </p>
         <p className="mt-6">
-          Made with ❤️ by{' '}
+          Made with ❤️ by{" "}
           <a href="https://iamshubh.com" target="_blank" className="underline">
             Shubh Sheth
           </a>

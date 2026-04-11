@@ -1,24 +1,24 @@
-import type {NflEvent, NflEventFilters, NflTeam} from '@/types/nfl';
-import {Card, CardContent, CardFooter} from '@/components/ui/card';
-import dayjs from 'dayjs';
-import type {EventRef} from '@/types/base';
-import {useQuery} from '@tanstack/react-query';
-import {fetchEventDetails} from '@/api/espn/fetchEventDetails';
-import {filterNflEvent} from './utils/filterNflEvents';
-import {fetchTeamDetails} from '@/api/espn/fetchTeamDetails';
+import type { NflEvent, NflEventFilters, NflTeam } from "@/types/nfl";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import dayjs from "dayjs";
+import type { EventRef } from "@/types/base";
+import { useQuery } from "@tanstack/react-query";
+import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
+import { filterNflEvent } from "./utils/filterNflEvents";
+import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 
 type NflEventCardProps = {
   eventRef: EventRef;
   filters: NflEventFilters;
 };
 
-function NflEventCard({eventRef, filters}: NflEventCardProps) {
+function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   const {
     data: nflEvent,
     isPending,
     error,
   } = useQuery({
-    queryKey: ['nfl-event', eventRef],
+    queryKey: ["nfl-event", eventRef],
     queryFn: () => fetchEventDetails<NflEvent>(eventRef.$ref),
   });
 
@@ -31,13 +31,13 @@ function NflEventCard({eventRef, filters}: NflEventCardProps) {
 
   const mainCompetition = filteredNflEvent.competitions[0];
   const homeCompetitor = mainCompetition.competitors.find(
-    c => c.homeAway === 'home'
+    c => c.homeAway === "home"
   );
   const awayCompetitor = mainCompetition.competitors.find(
-    c => c.homeAway === 'away'
+    c => c.homeAway === "away"
   );
 
-  const eventDate = dayjs(mainCompetition.date).format('MMM D, h:mm A');
+  const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
 
   return (
     <Card className="w-full">
@@ -73,23 +73,23 @@ function NflEventCard({eventRef, filters}: NflEventCardProps) {
   );
 }
 
-function TeamLogo({teamRef}: {teamRef: string}) {
-  const {data: team, isLoading} = useQuery({
-    queryKey: ['nfl', 'team', teamRef],
+function TeamLogo({ teamRef }: { teamRef: string }) {
+  const { data: team, isLoading } = useQuery({
+    queryKey: ["nfl", "team", teamRef],
     queryFn: () => fetchTeamDetails<NflTeam>(teamRef),
   });
 
   if (isLoading) return <div className="h-10 w-10 animate-pulse bg-muted" />;
   if (!team) return <TbdTeam />;
 
-  const defaultLogo = team?.logos?.find(logo => logo.rel.includes('default'));
+  const defaultLogo = team?.logos?.find(logo => logo.rel.includes("default"));
   if (!defaultLogo) return <TbdTeam />;
 
   return (
     <div className="flex flex-col items-center gap-3">
       <img
         src={defaultLogo.href}
-        alt={team?.name ?? 'Team Logo'}
+        alt={team?.name ?? "Team Logo"}
         className="h-10 w-10 object-contain"
         loading="lazy"
       />

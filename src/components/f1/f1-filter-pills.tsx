@@ -1,14 +1,14 @@
-import type {F1EventFilters} from '@/types/f1';
-import {FilterPill} from '@/components/base/filter-pill';
-import {translateF1EventTypeId} from './utils/translateF1EventType';
-import {toggleEventType, toggleShowPastEvents} from './utils/filterF1Events';
+import type { F1EventFilters } from "@/types/f1";
+import { FilterPill } from "@/components/base/filter-pill";
+import { translateF1EventTypeId } from "./utils/translateF1EventType";
+import { toggleEventType, toggleShowPastEvents } from "./utils/filterF1Events";
 
 type F1FilterPillsProps = {
   filters: F1EventFilters;
   setFilters: React.Dispatch<React.SetStateAction<F1EventFilters>>;
 };
 
-export function F1FilterPills({filters, setFilters}: F1FilterPillsProps) {
+export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
   const hasActivePills = filters.showPastEvents || filters.types.length > 0;
   if (!hasActivePills) return null;
 

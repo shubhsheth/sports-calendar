@@ -1,12 +1,12 @@
-import {createEvents, type EventAttributes} from 'ics';
-import fileDownload from 'js-file-download';
-import {Download} from 'lucide-react';
-import type {BaseEvent, EventRef} from '@/types/base';
-import {Button} from '@/components/ui/button';
-import type {FetchEventRefsResponse} from '@/api/espn/fetchEventRefs';
-import {QueryClient, useQueryClient} from '@tanstack/react-query';
-import {fetchEventDetails} from '@/api/espn/fetchEventDetails';
-import {useState} from 'react';
+import { createEvents, type EventAttributes } from "ics";
+import fileDownload from "js-file-download";
+import { Download } from "lucide-react";
+import type { BaseEvent, EventRef } from "@/types/base";
+import { Button } from "@/components/ui/button";
+import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
+import { useState } from "react";
 
 type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>;
@@ -23,7 +23,7 @@ function DownloadIcalButton<T extends BaseEvent, F>({
   filterEvents,
   eventFilters,
   baseQueryKey,
-  filename = 'calendar.ics',
+  filename = "calendar.ics",
 }: DownloadIcalButtonProps<T, F>) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -47,10 +47,10 @@ function DownloadIcalButton<T extends BaseEvent, F>({
 
     // Initiate ICS File download
     if (result.value) {
-      const blob = new Blob([result.value], {type: 'text/calendar'});
+      const blob = new Blob([result.value], { type: "text/calendar" });
       fileDownload(blob, filename);
     } else if (result.error) {
-      console.error('Failed to create iCal:', result.error);
+      console.error("Failed to create iCal:", result.error);
     }
   };
 
@@ -88,7 +88,7 @@ async function fetchAllEventRefs(
   baseQueryKey: string,
   fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>
 ): Promise<EventRef[]> {
-  const infiniteQueryKey = [baseQueryKey, 'events', 'infinite'];
+  const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
 
   // Fetch all event refs from cache
   const infiniteData = queryClient.getQueryData<{
@@ -125,7 +125,7 @@ async function fetchAllEventDetails<T>(
     FETCH_CONCURRENCY,
     ref => {
       return queryClient.ensureQueryData({
-        queryKey: [baseQueryKey, 'event', ref.$ref],
+        queryKey: [baseQueryKey, "event", ref.$ref],
         queryFn: () => fetchEventDetails<T>(ref.$ref),
       });
     }

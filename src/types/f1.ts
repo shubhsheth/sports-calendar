@@ -1,4 +1,4 @@
-import type {BaseEvent} from './base';
+import type { BaseEvent } from "./base";
 
 export type F1Event = BaseEvent & {
   competitions: F1EventCompetition[];
@@ -21,7 +21,7 @@ export type F1EventCompetition = {
     description: string;
     state: string;
   };
-  status: {$ref: string};
+  status: { $ref: string };
   session: number;
 };
 

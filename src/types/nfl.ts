@@ -1,4 +1,4 @@
-import type {BaseEvent, BaseTeam} from './base';
+import type { BaseEvent, BaseTeam } from "./base";
 
 export type NflEvent = BaseEvent & {
   competitions: NflEventCompetition[];
@@ -23,7 +23,7 @@ export type NflEventCompetition = {
     description: string;
     state: string;
   };
-  status?: {$ref: string};
+  status?: { $ref: string };
   venue: {
     $ref: string;
     fullName: string;
@@ -37,10 +37,10 @@ export type NflEventCompetition = {
 
 export type NflCompetitor = {
   $ref: string;
-  homeAway: 'home' | 'away';
+  homeAway: "home" | "away";
   winner?: boolean;
-  team: {$ref: string};
-  score?: {$ref: string};
+  team: { $ref: string };
+  score?: { $ref: string };
 };
 
 export type NflTeam = BaseTeam & {
