@@ -43,22 +43,30 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
     <Card className="w-full">
       <CardContent className="pt-1">
         <div className="grid grid-cols-3 gap-4 justify-between">
-          {awayCompetitor?.team?.$ref && (
+          {awayCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={awayCompetitor.team.$ref} />
+          ) : (
+            <TbdTeam />
           )}
           <div className="grid justify-center content-end pb-3 italic text-muted-foreground text-sm">
             at
           </div>
-          {homeCompetitor?.team?.$ref && (
+          {homeCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={homeCompetitor.team.$ref} />
+          ) : (
+            <TbdTeam />
           )}
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
-          <span> - </span>
-          {mainCompetition.venue.fullName}
+          {mainCompetition.venue && (
+            <>
+              <span> - </span>
+              {mainCompetition.venue.fullName}
+            </>
+          )}
         </p>
       </CardFooter>
     </Card>
@@ -72,10 +80,10 @@ function TeamLogo({ teamRef }: { teamRef: string }) {
   });
 
   if (isLoading) return <div className="h-10 w-10 animate-pulse bg-muted" />;
-  if (!team) return null;
+  if (!team) return <TbdTeam />;
 
   const defaultLogo = team?.logos?.find(logo => logo.rel.includes("default"));
-  if (!defaultLogo) return null;
+  if (!defaultLogo) return <TbdTeam />;
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -87,6 +95,17 @@ function TeamLogo({ teamRef }: { teamRef: string }) {
       />
       <div className="text-base font-semibold text-center">
         {team.displayName}
+      </div>
+    </div>
+  );
+}
+
+function TbdTeam() {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="h-10 w-10 bg-muted rounded" />
+      <div className="text-base font-semibold text-center text-muted-foreground">
+        TBD
       </div>
     </div>
   );
