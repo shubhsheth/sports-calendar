@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react';
-import {useInfiniteQuery} from '@tanstack/react-query';
-import {useInView} from 'react-intersection-observer';
-import type {EventRef} from '@/types/base';
-import type {FetchEventRefsResponse} from '@/api/espn/fetchEventRefs';
+import React, { useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import type { EventRef } from "@/types/base";
+import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 
 interface InfiniteScrollEventsProps {
   baseQueryKey: string;
@@ -22,7 +22,7 @@ function InfiniteScrollEvents({
   filters,
   eventCard: EventCard,
 }: InfiniteScrollEventsProps) {
-  const {ref, inView} = useInView({rootMargin: '500px'});
+  const { ref, inView } = useInView({ rootMargin: "500px" });
 
   const {
     data,
@@ -33,8 +33,8 @@ function InfiniteScrollEvents({
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: [baseQueryKey, 'events', 'infinite'],
-    queryFn: ({pageParam}) => fetchEventRefsFn(pageParam),
+    queryKey: [baseQueryKey, "events", "infinite"],
+    queryFn: ({ pageParam }) => fetchEventRefsFn(pageParam),
     initialPageParam: 1,
     getNextPageParam: lastPage => {
       const nextPageNumber = lastPage.pageIndex + 1;
@@ -71,7 +71,7 @@ function InfiniteScrollEvents({
         </React.Fragment>
       ))}
       <div ref={ref} className="py-10 flex justify-center w-full">
-        {hasNextPage ? 'Loading more...' : 'End of results'}
+        {hasNextPage ? "Loading more..." : "End of results"}
       </div>
     </>
   );

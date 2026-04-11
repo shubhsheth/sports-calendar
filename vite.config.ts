@@ -1,23 +1,23 @@
-import path from 'path';
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import tanstackRouter from '@tanstack/router-plugin/vite';
-import {defineConfig} from 'vite';
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import tanstackRouter from "@tanstack/router-plugin/vite";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   base:
     process.env.VITE_BASE_PATH ??
-    (process.env.NODE_ENV === 'production' ? '/sports-calendar/' : '/'),
+    (process.env.NODE_ENV === "production" ? "/sports-calendar/" : "/"),
   plugins: [tanstackRouter(), react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ["./src/test/setup.ts"],
   },
 });

@@ -1,36 +1,36 @@
-import {createFileRoute} from '@tanstack/react-router';
-import {useLocalStorageState} from '@/hooks/useLocalStorageState';
-import type {NflEvent, NflEventFilters} from '@/types/nfl';
-import InfiniteScrollEvents from '@/components/base/infinite-scroll-events';
-import DownloadIcalButton from '@/components/base/download-ical-button';
-import NbaEventCard from '@/components/nba/nba-event-card';
-import NflFilterSelector from '@/components/nfl/nfl-filter-selector';
-import {filterNflEvents} from '@/components/nfl/utils/filterNflEvents';
-import {fetchNflEventRefs} from '@/components/nfl/utils/fetchNflEventRefs';
-import {transformNflEventsToIcs} from '@/components/nfl/utils/transformNflEventsToIcs';
-import {NflFilterPills} from '@/components/nfl/nfl-filter-pills';
+import { createFileRoute } from "@tanstack/react-router";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
+import type { NflEvent, NflEventFilters } from "@/types/nfl";
+import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
+import DownloadIcalButton from "@/components/base/download-ical-button";
+import NbaEventCard from "@/components/nba/nba-event-card";
+import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
+import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
+import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
+import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
+import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
 
-export const Route = createFileRoute('/nfl')({
+export const Route = createFileRoute("/nfl")({
   component: NflPage,
   head: () => ({
     meta: [
       {
         title:
-          'NFL Schedule - Sports Calendar: View schedules for your favorite sports in one place',
-        name: 'description',
+          "NFL Schedule - Sports Calendar: View schedules for your favorite sports in one place",
+        name: "description",
         content:
-          'Stay up-to-date with the latest NFL schedule. Add events to your calendar with one click.',
+          "Stay up-to-date with the latest NFL schedule. Add events to your calendar with one click.",
       },
     ],
   }),
 });
 
-const NFL_BASE_QUERY_KEY = 'nfl';
+const NFL_BASE_QUERY_KEY = "nfl";
 
 function NflPage() {
   const [filters, setFilters] = useLocalStorageState<NflEventFilters>(
-    'sports-calendar:nfl-filters',
-    {showPastEvents: false, teamIds: []}
+    "sports-calendar:nfl-filters",
+    { showPastEvents: false, teamIds: [] }
   );
 
   return (

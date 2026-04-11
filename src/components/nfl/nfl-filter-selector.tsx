@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import type {NflEventFilters} from '@/types/nfl';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { NflEventFilters } from "@/types/nfl";
 import {
   Sheet,
   SheetClose,
@@ -9,10 +9,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
-import {Button} from '../ui/button';
-import {Checkbox} from '../ui/checkbox';
-import {Input} from '../ui/input';
+} from "../ui/sheet";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import { Input } from "../ui/input";
 import {
   Field,
   FieldDescription,
@@ -20,16 +20,19 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from '../ui/field';
-import {toggleShowPastEvents, toggleTeamFilter} from './utils/filterNflEvents';
-import {fetchNflTeams} from './utils/fetchNflTeams';
+} from "../ui/field";
+import {
+  toggleShowPastEvents,
+  toggleTeamFilter,
+} from "./utils/filterNflEvents";
+import { fetchNflTeams } from "./utils/fetchNflTeams";
 
 type NflFilterSelectorProps = {
   filters: NflEventFilters;
   setFilters: React.Dispatch<React.SetStateAction<NflEventFilters>>;
 };
 
-function NflFilterSelector({filters, setFilters}: NflFilterSelectorProps) {
+function NflFilterSelector({ filters, setFilters }: NflFilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -46,7 +49,7 @@ function NflFilterSelector({filters, setFilters}: NflFilterSelectorProps) {
               Whether to show events that have already occurred
             </FieldDescription>
             <FieldGroup>
-              <Field orientation={'horizontal'}>
+              <Field orientation={"horizontal"}>
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
@@ -75,11 +78,11 @@ function NflFilterSelector({filters, setFilters}: NflFilterSelectorProps) {
 
 export default NflFilterSelector;
 
-function TeamFilterFieldSet({filters, setFilters}: NflFilterSelectorProps) {
-  const [teamSearch, setTeamSearch] = useState('');
+function TeamFilterFieldSet({ filters, setFilters }: NflFilterSelectorProps) {
+  const [teamSearch, setTeamSearch] = useState("");
 
-  const {data: teams, isLoading: teamsLoading} = useQuery({
-    queryKey: ['nfl', 'teams'],
+  const { data: teams, isLoading: teamsLoading } = useQuery({
+    queryKey: ["nfl", "teams"],
     queryFn: fetchNflTeams,
   });
 
@@ -100,14 +103,14 @@ function TeamFilterFieldSet({filters, setFilters}: NflFilterSelectorProps) {
           size="sm"
           variant="outline"
           disabled={teamsLoading}
-          onClick={() => setFilters({...filters, teamIds: allTeamIds})}
+          onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
         >
           Select all
         </Button>
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setFilters({...filters, teamIds: []})}
+          onClick={() => setFilters({ ...filters, teamIds: [] })}
         >
           Clear
         </Button>
@@ -122,7 +125,7 @@ function TeamFilterFieldSet({filters, setFilters}: NflFilterSelectorProps) {
           <p className="text-sm text-muted-foreground py-2">Loading teams...</p>
         )}
         {filteredTeams.map(team => {
-          const logo = team.logos?.find(l => l.rel.includes('default'));
+          const logo = team.logos?.find(l => l.rel.includes("default"));
           return (
             <Field key={team.id} orientation="horizontal">
               <Checkbox
