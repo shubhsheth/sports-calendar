@@ -17,6 +17,9 @@ export type IplEvent = {
     longSummary: string;
   };
   competitors: IplCompetitor[];
+  venue?: {
+    fullName: string;
+  };
 };
 
 export type IplCompetitor = {

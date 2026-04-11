@@ -39,10 +39,10 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
-          {filtered.fullStatus.summary && (
+          {filtered.venue && (
             <>
-              <span> · </span>
-              {filtered.fullStatus.summary}
+              <span> - </span>
+              {filtered.venue.fullName}
             </>
           )}
         </p>

@@ -6,7 +6,8 @@ const LEAGUE_ID = "8048";
 export const IPL_2026 = {
   LEAGUE_ID,
   START_DATE: "2026-03-28",
-  END_DATE: "2026-05-24",
+  // Extended to June 1 to capture playoff games once ESPN schedules them
+  END_DATE: "2026-06-01",
 };
 
 // Internal types for the scoreboard response (different shape from IplEvent)
@@ -43,6 +44,7 @@ type ScoreboardEvent = {
       };
       summary: string;
     };
+    venue?: { fullName: string };
     competitors: ScoreboardCompetitor[];
   }>;
 };
@@ -81,6 +83,9 @@ function normalizeEvent(event: ScoreboardEvent): IplEvent {
       score: c.score,
       logo: c.team.logo,
     })),
+    venue: competition?.venue
+      ? { fullName: competition.venue.fullName }
+      : undefined,
   };
 }
 
