@@ -1,13 +1,24 @@
 import { fetchEventRefsBySeason } from "@/api/espn/fetchEventRefs";
 
-export const fetchNbaEventRefs = async (pageNumber?: number) => {
-  const sport = "basketball";
-  const league = "nba";
-  const season = "2026";
-  const pageSize = 30;
+const SPORT = "basketball";
+const LEAGUE = "nba";
+const SEASON = "2026";
+const PAGE_SIZE = 30;
 
-  return await fetchEventRefsBySeason(sport, league, season, {
-    pageSize,
+export const NBA_SEASON_TYPES = [
+  { id: 1, name: "Preseason" },
+  { id: 2, name: "Regular Season" },
+  { id: 5, name: "Play-In Tournament" },
+  { id: 3, name: "Playoffs" },
+];
+
+export async function fetchNbaEventRefs(
+  pageNumber?: number,
+  seasonTypeId?: number
+) {
+  return fetchEventRefsBySeason(SPORT, LEAGUE, SEASON, {
+    pageSize: PAGE_SIZE,
     pageNumber,
+    seasonTypeId,
   });
-};
+}

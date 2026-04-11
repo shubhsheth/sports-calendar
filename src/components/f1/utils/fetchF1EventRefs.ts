@@ -1,6 +1,9 @@
 import { fetchEventRefsBySeason } from "@/api/espn/fetchEventRefs";
 
-export const fetchF1EventRefs = async (pageNumber?: number) => {
+export const fetchF1EventRefs = async (
+  pageNumber?: number,
+  seasonTypeId?: number
+) => {
   const sport = "racing";
   const league = "f1";
   const season = "2026";
@@ -9,5 +12,6 @@ export const fetchF1EventRefs = async (pageNumber?: number) => {
   return await fetchEventRefsBySeason(sport, league, season, {
     pageSize,
     pageNumber,
+    seasonTypeId,
   });
 };

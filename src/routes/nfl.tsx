@@ -3,7 +3,7 @@ import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
-import NbaEventCard from "@/components/nba/nba-event-card";
+import NflEventCard from "@/components/nfl/nfl-event-card";
 import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
 import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/nfl")({
 });
 
 const NFL_BASE_QUERY_KEY = "nfl";
+const NFL_SEASON_TYPE_IDS = [1, 2, 3];
 
 function NflPage() {
   const [filters, setFilters] = useLocalStorageState<NflEventFilters>(
@@ -39,6 +40,7 @@ function NflPage() {
         <h1 className="text-4xl font-extrabold tracking-tight">NFL Schedule</h1>
         <div className="flex gap-2">
           <DownloadIcalButton<NflEvent, NflEventFilters>
+            seasonTypeIds={NFL_SEASON_TYPE_IDS}
             fetchEventRefsFn={fetchNflEventRefs}
             transformEventsToIcsFn={transformNflEventsToIcs}
             filterEvents={filterNflEvents}
@@ -52,9 +54,10 @@ function NflPage() {
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
           baseQueryKey={NFL_BASE_QUERY_KEY}
+          seasonTypeIds={NFL_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchNflEventRefs}
           filters={filters}
-          eventCard={NbaEventCard}
+          eventCard={NflEventCard}
         />
       </div>
     </div>

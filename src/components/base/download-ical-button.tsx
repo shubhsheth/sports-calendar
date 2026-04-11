@@ -9,7 +9,11 @@ import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useState } from "react";
 
 type DownloadIcalButtonProps<T extends BaseEvent, F> = {
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>;
+  seasonTypeIds: number[];
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number
+  ) => Promise<FetchEventRefsResponse>;
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
   eventFilters: F;
@@ -18,6 +22,7 @@ type DownloadIcalButtonProps<T extends BaseEvent, F> = {
 };
 
 function DownloadIcalButton<T extends BaseEvent, F>({
+  seasonTypeIds,
   fetchEventRefsFn,
   transformEventsToIcsFn,
   filterEvents,
@@ -35,7 +40,8 @@ function DownloadIcalButton<T extends BaseEvent, F>({
     const allEvents = await fetchAllEvents<T>(
       queryClient,
       baseQueryKey,
-      fetchEventRefsFn
+      fetchEventRefsFn,
+      seasonTypeIds
     );
 
     // Filter, Transform and Create ICS File
@@ -67,12 +73,17 @@ export default DownloadIcalButton;
 async function fetchAllEvents<T>(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number
+  ) => Promise<FetchEventRefsResponse>,
+  seasonTypeIds: number[]
 ): Promise<T[]> {
   const allEventRefs = await fetchAllEventRefs(
     queryClient,
     baseQueryKey,
-    fetchEventRefsFn
+    fetchEventRefsFn,
+    seasonTypeIds
   );
   const allEventDetails = await fetchAllEventDetails<T>(
     queryClient,
@@ -86,26 +97,50 @@ async function fetchAllEvents<T>(
 async function fetchAllEventRefs(
   queryClient: QueryClient,
   baseQueryKey: string,
-  fetchEventRefsFn: (pageParam: number) => Promise<FetchEventRefsResponse>
+  fetchEventRefsFn: (
+    pageNumber: number,
+    seasonTypeId: number
+  ) => Promise<FetchEventRefsResponse>,
+  seasonTypeIds: number[]
 ): Promise<EventRef[]> {
   const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
 
-  // Fetch all event refs from cache
+  // Read already-fetched refs from infinite scroll cache
   const infiniteData = queryClient.getQueryData<{
     pages: FetchEventRefsResponse[];
+    pageParams: { seasonTypeId: number; pageNumber: number }[];
   }>(infiniteQueryKey);
   const cachedPages = infiniteData?.pages ?? [];
+  const cachedPageParams = infiniteData?.pageParams ?? [];
 
-  // Fetch remaining event refs from API
+  // Determine where to resume from after cached pages
+  let seasonTypeIdx = 0;
+  let pageNumber = 1;
+
+  if (cachedPages.length > 0) {
+    const lastPage = cachedPages[cachedPages.length - 1];
+    const lastParam = cachedPageParams[cachedPageParams.length - 1];
+    if (lastPage.pageIndex < lastPage.pageCount) {
+      seasonTypeIdx = seasonTypeIds.indexOf(lastParam.seasonTypeId);
+      pageNumber = lastParam.pageNumber + 1;
+    } else {
+      seasonTypeIdx = seasonTypeIds.indexOf(lastParam.seasonTypeId) + 1;
+      pageNumber = 1;
+    }
+  }
+
+  // Fetch remaining pages across all remaining season types
   const remainingPages: FetchEventRefsResponse[] = [];
-  let currentPage = cachedPages.length ? cachedPages.length + 1 : 1;
-  let hasMorePages = true;
-
-  while (hasMorePages) {
-    const pageData = await fetchEventRefsFn(currentPage);
+  while (seasonTypeIdx < seasonTypeIds.length) {
+    const seasonTypeId = seasonTypeIds[seasonTypeIdx];
+    const pageData = await fetchEventRefsFn(pageNumber, seasonTypeId);
     remainingPages.push(pageData);
-    hasMorePages = pageData.pageIndex < pageData.pageCount;
-    currentPage++;
+    if (pageData.pageIndex < pageData.pageCount) {
+      pageNumber++;
+    } else {
+      seasonTypeIdx++;
+      pageNumber = 1;
+    }
   }
 
   // Convert pages to flat map of refs
