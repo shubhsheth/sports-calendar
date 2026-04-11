@@ -351,3 +351,74 @@ The `fetchEventRefsBySeason()` + `fetchEventDetails()` pipeline is generic and w
 | IndyCar        | `racing`    | `irl`            | Session structure vs F1 is unknown |
 
 **Caution:** Team sports with non-standard period structures (baseball, soccer) will have different competition shapes. Other racing series may not use F1's multi-competition-per-event model.
+
+---
+
+## 12. IPL Cricket
+
+IPL uses a **completely different API domain** and cannot be fetched via `sports.core.api.espn.com`. The Core API returns an empty leagues list for cricket (`/v2/sports/cricket/leagues` → `{"count":0,"items":[]}`).
+
+### Domain
+
+```
+https://site.api.espn.com/apis/site/v2/sports/cricket/{leagueId}/{resource}
+```
+
+The Site API returns **inline data** — no `$ref` stub-following is needed. Teams, scores, and match status are all embedded directly in the event object.
+
+### IPL-specific endpoints
+
+| Endpoint | Returns |
+|---|---|
+| `/8048/events?dates=YYYYMMDD` | All IPL matches on a given calendar day |
+| `/8048/scoreboard` | All 10 teams (top-level `teams[]`), current events, standings, season metadata |
+
+### IPL season
+
+| Field | Value |
+|---|---|
+| League ID | `8048` |
+| 2026 season start | 2026-03-28 |
+| 2026 season end | 2026-05-24 |
+| Season ID concept | Not used — events are fetched by **date** not season type |
+
+### Event shape (Site API)
+
+Each event from `/events?dates=YYYYMMDD` is a single match object with competitors inline:
+
+```json
+{
+  "id": "1527690",
+  "date": "2026-04-11T10:00:00Z",
+  "name": "Punjab Kings v Sunrisers Hyderabad",
+  "shortName": "PBKS v SRH",
+  "fullStatus": { "type": { "state": "pre" }, "summary": "Starts at 15:30 local time" },
+  "competitors": [
+    { "id": "335973", "homeAway": "home", "displayName": "Punjab Kings",
+      "abbreviation": "PBKS", "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/335973.png" },
+    { "id": "628333", "homeAway": "away", "displayName": "Sunrisers Hyderabad",
+      "abbreviation": "SRH", "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/628333.png" }
+  ]
+}
+```
+
+Note: each event **is** the competition (no `competitions[]` array). Team logos are direct URLs using the pattern `https://a.espncdn.com/i/teamlogos/cricket/500/{teamId}.png`.
+
+### Team listing
+
+The `/8048/scoreboard` endpoint's top-level `teams[]` array lists all 10 IPL franchises with `id`, `displayName`, and `abbreviation`. Logo URLs are not included in the scoreboard response but follow the `cricket/500/{id}.png` pattern above.
+
+### Implementation pattern
+
+Because there is no page-number-based pagination, the IPL implementation iterates dates:
+
+```ts
+// Generates all YYYYMMDD strings for the season
+getIplSeasonDates() → ["20260328", "20260329", ..., "20260524"]
+
+// useInfiniteQuery: each "page" is one calendar date
+initialPageParam: getIplSeasonDates()[0]
+getNextPageParam: (_, __, lastDateStr) => nextDateInArray | undefined
+```
+
+Days with no matches return `{ events: [] }` — the empty array is handled gracefully.
