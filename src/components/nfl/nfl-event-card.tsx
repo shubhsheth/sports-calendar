@@ -6,6 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNflEvent } from "./utils/filterNflEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
+import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
+import { NFL_DURATION_MINUTES } from "./utils/nflEventDuration";
 
 type NflEventCardProps = {
   eventRef: EventRef;
@@ -38,18 +41,20 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
+  const isLive = isEventLive(mainCompetition.date, NFL_DURATION_MINUTES);
 
   return (
     <Card className="w-full">
       <CardContent className="pt-1">
-        <div className="grid grid-cols-3 gap-4 justify-between">
+        <div className="grid grid-cols-3 gap-4">
           {awayCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={awayCompetitor.team.$ref} />
           ) : (
             <TbdTeam />
           )}
-          <div className="grid justify-center content-end pb-3 italic text-muted-foreground text-sm">
-            at
+          <div className="flex flex-col items-center justify-between py-3">
+            {isLive ? <LiveBadge /> : <span />}
+            <span className="italic text-muted-foreground text-sm">at</span>
           </div>
           {homeCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={homeCompetitor.team.$ref} />

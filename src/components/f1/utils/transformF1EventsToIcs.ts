@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 import { translateF1EventTypeAbbr } from "./translateF1EventType";
 import { cleanUpSponsorName } from "./cleanUpSponsorName";
+import { F1_SESSION_DURATIONS } from "./f1SessionDurations";
 
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
@@ -21,7 +22,13 @@ export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
           start.hour(),
           start.minute(),
         ],
-        duration: { hours: 1 },
+        duration: (() => {
+          const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
+          return {
+            hours: Math.floor(durationMin / 60),
+            minutes: durationMin % 60,
+          };
+        })(),
       });
     }
   }

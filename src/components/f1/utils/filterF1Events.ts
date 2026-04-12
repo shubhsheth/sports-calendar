@@ -1,5 +1,6 @@
 import type { F1Event, F1EventFilters } from "@/types/f1";
-import dayjs from "dayjs";
+import { isEventPast } from "@/lib/eventStatus";
+import { F1_SESSION_DURATIONS } from "./f1SessionDurations";
 
 export function filterF1Events(events: F1Event[], filters: F1EventFilters) {
   const filteredEvents: F1Event[] = [];
@@ -16,7 +17,8 @@ export function filterF1Event(
   filters: F1EventFilters
 ): F1Event | null {
   const filteredCompetitions = event.competitions.filter(competition => {
-    if (!filters.showPastEvents && dayjs(competition.date).isBefore(dayjs())) {
+    const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
+    if (!filters.showPastEvents && isEventPast(competition.date, durationMin)) {
       return false;
     }
     if (!filters.types.includes(competition.type.id)) {

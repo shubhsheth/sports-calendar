@@ -7,6 +7,9 @@ import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useQuery } from "@tanstack/react-query";
 import type { EventRef } from "@/types/base";
 import { filterF1Event } from "./utils/filterF1Events";
+import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
+import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
 
 type F1EventCardProps = {
   baseQueryKey: string;
@@ -45,6 +48,8 @@ function F1EventCard({ baseQueryKey, eventRef, filters }: F1EventCardProps) {
         <div className="flex flex-col gap-1">
           {filteredF1Event.competitions.map(competition => {
             const isRace = competition.type.abbreviation === "Race";
+            const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
+            const isLive = isEventLive(competition.date, durationMin);
             return (
               <div
                 key={competition.id}
@@ -76,9 +81,12 @@ function F1EventCard({ baseQueryKey, eventRef, filters }: F1EventCardProps) {
                   </div>
                 </div>
 
-                {/* Time */}
-                <div className="text-right font-mono font-medium">
-                  {dayjs(competition.date).format("HH:mm")}
+                {/* Time / Live */}
+                <div className="flex flex-col items-end gap-1">
+                  {isLive && <LiveBadge />}
+                  <span className="font-mono font-medium">
+                    {dayjs(competition.date).format("HH:mm")}
+                  </span>
                 </div>
               </div>
             );

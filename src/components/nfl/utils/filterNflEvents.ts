@@ -1,5 +1,6 @@
 import type { NflEvent, NflEventFilters } from "@/types/nfl";
-import dayjs from "dayjs";
+import { isEventPast } from "@/lib/eventStatus";
+import { NFL_DURATION_MINUTES } from "./nflEventDuration";
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
@@ -19,7 +20,10 @@ export function filterNflEvent(
   filters: NflEventFilters
 ): NflEvent | null {
   const filteredCompetitions = event.competitions.filter(competition => {
-    if (!filters.showPastEvents && dayjs(competition.date).isBefore(dayjs())) {
+    if (
+      !filters.showPastEvents &&
+      isEventPast(competition.date, NFL_DURATION_MINUTES)
+    ) {
       return false;
     }
 

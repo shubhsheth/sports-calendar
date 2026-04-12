@@ -2,6 +2,9 @@ import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { filterIplEvent } from "./utils/filterIplEvents";
+import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
+import { IPL_DURATION_MINUTES } from "./utils/iplEventDuration";
 
 type IplEventCardProps = {
   event: IplEvent;
@@ -16,18 +19,20 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
   const awayCompetitor = filtered.competitors.find(c => c.homeAway === "away");
 
   const eventDate = dayjs(filtered.date).format("MMM D, h:mm A");
+  const isLive = isEventLive(filtered.date, IPL_DURATION_MINUTES);
 
   return (
     <Card className="w-full">
       <CardContent className="pt-1">
-        <div className="grid grid-cols-3 gap-4 justify-between">
+        <div className="grid grid-cols-3 gap-4">
           {awayCompetitor ? (
             <TeamDisplay competitor={awayCompetitor} />
           ) : (
             <TbdTeam />
           )}
-          <div className="grid justify-center content-end pb-3 italic text-muted-foreground text-sm">
-            v
+          <div className="flex flex-col items-center justify-between py-3">
+            {isLive ? <LiveBadge /> : <span />}
+            <span className="italic text-muted-foreground text-sm">v</span>
           </div>
           {homeCompetitor ? (
             <TeamDisplay competitor={homeCompetitor} />
