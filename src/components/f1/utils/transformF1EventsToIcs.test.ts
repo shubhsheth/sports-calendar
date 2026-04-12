@@ -86,9 +86,20 @@ describe("transformF1EventsToIcs", () => {
     expect(entry.title).toBe("F1: Race (Dutch GP)");
   });
 
-  it("sets duration to 1 hour", () => {
-    const [entry] = transformF1EventsToIcs([makeEvent()]);
-    expect(entry.duration).toEqual({ hours: 1 });
+  it("sets duration based on session type (race = 2h, qualifying = 1h)", () => {
+    const [race] = transformF1EventsToIcs([makeEvent()]);
+    expect(race.duration).toEqual({ hours: 2, minutes: 0 });
+
+    const qualEvent = makeEvent({
+      competitions: [
+        {
+          ...makeEvent().competitions[0],
+          type: { id: "2", text: "Qualifying", abbreviation: "Qual" },
+        },
+      ],
+    });
+    const [qual] = transformF1EventsToIcs([qualEvent]);
+    expect(qual.duration).toEqual({ hours: 1, minutes: 0 });
   });
 
   it("produces a start array with 5 numeric elements", () => {
