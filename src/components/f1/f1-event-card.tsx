@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { EventRef } from "@/types/base";
 import { filterF1Event } from "./utils/filterF1Events";
 import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
+import { LiveBadge } from "@/components/ui/live-badge";
 
 type F1EventCardProps = {
   baseQueryKey: string;
@@ -85,12 +86,7 @@ function F1EventCard({ baseQueryKey, eventRef, filters }: F1EventCardProps) {
 
                 {/* Time / Live */}
                 <div className="flex flex-col items-end gap-1">
-                  {isLive && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-500">
-                      <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-                      LIVE
-                    </span>
-                  )}
+                  {isLive && <LiveBadge />}
                   <span className="font-mono font-medium">
                     {dayjs(competition.date).format("HH:mm")}
                   </span>

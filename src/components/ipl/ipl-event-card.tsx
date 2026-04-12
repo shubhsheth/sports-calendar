@@ -2,6 +2,7 @@ import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { filterIplEvent } from "./utils/filterIplEvents";
+import { LiveBadge } from "@/components/ui/live-badge";
 
 type IplEventCardProps = {
   event: IplEvent;
@@ -29,8 +30,9 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
           ) : (
             <TbdTeam />
           )}
-          <div className="grid justify-center content-end pb-3 italic text-muted-foreground text-sm">
-            v
+          <div className="flex flex-col items-center justify-end gap-1 pb-3">
+            {isLive && <LiveBadge />}
+            <span className="italic text-muted-foreground text-sm">v</span>
           </div>
           {homeCompetitor ? (
             <TeamDisplay competitor={homeCompetitor} />
@@ -40,12 +42,6 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
-        {isLive && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-500 mb-1">
-            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-            LIVE
-          </span>
-        )}
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
           {filtered.venue && (

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNflEvent } from "./utils/filterNflEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
+import { LiveBadge } from "@/components/ui/live-badge";
 
 type NflEventCardProps = {
   eventRef: EventRef;
@@ -51,8 +52,9 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
           ) : (
             <TbdTeam />
           )}
-          <div className="grid justify-center content-end pb-3 italic text-muted-foreground text-sm">
-            at
+          <div className="flex flex-col items-center justify-end gap-1 pb-3">
+            {isLive && <LiveBadge />}
+            <span className="italic text-muted-foreground text-sm">at</span>
           </div>
           {homeCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={homeCompetitor.team.$ref} />
@@ -62,12 +64,6 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
-        {isLive && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-500 mb-1">
-            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
-            LIVE
-          </span>
-        )}
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
           {mainCompetition.venue && (
