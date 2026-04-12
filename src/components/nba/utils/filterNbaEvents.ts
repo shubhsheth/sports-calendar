@@ -19,7 +19,10 @@ export function filterNbaEvent(
   filters: NbaEventFilters
 ): NbaEvent | null {
   const filteredCompetitions = event.competitions.filter(competition => {
-    if (!filters.showPastEvents && dayjs(competition.date).isBefore(dayjs())) {
+    if (
+      !filters.showPastEvents &&
+      dayjs().isAfter(dayjs(competition.date).add(150, "minutes"))
+    ) {
       return false;
     }
 

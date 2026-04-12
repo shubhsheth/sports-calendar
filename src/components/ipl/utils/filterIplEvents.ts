@@ -17,7 +17,10 @@ export function filterIplEvent(
   event: IplEvent,
   filters: IplEventFilters
 ): IplEvent | null {
-  if (!filters.showPastEvents && dayjs(event.date).isBefore(dayjs())) {
+  if (
+    !filters.showPastEvents &&
+    dayjs().isAfter(dayjs(event.date).add(240, "minutes"))
+  ) {
     return null;
   }
 

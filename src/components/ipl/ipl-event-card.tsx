@@ -16,6 +16,9 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
   const awayCompetitor = filtered.competitors.find(c => c.homeAway === "away");
 
   const eventDate = dayjs(filtered.date).format("MMM D, h:mm A");
+  const isLive =
+    dayjs().isAfter(dayjs(filtered.date)) &&
+    dayjs().isBefore(dayjs(filtered.date).add(240, "minutes"));
 
   return (
     <Card className="w-full">
@@ -37,6 +40,12 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
+        {isLive && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-500 mb-1">
+            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+            LIVE
+          </span>
+        )}
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
           {filtered.venue && (

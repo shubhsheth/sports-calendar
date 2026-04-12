@@ -38,6 +38,9 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
+  const isLive =
+    dayjs().isAfter(dayjs(mainCompetition.date)) &&
+    dayjs().isBefore(dayjs(mainCompetition.date).add(210, "minutes"));
 
   return (
     <Card className="w-full">
@@ -59,6 +62,12 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
+        {isLive && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-green-500 mb-1">
+            <span className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+            LIVE
+          </span>
+        )}
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
           {mainCompetition.venue && (
