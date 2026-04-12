@@ -46,14 +46,14 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
   return (
     <Card className="w-full">
       <CardContent className="pt-1">
-        <div className="grid grid-cols-3 gap-4 justify-between">
+        <div className="grid grid-cols-3 gap-4">
           {awayCompetitor?.team?.$ref ? (
             <TeamLogo teamRef={awayCompetitor.team.$ref} />
           ) : (
             <TbdTeam />
           )}
-          <div className="flex flex-col items-center justify-end gap-1 pb-3">
-            {isLive && <LiveBadge />}
+          <div className="flex flex-col items-center justify-between py-3">
+            {isLive ? <LiveBadge /> : <span />}
             <span className="italic text-muted-foreground text-sm">at</span>
           </div>
           {homeCompetitor?.team?.$ref ? (
