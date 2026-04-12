@@ -7,6 +7,8 @@ import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNbaEvent } from "./utils/filterNbaEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
+import { NBA_DURATION_MINUTES } from "./utils/nbaEventDuration";
 
 type NbaEventCardProps = {
   eventRef: EventRef;
@@ -39,9 +41,7 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
-  const isLive =
-    dayjs().isAfter(dayjs(mainCompetition.date)) &&
-    dayjs().isBefore(dayjs(mainCompetition.date).add(150, "minutes"));
+  const isLive = isEventLive(mainCompetition.date, NBA_DURATION_MINUTES);
 
   return (
     <Card className="w-full">

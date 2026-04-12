@@ -9,6 +9,7 @@ import type { EventRef } from "@/types/base";
 import { filterF1Event } from "./utils/filterF1Events";
 import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
 import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
 
 type F1EventCardProps = {
   baseQueryKey: string;
@@ -48,11 +49,7 @@ function F1EventCard({ baseQueryKey, eventRef, filters }: F1EventCardProps) {
           {filteredF1Event.competitions.map(competition => {
             const isRace = competition.type.abbreviation === "Race";
             const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
-            const isLive =
-              dayjs().isAfter(dayjs(competition.date)) &&
-              dayjs().isBefore(
-                dayjs(competition.date).add(durationMin, "minutes")
-              );
+            const isLive = isEventLive(competition.date, durationMin);
             return (
               <div
                 key={competition.id}

@@ -7,6 +7,8 @@ import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNflEvent } from "./utils/filterNflEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
+import { isEventLive } from "@/lib/eventStatus";
+import { NFL_DURATION_MINUTES } from "./utils/nflEventDuration";
 
 type NflEventCardProps = {
   eventRef: EventRef;
@@ -39,9 +41,7 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
-  const isLive =
-    dayjs().isAfter(dayjs(mainCompetition.date)) &&
-    dayjs().isBefore(dayjs(mainCompetition.date).add(210, "minutes"));
+  const isLive = isEventLive(mainCompetition.date, NFL_DURATION_MINUTES);
 
   return (
     <Card className="w-full">

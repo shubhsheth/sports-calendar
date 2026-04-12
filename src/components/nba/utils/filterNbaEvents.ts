@@ -1,5 +1,6 @@
 import type { NbaEvent, NbaEventFilters } from "@/types/nba";
-import dayjs from "dayjs";
+import { isEventPast } from "@/lib/eventStatus";
+import { NBA_DURATION_MINUTES } from "./nbaEventDuration";
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
@@ -21,7 +22,7 @@ export function filterNbaEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      dayjs().isAfter(dayjs(competition.date).add(150, "minutes"))
+      isEventPast(competition.date, NBA_DURATION_MINUTES)
     ) {
       return false;
     }

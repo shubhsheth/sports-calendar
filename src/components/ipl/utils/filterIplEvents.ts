@@ -1,5 +1,6 @@
 import type { IplEvent, IplEventFilters } from "@/types/ipl";
-import dayjs from "dayjs";
+import { isEventPast } from "@/lib/eventStatus";
+import { IPL_DURATION_MINUTES } from "./iplEventDuration";
 
 export function filterIplEvents(
   events: IplEvent[],
@@ -19,7 +20,7 @@ export function filterIplEvent(
 ): IplEvent | null {
   if (
     !filters.showPastEvents &&
-    dayjs().isAfter(dayjs(event.date).add(240, "minutes"))
+    isEventPast(event.date, IPL_DURATION_MINUTES)
   ) {
     return null;
   }
