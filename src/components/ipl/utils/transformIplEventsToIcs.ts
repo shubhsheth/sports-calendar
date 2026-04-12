@@ -15,6 +15,7 @@ export function transformIplEventsToIcs(events: IplEvent[]): EventAttributes[] {
         start.minute(),
       ],
       duration: { hours: 4, minutes: 0 },
+      location: event.venue?.fullName,
     };
   });
 }

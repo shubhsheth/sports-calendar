@@ -20,6 +20,7 @@ export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
           start.minute(),
         ],
         duration: { hours: 2, minutes: 30 },
+        location: competition.venue?.fullName,
       });
     }
   }

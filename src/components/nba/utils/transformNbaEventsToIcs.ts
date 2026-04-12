@@ -20,6 +20,7 @@ export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
           start.minute(),
         ],
         duration: { hours: 2, minutes: 30 },
+        location: competition.venue?.fullName,
       });
     }
   }

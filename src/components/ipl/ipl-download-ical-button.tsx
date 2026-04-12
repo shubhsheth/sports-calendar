@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createEvents } from "ics";
 import fileDownload from "js-file-download";
-import { Download } from "lucide-react";
+import { CalendarPlus, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import {
@@ -10,6 +10,13 @@ import {
 } from "./utils/fetchIplEvents";
 import { filterIplEvents } from "./utils/filterIplEvents";
 import { transformIplEventsToIcs } from "./utils/transformIplEventsToIcs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type IplDownloadIcalButtonProps = {
   filters: IplEventFilters;
@@ -20,36 +27,72 @@ function IplDownloadIcalButton({
   filters,
   filename = "ipl-calendar.ics",
 }: IplDownloadIcalButtonProps) {
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleClick = async () => {
-    setLoading(true);
-
+  const buildIcsBlob = async (): Promise<Blob | null> => {
     const dates = getIplSeasonDates();
     const allEvents = await mapWithConcurrency(dates, 10, date =>
       fetchIplEventsByDate(date)
     );
     const flatEvents = allEvents.flat() as IplEvent[];
-
     const filteredEvents = filterIplEvents(flatEvents, filters);
     const icsEvents = transformIplEventsToIcs(filteredEvents);
     const result = createEvents(icsEvents);
-
-    setLoading(false);
-
-    if (result.value) {
-      const blob = new Blob([result.value], { type: "text/calendar" });
-      fileDownload(blob, filename);
-    } else if (result.error) {
+    if (!result.value) {
       console.error("Failed to create iCal:", result.error);
+      return null;
     }
+    return new Blob([result.value], { type: "text/calendar" });
+  };
+
+  const handleDownload = async () => {
+    setLoading(true);
+    const blob = await buildIcsBlob();
+    if (blob) {
+      fileDownload(blob, filename);
+    }
+    setLoading(false);
+    setOpen(false);
   };
 
   return (
-    <Button variant="default" onClick={handleClick} disabled={loading}>
-      <Download className="size-4" aria-hidden />
-      Download as iCal
-    </Button>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <CalendarPlus className="size-4" aria-hidden />
+        Add to Calendar
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to Calendar</DialogTitle>
+            <DialogDescription>
+              Download a calendar file to import into your calendar app.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="px-5 pb-5 pt-2">
+            <Button
+              className="w-full"
+              onClick={handleDownload}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  Preparing…
+                </>
+              ) : (
+                <>
+                  <Download className="size-4" aria-hidden />
+                  Download .ics
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -60,24 +103,19 @@ async function mapWithConcurrency<T, R>(
   limit: number,
   mapper: (item: T) => Promise<R>
 ): Promise<R[]> {
-  const results: R[] = [];
-  const executing: Promise<void>[] = [];
+  const results: R[] = new Array(items.length);
+  let index = 0;
 
-  for (const item of items) {
-    const p = (async () => {
-      const result = await mapper(item);
-      results.push(result);
-    })().then(() => {
-      executing.splice(executing.indexOf(p), 1);
-    });
-
-    executing.push(p);
-
-    if (executing.length >= limit) {
-      await Promise.race(executing);
-    }
+  async function runNext(): Promise<void> {
+    if (index >= items.length) return;
+    const current = index++;
+    results[current] = await mapper(items[current]);
+    await runNext();
   }
 
-  await Promise.all(executing);
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () =>
+    runNext()
+  );
+  await Promise.all(workers);
   return results;
 }
