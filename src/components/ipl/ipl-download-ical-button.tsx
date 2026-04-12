@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { createEvents } from "ics";
 import fileDownload from "js-file-download";
-import { CalendarPlus, CalendarDays, Download, ChevronRight, Loader2 } from "lucide-react";
+import {
+  CalendarPlus,
+  CalendarDays,
+  Download,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import {
@@ -41,11 +47,11 @@ function IplDownloadIcalButton({
     const filteredEvents = filterIplEvents(flatEvents, filters);
     const icsEvents = transformIplEventsToIcs(filteredEvents);
     const result = createEvents(icsEvents);
-    if (result.error) {
+    if (!result.value) {
       console.error("Failed to create iCal:", result.error);
       return null;
     }
-    return new Blob([result.value!], { type: "text/calendar" });
+    return new Blob([result.value], { type: "text/calendar" });
   };
 
   const handleGoogleCalendar = async () => {
@@ -186,7 +192,10 @@ function CalendarOptionRow({
         <div className="text-sm font-medium text-foreground">{label}</div>
         <div className="text-xs text-muted-foreground">{description}</div>
       </div>
-      <ChevronRight className="size-4 text-muted-foreground shrink-0" aria-hidden />
+      <ChevronRight
+        className="size-4 text-muted-foreground shrink-0"
+        aria-hidden
+      />
     </button>
   );
 }
@@ -198,24 +207,19 @@ async function mapWithConcurrency<T, R>(
   limit: number,
   mapper: (item: T) => Promise<R>
 ): Promise<R[]> {
-  const results: R[] = [];
-  const executing: Promise<void>[] = [];
+  const results: R[] = new Array(items.length);
+  let index = 0;
 
-  for (const item of items) {
-    const p = (async () => {
-      const result = await mapper(item);
-      results.push(result);
-    })().then(() => {
-      executing.splice(executing.indexOf(p), 1);
-    });
-
-    executing.push(p);
-
-    if (executing.length >= limit) {
-      await Promise.race(executing);
-    }
+  async function runNext(): Promise<void> {
+    if (index >= items.length) return;
+    const current = index++;
+    results[current] = await mapper(items[current]);
+    await runNext();
   }
 
-  await Promise.all(executing);
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () =>
+    runNext()
+  );
+  await Promise.all(workers);
   return results;
 }

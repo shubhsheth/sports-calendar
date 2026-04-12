@@ -1,6 +1,12 @@
 import { createEvents, type EventAttributes } from "ics";
 import fileDownload from "js-file-download";
-import { CalendarPlus, CalendarDays, Download, ChevronRight, Loader2 } from "lucide-react";
+import {
+  CalendarPlus,
+  CalendarDays,
+  Download,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import type { BaseEvent, EventRef } from "@/types/base";
 import { Button } from "@/components/ui/button";
 import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
@@ -53,11 +59,11 @@ function DownloadIcalButton<T extends BaseEvent, F>({
     const filteredEvents = filterEvents(allEvents, eventFilters);
     const eventIcs = transformEventsToIcsFn(filteredEvents);
     const result = createEvents(eventIcs);
-    if (result.error) {
+    if (!result.value) {
       console.error("Failed to create iCal:", result.error);
       return null;
     }
-    return new Blob([result.value!], { type: "text/calendar" });
+    return new Blob([result.value], { type: "text/calendar" });
   };
 
   const handleGoogleCalendar = async () => {
@@ -199,7 +205,10 @@ function CalendarOptionRow({
         <div className="text-sm font-medium text-foreground">{label}</div>
         <div className="text-xs text-muted-foreground">{description}</div>
       </div>
-      <ChevronRight className="size-4 text-muted-foreground shrink-0" aria-hidden />
+      <ChevronRight
+        className="size-4 text-muted-foreground shrink-0"
+        aria-hidden
+      />
     </button>
   );
 }
@@ -310,27 +319,19 @@ async function mapWithConcurrency<T>(
   limit: number,
   mapper: (item: EventRef) => Promise<T>
 ): Promise<T[]> {
-  const results: T[] = [];
-  const executing: Promise<void>[] = [];
+  const results: T[] = new Array(items.length);
+  let index = 0;
 
-  for (const item of items) {
-    // 1. Create the task and ensure it removes itself from 'executing' when done
-    const p = (async () => {
-      const result = await mapper(item);
-      results.push(result);
-    })().then(() => {
-      executing.splice(executing.indexOf(p), 1);
-    });
-
-    executing.push(p);
-
-    // 2. If we hit the limit, wait for at least one task to clear out
-    if (executing.length >= limit) {
-      await Promise.race(executing);
-    }
+  async function runNext(): Promise<void> {
+    if (index >= items.length) return;
+    const current = index++;
+    results[current] = await mapper(items[current]);
+    await runNext();
   }
 
-  // 3. Wait for the final batch to cross the finish line
-  await Promise.all(executing);
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () =>
+    runNext()
+  );
+  await Promise.all(workers);
   return results;
 }
