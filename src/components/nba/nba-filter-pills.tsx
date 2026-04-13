@@ -23,7 +23,7 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
   if (!hasActivePills) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2">
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"

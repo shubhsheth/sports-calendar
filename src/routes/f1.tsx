@@ -35,8 +35,8 @@ function F1Page() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex flex-col w-full mb-4 gap-2">
+    <div className="max-w-3xl mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-extrabold tracking-tight">F1 Schedule</h1>
         <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
           <DownloadIcalButton<F1Event, F1EventFilters>

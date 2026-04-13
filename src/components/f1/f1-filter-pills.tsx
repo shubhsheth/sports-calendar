@@ -13,7 +13,7 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
   if (!hasActivePills) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2">
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"
