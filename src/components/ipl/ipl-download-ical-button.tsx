@@ -58,7 +58,7 @@ function IplDownloadIcalButton({
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
+      <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
         <CalendarPlus className="size-4" aria-hidden />
         Add to Calendar
       </Button>
