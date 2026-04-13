@@ -11,6 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,7 +37,10 @@ function IplFilterSelector({ filters, setFilters }: IplFilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">Filter</Button>
+        <Button variant="outline" size="lg">
+          <SlidersHorizontal className="size-4" aria-hidden />
+          Filter
+        </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

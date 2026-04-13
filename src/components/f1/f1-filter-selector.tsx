@@ -9,6 +9,7 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { Button } from "../ui/button";
+import { SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import {
   Field,
@@ -33,7 +34,10 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">Filter</Button>
+        <Button variant="outline" size="lg">
+          <SlidersHorizontal className="size-4" aria-hidden />
+          Filter
+        </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

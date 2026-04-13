@@ -39,10 +39,10 @@ function IplPage() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex w-full justify-between mb-4">
+    <div className="max-w-3xl mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-extrabold tracking-tight">IPL Schedule</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
           <IplDownloadIcalButton filters={filters} />
           <IplFilterSelector filters={filters} setFilters={setFilters} />
         </div>
