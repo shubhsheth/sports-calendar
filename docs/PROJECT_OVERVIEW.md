@@ -21,6 +21,7 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 | Date Handling | dayjs |
 | Calendar Export | `ics` v3.8 + `js-file-download` |
 | Infinite Scroll | `react-intersection-observer` |
+| Analytics | PostHog (`posthog-js`) |
 | Deployment | GitHub Pages via GitHub Actions |
 
 ---
@@ -38,15 +39,19 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 ```
 docs/
 └── ESPN_API.md                  # ESPN Core API reference
+.env.example                     # Required environment variables (PostHog key/host)
 src/
 ├── api/espn/
 │   ├── fetchEventRefs.ts        # Paginated event references from ESPN
 │   ├── fetchEventDetails.ts     # Full event details by ref URL
 │   └── fetchTeamDetails.ts      # Team info by ref URL
+├── lib/
+│   ├── analytics.ts             # PostHog init + typed event tracking helpers
+│   └── utils.ts                 # cn() class merging utility
 ├── components/
 │   ├── base/
-│   │   ├── infinite-scroll-events.tsx   # Generic infinite scroll
-│   │   └── download-ical-button.tsx     # Generic ICS export with concurrency control
+│   │   ├── infinite-scroll-events.tsx   # Generic infinite scroll (accepts league prop)
+│   │   └── download-ical-button.tsx     # Generic ICS export with concurrency control (accepts league prop)
 │   ├── nba/
 │   │   ├── nba-event-card.tsx
 │   │   ├── nba-filter-selector.tsx
@@ -71,8 +76,7 @@ src/
 │   ├── nba.ts                   # NbaEvent, NbaTeam, NbaEventFilters
 │   ├── nfl.ts                   # NflEvent, NflTeam, NflEventFilters
 │   └── f1.ts                    # F1Event, F1EventFilters
-├── lib/utils.ts                 # cn() class merging utility
-└── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap
+└── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init
 ```
 
 ---
@@ -80,11 +84,12 @@ src/
 ## Technical Patterns
 
 ### 1. Generic Base Components with Injected Functions
-`InfiniteScrollEvents<T, F>` and `DownloadIcalButton<T, F>` are sport-agnostic. They accept:
-- `fetchEventRefs` — sport-specific fetcher
-- `filterEvents` — sport-specific filter logic
-- `transformEventsToIcs` — sport-specific ICS transform
-- `renderEventCard` — sport-specific card component
+`InfiniteScrollEvents<T, F>` and `DownloadIcalButton<T, F>` are league-agnostic. They accept:
+- `league` — string identifier (e.g. `"nfl"`) used as the React Query cache key prefix **and** analytics context
+- `fetchEventRefs` — league-specific fetcher
+- `filterEvents` — league-specific filter logic
+- `transformEventsToIcs` — league-specific ICS transform
+- `renderEventCard` — league-specific card component
 
 ### 2. ESPN `$ref` Pattern
 ESPN's API returns paginated arrays of `{ $ref: URL }` objects. The app fetches refs first (cheap, paginated), then lazily follows each URL for full event/team details.
@@ -100,10 +105,19 @@ ESPN's API returns paginated arrays of `{ $ref: URL }` objects. The app fetches 
 ### 5. Per-Sport Self-Contained Modules
 Each sport (`nba/`, `nfl/`, `f1/`) owns its card, filter selector, and utils (fetch / filter / transform / translate).
 
-### 6. File-Based Routing
+### 6. Analytics with PostHog
+`src/lib/analytics.ts` is the single point of contact for PostHog. It:
+- Initialises PostHog from `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` env vars; silently no-ops if the key is absent (safe for dev/test)
+- Exports a typed `analytics` object with one function per tracked interaction
+- Page views are captured via a `router.subscribe('onResolved', ...)` hook in `main.tsx`, so every TanStack Router navigation fires `$pageview` automatically
+- All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`) for easy segmentation in PostHog
+
+**Key events:** `$pageview`, `league_selected`, `filter_panel_opened`, `filter_show_past_events_toggled`, `filter_team_toggled`, `filter_event_type_toggled` (F1), `filter_select_all_clicked`, `filter_clear_clicked`, `filter_pill_removed`, `calendar_download_opened`, `calendar_downloaded`, `schedule_next_page_loaded`
+
+### 7. File-Based Routing
 `@tanstack/react-router` auto-generates `routeTree.gen.ts` from the `src/routes/` file structure.
 
-### 7. Type Hierarchy
+### 8. Type Hierarchy
 `BaseEvent` / `BaseTeam` serve as shared bases. Sport-specific types extend them. Filter types are per-sport (`NbaEventFilters`, `F1EventFilters` with `types: string[]` for session filtering).
 
 ---

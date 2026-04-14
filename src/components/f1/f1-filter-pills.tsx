@@ -2,6 +2,7 @@ import type { F1EventFilters } from "@/types/f1";
 import { FilterPill } from "@/components/base/filter-pill";
 import { translateF1EventTypeId } from "./utils/translateF1EventType";
 import { toggleEventType, toggleShowPastEvents } from "./utils/filterF1Events";
+import { analytics } from "@/lib/analytics";
 
 type F1FilterPillsProps = {
   filters: F1EventFilters;
@@ -17,14 +18,20 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"
-          onRemove={() => toggleShowPastEvents(filters, setFilters)}
+          onRemove={() => {
+            analytics.filterPillRemoved("f1", "show_past_events", "Show past events");
+            toggleShowPastEvents(filters, setFilters);
+          }}
         />
       )}
       {filters.types.map(typeId => (
         <FilterPill
           key={typeId}
           label={translateF1EventTypeId(typeId)}
-          onRemove={() => toggleEventType(typeId, filters, setFilters)}
+          onRemove={() => {
+            analytics.filterPillRemoved("f1", "event_type", translateF1EventTypeId(typeId));
+            toggleEventType(typeId, filters, setFilters);
+          }}
         />
       ))}
     </div>

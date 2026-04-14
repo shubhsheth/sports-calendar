@@ -11,6 +11,7 @@ import { isEventLive } from "@/lib/eventStatus";
 import { NFL_DURATION_MINUTES } from "./utils/nflEventDuration";
 
 type NflEventCardProps = {
+  league: string;
   eventRef: EventRef;
   filters: NflEventFilters;
 };

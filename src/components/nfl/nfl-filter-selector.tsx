@@ -27,6 +27,7 @@ import {
   toggleTeamFilter,
 } from "./utils/filterNflEvents";
 import { fetchNflTeams } from "./utils/fetchNflTeams";
+import { analytics } from "@/lib/analytics";
 
 type NflFilterSelectorProps = {
   filters: NflEventFilters;
@@ -37,7 +38,11 @@ function NflFilterSelector({ filters, setFilters }: NflFilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="lg">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => analytics.filterPanelOpened("nfl")}
+        >
           <SlidersHorizontal className="size-4" aria-hidden />
           Filter
         </Button>
@@ -57,9 +62,13 @@ function NflFilterSelector({ filters, setFilters }: NflFilterSelectorProps) {
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
-                  onCheckedChange={() =>
-                    toggleShowPastEvents(filters, setFilters)
-                  }
+                  onCheckedChange={() => {
+                    analytics.filterShowPastEventsToggled(
+                      "nfl",
+                      !filters.showPastEvents
+                    );
+                    toggleShowPastEvents(filters, setFilters);
+                  }}
                 />
                 <FieldLabel htmlFor="show-past-events">
                   Show past events
@@ -107,14 +116,20 @@ function TeamFilterFieldSet({ filters, setFilters }: NflFilterSelectorProps) {
           size="sm"
           variant="outline"
           disabled={teamsLoading}
-          onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
+          onClick={() => {
+            analytics.filterSelectAll("nfl");
+            setFilters({ ...filters, teamIds: allTeamIds });
+          }}
         >
           Select all
         </Button>
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setFilters({ ...filters, teamIds: [] })}
+          onClick={() => {
+            analytics.filterCleared("nfl");
+            setFilters({ ...filters, teamIds: [] });
+          }}
         >
           Clear
         </Button>
@@ -135,9 +150,14 @@ function TeamFilterFieldSet({ filters, setFilters }: NflFilterSelectorProps) {
               <Checkbox
                 id={`team-${team.id}`}
                 checked={filters.teamIds.includes(team.id)}
-                onCheckedChange={() =>
-                  toggleTeamFilter(team.id, filters, setFilters)
-                }
+                onCheckedChange={() => {
+                  analytics.filterTeamToggled(
+                    "nfl",
+                    team.id,
+                    filters.teamIds.includes(team.id) ? "removed" : "added"
+                  );
+                  toggleTeamFilter(team.id, filters, setFilters);
+                }}
               />
               {logo && (
                 <img

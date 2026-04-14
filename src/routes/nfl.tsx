@@ -25,7 +25,7 @@ export const Route = createFileRoute("/nfl")({
   }),
 });
 
-const NFL_BASE_QUERY_KEY = "nfl";
+const NFL_LEAGUE = "nfl";
 const NFL_SEASON_TYPE_IDS = [1, 2, 3];
 
 function NflPage() {
@@ -40,12 +40,12 @@ function NflPage() {
         <h1 className="text-4xl font-extrabold tracking-tight">NFL Schedule</h1>
         <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
           <DownloadIcalButton<NflEvent, NflEventFilters>
+            league={NFL_LEAGUE}
             seasonTypeIds={NFL_SEASON_TYPE_IDS}
             fetchEventRefsFn={fetchNflEventRefs}
             transformEventsToIcsFn={transformNflEventsToIcs}
             filterEvents={filterNflEvents}
             eventFilters={filters}
-            baseQueryKey={NFL_BASE_QUERY_KEY}
           />
           <NflFilterSelector filters={filters} setFilters={setFilters} />
         </div>
@@ -53,7 +53,7 @@ function NflPage() {
       <NflFilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
-          baseQueryKey={NFL_BASE_QUERY_KEY}
+          league={NFL_LEAGUE}
           seasonTypeIds={NFL_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchNflEventRefs}
           filters={filters}

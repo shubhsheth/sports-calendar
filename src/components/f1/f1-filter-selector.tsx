@@ -22,6 +22,7 @@ import {
 import { Separator } from "../ui/separator";
 import { toggleEventType, toggleShowPastEvents } from "./utils/filterF1Events";
 import { translateF1EventTypeId } from "./utils/translateF1EventType";
+import { analytics } from "@/lib/analytics";
 
 type F1FilterSelectorProps = {
   filters: F1EventFilters;
@@ -34,7 +35,11 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="lg">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => analytics.filterPanelOpened("f1")}
+        >
           <SlidersHorizontal className="size-4" aria-hidden />
           Filter
         </Button>
@@ -54,9 +59,13 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
-                  onCheckedChange={() =>
-                    toggleShowPastEvents(filters, setFilters)
-                  }
+                  onCheckedChange={() => {
+                    analytics.filterShowPastEventsToggled(
+                      "f1",
+                      !filters.showPastEvents
+                    );
+                    toggleShowPastEvents(filters, setFilters);
+                  }}
                 />
                 <FieldLabel htmlFor="show-past-events">
                   Show past events
@@ -76,9 +85,14 @@ function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
                   <Checkbox
                     id={`event-type-${type}`}
                     checked={filters.types.includes(type)}
-                    onCheckedChange={() =>
-                      toggleEventType(type, filters, setFilters)
-                    }
+                    onCheckedChange={() => {
+                      analytics.filterEventTypeToggled(
+                        "f1",
+                        type,
+                        filters.types.includes(type) ? "removed" : "added"
+                      );
+                      toggleEventType(type, filters, setFilters);
+                    }}
                   />
                   <FieldLabel htmlFor={`event-type-${type}`}>
                     {translateF1EventTypeId(type)}

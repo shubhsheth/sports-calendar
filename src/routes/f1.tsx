@@ -25,7 +25,7 @@ export const Route = createFileRoute("/f1")({
   }),
 });
 
-const F1_BASE_QUERY_KEY = "f1";
+const F1_LEAGUE = "f1";
 const F1_SEASON_TYPE_IDS = [2];
 
 function F1Page() {
@@ -40,12 +40,12 @@ function F1Page() {
         <h1 className="text-4xl font-extrabold tracking-tight">F1 Schedule</h1>
         <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
           <DownloadIcalButton<F1Event, F1EventFilters>
+            league={F1_LEAGUE}
             seasonTypeIds={F1_SEASON_TYPE_IDS}
             fetchEventRefsFn={fetchF1EventRefs}
             transformEventsToIcsFn={transformF1EventsToIcs}
             filterEvents={filterF1Events}
             eventFilters={filters}
-            baseQueryKey={F1_BASE_QUERY_KEY}
           />
           <F1FilterSelector filters={filters} setFilters={setFilters} />
         </div>
@@ -53,7 +53,7 @@ function F1Page() {
       <F1FilterPills filters={filters} setFilters={setFilters} />
       <div className="flex flex-wrap gap-4">
         <InfiniteScrollEvents
-          baseQueryKey={F1_BASE_QUERY_KEY}
+          league={F1_LEAGUE}
           seasonTypeIds={F1_SEASON_TYPE_IDS}
           fetchEventRefsFn={fetchF1EventRefs}
           filters={filters}

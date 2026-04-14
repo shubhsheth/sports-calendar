@@ -6,6 +6,7 @@ import {
   toggleShowPastEvents,
   toggleTeamFilter,
 } from "./utils/filterIplEvents";
+import { analytics } from "@/lib/analytics";
 
 type IplFilterPillsProps = {
   filters: IplEventFilters;
@@ -27,7 +28,10 @@ export function IplFilterPills({ filters, setFilters }: IplFilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"
-          onRemove={() => toggleShowPastEvents(filters, setFilters)}
+          onRemove={() => {
+            analytics.filterPillRemoved("ipl", "show_past_events", "Show past events");
+            toggleShowPastEvents(filters, setFilters);
+          }}
         />
       )}
       {teams &&
@@ -39,7 +43,10 @@ export function IplFilterPills({ filters, setFilters }: IplFilterPillsProps) {
               key={teamId}
               label={team.displayName}
               imgSrc={team.logo}
-              onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
+              onRemove={() => {
+                analytics.filterPillRemoved("ipl", "team", team.displayName);
+                toggleTeamFilter(teamId, filters, setFilters);
+              }}
             />
           );
         })}
