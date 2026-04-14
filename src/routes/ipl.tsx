@@ -82,10 +82,7 @@ function IplEventList({ filters }: { filters: IplEventFilters }) {
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
-      analytics.scheduleNextPageLoaded(
-        "ipl",
-        (data?.pages.length ?? 0) + 1
-      );
+      analytics.scheduleNextPageLoaded("ipl", (data?.pages.length ?? 0) + 1);
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, data]);
 

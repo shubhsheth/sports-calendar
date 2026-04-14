@@ -29,7 +29,11 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
         <FilterPill
           label="Show past events"
           onRemove={() => {
-            analytics.filterPillRemoved("nfl", "show_past_events", "Show past events");
+            analytics.filterPillRemoved(
+              "nfl",
+              "show_past_events",
+              "Show past events"
+            );
             toggleShowPastEvents(filters, setFilters);
           }}
         />

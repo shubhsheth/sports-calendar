@@ -19,7 +19,11 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
         <FilterPill
           label="Show past events"
           onRemove={() => {
-            analytics.filterPillRemoved("f1", "show_past_events", "Show past events");
+            analytics.filterPillRemoved(
+              "f1",
+              "show_past_events",
+              "Show past events"
+            );
             toggleShowPastEvents(filters, setFilters);
           }}
         />
@@ -29,7 +33,11 @@ export function F1FilterPills({ filters, setFilters }: F1FilterPillsProps) {
           key={typeId}
           label={translateF1EventTypeId(typeId)}
           onRemove={() => {
-            analytics.filterPillRemoved("f1", "event_type", translateF1EventTypeId(typeId));
+            analytics.filterPillRemoved(
+              "f1",
+              "event_type",
+              translateF1EventTypeId(typeId)
+            );
             toggleEventType(typeId, filters, setFilters);
           }}
         />

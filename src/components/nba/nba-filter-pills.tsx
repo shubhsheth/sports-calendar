@@ -29,7 +29,11 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
         <FilterPill
           label="Show past events"
           onRemove={() => {
-            analytics.filterPillRemoved("nba", "show_past_events", "Show past events");
+            analytics.filterPillRemoved(
+              "nba",
+              "show_past_events",
+              "Show past events"
+            );
             toggleShowPastEvents(filters, setFilters);
           }}
         />

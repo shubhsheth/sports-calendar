@@ -4,8 +4,7 @@ export function initAnalytics() {
   const key = import.meta.env.VITE_POSTHOG_KEY;
   if (!key) return;
   posthog.init(key, {
-    api_host:
-      import.meta.env.VITE_POSTHOG_HOST ?? "https://us.i.posthog.com",
+    api_host: import.meta.env.VITE_POSTHOG_HOST ?? "https://us.i.posthog.com",
     capture_pageview: false, // handled manually via router subscription
     capture_pageleave: true,
   });

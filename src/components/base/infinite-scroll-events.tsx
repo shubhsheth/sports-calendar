@@ -67,10 +67,7 @@ function InfiniteScrollEvents({
     // If the sentinel is in view, we have more to load, AND we aren't currently loading...
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
-      analytics.scheduleNextPageLoaded(
-        league,
-        (data?.pages.length ?? 0) + 1
-      );
+      analytics.scheduleNextPageLoaded(league, (data?.pages.length ?? 0) + 1);
     }
     // We add 'isFetchingNextPage' and 'data' so that as soon as a
     // page finishes loading, if the sentinel is STILL visible,

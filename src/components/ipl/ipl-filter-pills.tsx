@@ -29,7 +29,11 @@ export function IplFilterPills({ filters, setFilters }: IplFilterPillsProps) {
         <FilterPill
           label="Show past events"
           onRemove={() => {
-            analytics.filterPillRemoved("ipl", "show_past_events", "Show past events");
+            analytics.filterPillRemoved(
+              "ipl",
+              "show_past_events",
+              "Show past events"
+            );
             toggleShowPastEvents(filters, setFilters);
           }}
         />
