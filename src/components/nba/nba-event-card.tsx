@@ -11,6 +11,7 @@ import { isEventLive } from "@/lib/eventStatus";
 import { NBA_DURATION_MINUTES } from "./utils/nbaEventDuration";
 
 type NbaEventCardProps = {
+  league: string;
   eventRef: EventRef;
   filters: NbaEventFilters;
 };

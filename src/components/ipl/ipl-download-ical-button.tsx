@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { analytics } from "@/lib/analytics";
 
 type IplDownloadIcalButtonProps = {
   filters: IplEventFilters;
@@ -51,6 +52,7 @@ function IplDownloadIcalButton({
     const blob = await buildIcsBlob();
     if (blob) {
       fileDownload(blob, filename);
+      analytics.calendarDownloaded("ipl");
     }
     setLoading(false);
     setOpen(false);
@@ -58,7 +60,14 @@ function IplDownloadIcalButton({
 
   return (
     <>
-      <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        size="lg"
+        onClick={() => {
+          setOpen(true);
+          analytics.calendarDownloadOpened("ipl");
+        }}
+      >
         <CalendarPlus className="size-4" aria-hidden />
         Add to Calendar
       </Button>

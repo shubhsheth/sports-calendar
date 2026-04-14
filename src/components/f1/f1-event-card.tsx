@@ -12,18 +12,18 @@ import { LiveBadge } from "@/components/ui/live-badge";
 import { isEventLive } from "@/lib/eventStatus";
 
 type F1EventCardProps = {
-  baseQueryKey: string;
+  league: string;
   eventRef: EventRef;
   filters: F1EventFilters;
 };
 
-function F1EventCard({ baseQueryKey, eventRef, filters }: F1EventCardProps) {
+function F1EventCard({ league, eventRef, filters }: F1EventCardProps) {
   const {
     data: f1Event,
     isPending,
     error,
   } = useQuery({
-    queryKey: [baseQueryKey, "event", eventRef.$ref],
+    queryKey: [league, "event", eventRef.$ref],
     queryFn: () => fetchEventDetails<F1Event>(eventRef.$ref),
   });
 

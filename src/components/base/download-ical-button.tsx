@@ -14,8 +14,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { analytics } from "@/lib/analytics";
 
 type DownloadIcalButtonProps<T extends BaseEvent, F> = {
+  league: string;
   seasonTypeIds: number[];
   fetchEventRefsFn: (
     pageNumber: number,
@@ -24,17 +26,16 @@ type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
   eventFilters: F;
-  baseQueryKey: string;
   filename?: string;
 };
 
 function DownloadIcalButton<T extends BaseEvent, F>({
+  league,
   seasonTypeIds,
   fetchEventRefsFn,
   transformEventsToIcsFn,
   filterEvents,
   eventFilters,
-  baseQueryKey,
   filename = "calendar.ics",
 }: DownloadIcalButtonProps<T, F>) {
   const queryClient = useQueryClient();
@@ -44,7 +45,7 @@ function DownloadIcalButton<T extends BaseEvent, F>({
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const allEvents = await fetchAllEvents<T>(
       queryClient,
-      baseQueryKey,
+      league,
       fetchEventRefsFn,
       seasonTypeIds
     );
@@ -63,6 +64,7 @@ function DownloadIcalButton<T extends BaseEvent, F>({
     const blob = await buildIcsBlob();
     if (blob) {
       fileDownload(blob, filename);
+      analytics.calendarDownloaded(league);
     }
     setLoading(false);
     setOpen(false);
@@ -70,7 +72,14 @@ function DownloadIcalButton<T extends BaseEvent, F>({
 
   return (
     <>
-      <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        size="lg"
+        onClick={() => {
+          setOpen(true);
+          analytics.calendarDownloadOpened(league);
+        }}
+      >
         <CalendarPlus className="size-4" aria-hidden />
         Add to Calendar
       </Button>
@@ -112,7 +121,7 @@ export default DownloadIcalButton;
 
 async function fetchAllEvents<T>(
   queryClient: QueryClient,
-  baseQueryKey: string,
+  league: string,
   fetchEventRefsFn: (
     pageNumber: number,
     seasonTypeId: number
@@ -121,13 +130,13 @@ async function fetchAllEvents<T>(
 ): Promise<T[]> {
   const allEventRefs = await fetchAllEventRefs(
     queryClient,
-    baseQueryKey,
+    league,
     fetchEventRefsFn,
     seasonTypeIds
   );
   const allEventDetails = await fetchAllEventDetails<T>(
     queryClient,
-    baseQueryKey,
+    league,
     allEventRefs
   );
 
@@ -136,14 +145,14 @@ async function fetchAllEvents<T>(
 
 async function fetchAllEventRefs(
   queryClient: QueryClient,
-  baseQueryKey: string,
+  league: string,
   fetchEventRefsFn: (
     pageNumber: number,
     seasonTypeId: number
   ) => Promise<FetchEventRefsResponse>,
   seasonTypeIds: number[]
 ): Promise<EventRef[]> {
-  const infiniteQueryKey = [baseQueryKey, "events", "infinite"];
+  const infiniteQueryKey = [league, "events", "infinite"];
 
   // Read already-fetched refs from infinite scroll cache
   const infiniteData = queryClient.getQueryData<{
@@ -190,7 +199,7 @@ async function fetchAllEventRefs(
 
 async function fetchAllEventDetails<T>(
   queryClient: QueryClient,
-  baseQueryKey: string,
+  league: string,
   allEventRefs: EventRef[]
 ): Promise<T[]> {
   const FETCH_CONCURRENCY = 8;
@@ -200,7 +209,7 @@ async function fetchAllEventDetails<T>(
     FETCH_CONCURRENCY,
     ref => {
       return queryClient.ensureQueryData({
-        queryKey: [baseQueryKey, "event", ref.$ref],
+        queryKey: [league, "event", ref.$ref],
         queryFn: () => fetchEventDetails<T>(ref.$ref),
       });
     }

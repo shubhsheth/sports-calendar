@@ -3,9 +3,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import type { EventRef } from "@/types/base";
 import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
+import { analytics } from "@/lib/analytics";
 
 interface InfiniteScrollEventsProps {
-  baseQueryKey: string;
+  league: string;
   seasonTypeIds: number[];
   fetchEventRefsFn: (
     pageNumber: number,
@@ -13,7 +14,7 @@ interface InfiniteScrollEventsProps {
   ) => Promise<FetchEventRefsResponse>;
   filters: unknown;
   eventCard: React.ComponentType<{
-    baseQueryKey: string;
+    league: string;
     eventRef: EventRef;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filters: any;
@@ -21,7 +22,7 @@ interface InfiniteScrollEventsProps {
 }
 
 function InfiniteScrollEvents({
-  baseQueryKey,
+  league,
   seasonTypeIds,
   fetchEventRefsFn,
   filters,
@@ -38,7 +39,7 @@ function InfiniteScrollEvents({
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: [baseQueryKey, "events", "infinite"],
+    queryKey: [league, "events", "infinite"],
     queryFn: ({ pageParam }) => {
       const { seasonTypeId, pageNumber } = pageParam as {
         seasonTypeId: number;
@@ -66,11 +67,12 @@ function InfiniteScrollEvents({
     // If the sentinel is in view, we have more to load, AND we aren't currently loading...
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
+      analytics.scheduleNextPageLoaded(league, (data?.pages.length ?? 0) + 1);
     }
     // We add 'isFetchingNextPage' and 'data' so that as soon as a
     // page finishes loading, if the sentinel is STILL visible,
     // it immediately triggers the next page.
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, data]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, data, league]);
 
   if (isLoading) return <div>Loading schedule...</div>;
   if (isError) return <div>Error loading schedule: {error.message}</div>;
@@ -82,7 +84,7 @@ function InfiniteScrollEvents({
           {page.items.map(item => (
             <EventCard
               key={item.$ref}
-              baseQueryKey={baseQueryKey}
+              league={league}
               eventRef={item}
               filters={filters}
             />

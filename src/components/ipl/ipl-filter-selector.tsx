@@ -27,6 +27,7 @@ import {
   toggleTeamFilter,
 } from "./utils/filterIplEvents";
 import { fetchIplTeams } from "./utils/fetchIplTeams";
+import { analytics } from "@/lib/analytics";
 
 type IplFilterSelectorProps = {
   filters: IplEventFilters;
@@ -37,7 +38,11 @@ function IplFilterSelector({ filters, setFilters }: IplFilterSelectorProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="lg">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => analytics.filterPanelOpened("ipl")}
+        >
           <SlidersHorizontal className="size-4" aria-hidden />
           Filter
         </Button>
@@ -57,9 +62,13 @@ function IplFilterSelector({ filters, setFilters }: IplFilterSelectorProps) {
                 <Checkbox
                   id="show-past-events"
                   checked={filters.showPastEvents}
-                  onCheckedChange={() =>
-                    toggleShowPastEvents(filters, setFilters)
-                  }
+                  onCheckedChange={() => {
+                    analytics.filterShowPastEventsToggled(
+                      "ipl",
+                      !filters.showPastEvents
+                    );
+                    toggleShowPastEvents(filters, setFilters);
+                  }}
                 />
                 <FieldLabel htmlFor="show-past-events">
                   Show past events
@@ -107,14 +116,20 @@ function TeamFilterFieldSet({ filters, setFilters }: IplFilterSelectorProps) {
           size="sm"
           variant="outline"
           disabled={teamsLoading}
-          onClick={() => setFilters({ ...filters, teamIds: allTeamIds })}
+          onClick={() => {
+            analytics.filterSelectAll("ipl");
+            setFilters({ ...filters, teamIds: allTeamIds });
+          }}
         >
           Select all
         </Button>
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setFilters({ ...filters, teamIds: [] })}
+          onClick={() => {
+            analytics.filterCleared("ipl");
+            setFilters({ ...filters, teamIds: [] });
+          }}
         >
           Clear
         </Button>
@@ -133,9 +148,14 @@ function TeamFilterFieldSet({ filters, setFilters }: IplFilterSelectorProps) {
             <Checkbox
               id={`team-${team.id}`}
               checked={filters.teamIds.includes(team.id)}
-              onCheckedChange={() =>
-                toggleTeamFilter(team.id, filters, setFilters)
-              }
+              onCheckedChange={() => {
+                analytics.filterTeamToggled(
+                  "ipl",
+                  team.id,
+                  filters.teamIds.includes(team.id) ? "removed" : "added"
+                );
+                toggleTeamFilter(team.id, filters, setFilters);
+              }}
             />
             <img
               src={team.logo}

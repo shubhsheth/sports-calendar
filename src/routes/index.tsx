@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { analytics } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -21,24 +22,28 @@ function IndexComponent() {
       <Link
         to="/nba"
         className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+        onClick={() => analytics.leagueSelected("nba")}
       >
         View NBA Schedule
       </Link>
       <Link
         to="/f1"
         className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+        onClick={() => analytics.leagueSelected("f1")}
       >
         View F1 Schedule
       </Link>
       <Link
         to="/nfl"
         className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+        onClick={() => analytics.leagueSelected("nfl")}
       >
         View NFL Schedule
       </Link>
       <Link
         to="/ipl"
         className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+        onClick={() => analytics.leagueSelected("ipl")}
       >
         View IPL Schedule
       </Link>

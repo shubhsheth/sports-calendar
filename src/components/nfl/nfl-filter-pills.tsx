@@ -6,6 +6,7 @@ import {
   toggleShowPastEvents,
   toggleTeamFilter,
 } from "./utils/filterNflEvents";
+import { analytics } from "@/lib/analytics";
 
 type NflFilterPillsProps = {
   filters: NflEventFilters;
@@ -27,7 +28,14 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"
-          onRemove={() => toggleShowPastEvents(filters, setFilters)}
+          onRemove={() => {
+            analytics.filterPillRemoved(
+              "nfl",
+              "show_past_events",
+              "Show past events"
+            );
+            toggleShowPastEvents(filters, setFilters);
+          }}
         />
       )}
       {teams &&
@@ -40,7 +48,10 @@ export function NflFilterPills({ filters, setFilters }: NflFilterPillsProps) {
               key={teamId}
               label={team.displayName}
               imgSrc={logo?.href}
-              onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
+              onRemove={() => {
+                analytics.filterPillRemoved("nfl", "team", team.displayName);
+                toggleTeamFilter(teamId, filters, setFilters);
+              }}
             />
           );
         })}

@@ -3,8 +3,11 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { initAnalytics, analytics } from "./lib/analytics";
 
 import "./index.css";
+
+initAnalytics();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +26,10 @@ const router = createRouter({
   basepath: import.meta.env.BASE_URL,
   defaultPreload: "intent",
   scrollRestoration: true,
+});
+
+router.subscribe("onResolved", () => {
+  analytics.pageView(router.state.location.pathname);
 });
 
 declare module "@tanstack/react-router" {

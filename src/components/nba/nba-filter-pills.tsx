@@ -6,6 +6,7 @@ import {
   toggleShowPastEvents,
   toggleTeamFilter,
 } from "./utils/filterNbaEvents";
+import { analytics } from "@/lib/analytics";
 
 type NbaFilterPillsProps = {
   filters: NbaEventFilters;
@@ -27,7 +28,14 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
       {filters.showPastEvents && (
         <FilterPill
           label="Show past events"
-          onRemove={() => toggleShowPastEvents(filters, setFilters)}
+          onRemove={() => {
+            analytics.filterPillRemoved(
+              "nba",
+              "show_past_events",
+              "Show past events"
+            );
+            toggleShowPastEvents(filters, setFilters);
+          }}
         />
       )}
       {teams &&
@@ -40,7 +48,10 @@ export function NbaFilterPills({ filters, setFilters }: NbaFilterPillsProps) {
               key={teamId}
               label={team.displayName}
               imgSrc={logo?.href}
-              onRemove={() => toggleTeamFilter(teamId, filters, setFilters)}
+              onRemove={() => {
+                analytics.filterPillRemoved("nba", "team", team.displayName);
+                toggleTeamFilter(teamId, filters, setFilters);
+              }}
             />
           );
         })}
