@@ -63,12 +63,12 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 3. **Project Structure** — Where source code lives, where tests go, where docs belong.
    ```
    src/           → Application source code
-   src/components → React components
-   src/lib        → Shared utilities
-   tests/         → Unit and integration tests
+   src/components → React components (*.test.ts colocated)
+   src/lib        → Shared utilities (*.test.ts colocated)
    e2e/           → End-to-end tests
    docs/          → Documentation
    ```
+   Tests live next to the code they test, not in a separate top-level folder.
 
 4. **Code Style** — One real code snippet showing your style beats three paragraphs describing it. Include naming conventions, formatting rules, and examples of good output.
 

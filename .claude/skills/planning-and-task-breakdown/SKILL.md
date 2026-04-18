@@ -19,6 +19,20 @@ Decompose work into small, verifiable tasks with explicit acceptance criteria. G
 
 **When NOT to use:** Single-file changes with obvious scope, or when the spec already contains well-defined tasks.
 
+## The Full Workflow
+
+This skill covers the **PLAN** and **TASKS** phases. All four phases must complete in order:
+
+```
+SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
+   │          │        │          │
+   ▼          ▼        ▼          ▼
+ Human      Human    Human      Human
+ reviews    reviews  reviews    reviews
+```
+
+Do not start planning until a spec exists and the human has approved it.
+
 ## The Planning Process
 
 ### Step 1: Enter Plan Mode
@@ -98,7 +112,7 @@ Each task follows this structure:
 
 **Files likely touched:**
 - `src/path/to/file.ts`
-- `tests/path/to/test.ts`
+- `src/path/to/file.test.ts`
 
 **Estimated scope:** [Small: 1-2 files | Medium: 3-5 files | Large: 5+ files]
 ```

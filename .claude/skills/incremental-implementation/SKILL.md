@@ -18,6 +18,20 @@ Build in thin vertical slices — implement one piece, test it, verify it, then 
 
 **When NOT to use:** Single-file, single-function changes where the scope is already minimal.
 
+## The Full Workflow
+
+This skill covers the **IMPLEMENT** phase. All four phases must complete in order:
+
+```
+SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
+   │          │        │          │
+   ▼          ▼        ▼          ▼
+ Human      Human    Human      Human
+ reviews    reviews  reviews    reviews
+```
+
+Do not begin implementation until a spec exists, a plan is approved, and tasks are broken down and reviewed.
+
 ## The Increment Cycle
 
 ```
