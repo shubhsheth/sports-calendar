@@ -35,6 +35,19 @@ Do not start planning until a spec exists and the human has approved it.
 
 ## The Planning Process
 
+### Step 0: Identify Unresolved Technical Decisions
+
+Before mapping dependencies, list any technical questions that require a proof-of-concept or research spike before the plan can be valid:
+
+```
+UNRESOLVED BEFORE PLANNING:
+- Can the third-party API support bulk operations? (need to test)
+- Does the existing ORM support the query pattern FR-4 requires? (need to check)
+→ Resolve these first. A plan built on unvalidated assumptions will need to be rewritten.
+```
+
+If any item in this list would change the task structure if answered differently, run a short research spike before writing the full plan. Add those spikes as explicit tasks in Phase 0 of the plan.
+
 ### Step 1: Enter Plan Mode
 
 Before writing any code, operate in read-only mode:
@@ -108,6 +121,8 @@ Each task follows this structure:
 - [ ] Build succeeds: `npm run build`
 - [ ] Manual check: [description of what to verify]
 
+**Implements:** FR-2, FR-3 (or "infrastructure — no direct FR mapping")
+
 **Dependencies:** [Task numbers this depends on, or "None"]
 
 **Files likely touched:**
@@ -167,6 +182,10 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 - [Key decision 2 and rationale]
 
 ## Task List
+
+### Phase 0: Research (if needed)
+- [ ] RESEARCH-01: [spike or proof-of-concept]
+→ Do not begin Phase 1 until all Phase 0 spikes are resolved.
 
 ### Phase 1: Foundation
 - [ ] Task 1: ...
@@ -235,3 +254,13 @@ Before starting implementation, confirm:
 - [ ] No task touches more than ~5 files
 - [ ] Checkpoints exist between major phases
 - [ ] The human has reviewed and approved the plan
+
+**Cross-Artifact Consistency Check** — run this before approving the plan:
+
+- [ ] Every FR in the spec is referenced by at least one task's `Implements` field
+- [ ] No task references an FR number that doesn't exist in the spec
+- [ ] NFR requirements (performance, security, accessibility) appear as tasks, not just spec text
+- [ ] Out of Scope items in the spec have no corresponding tasks
+- [ ] Phase 0 research tasks exist for every unresolved technical decision from Step 0
+
+Flag any gaps with severity: **CRITICAL** (blocks implementation), **HIGH** (will cause rework), **MEDIUM** (degrades quality). Resolve CRITICAL and HIGH before advancing to implementation.

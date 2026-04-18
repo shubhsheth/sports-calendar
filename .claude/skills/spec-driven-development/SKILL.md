@@ -48,6 +48,17 @@ ASSUMPTIONS I'M MAKING:
 
 Don't silently fill in ambiguous requirements. The spec's entire purpose is to surface misunderstandings *before* code gets written — assumptions are the most dangerous form of misunderstanding.
 
+**Handle mid-spec ambiguity with `[NEEDS CLARIFICATION]` markers.** When a requirement is unclear but not blocking enough to stop writing, embed the marker inline and keep going. Cap at **3 markers per spec** — more than 3 means you should stop and ask the human before continuing. When presenting markers for resolution, use a table:
+
+```
+| # | Question | Options | Implication if left open |
+|---|----------|---------|--------------------------|
+| 1 | Should filtering apply server-side or client-side? | Server / Client | Drives whether the API needs filter params |
+| 2 | Is this feature gated by user role? | Yes (admin only) / No (all users) | Changes auth requirements significantly |
+```
+
+Replace all markers before the spec advances to the PLAN phase.
+
 **Write a spec document covering these six core areas:**
 
 1. **Objective** — What are we building and why? Who is the user? What does success look like?
@@ -85,7 +96,23 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 # Spec: [Project/Feature Name]
 
 ## Objective
-[What we're building and why. User stories or acceptance criteria.]
+[What we're building and why.]
+
+## User Stories
+- As a [user type], I want to [action] so that [outcome]
+
+## Functional Requirements
+- FR-1: [requirement]
+- FR-2: [requirement]
+
+## Non-Functional Requirements
+- NFR-1: [performance / security / accessibility requirement]
+
+## Out of Scope
+- [Explicit exclusions for this iteration]
+
+## Assumptions
+- [What we're treating as settled without explicit confirmation]
 
 ## Tech Stack
 [Framework, language, key dependencies with versions]
@@ -108,7 +135,7 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 - Never: [...]
 
 ## Success Criteria
-[How we'll know this is done — specific, testable conditions]
+[How we'll know this is done — specific, measurable, technology-agnostic conditions]
 
 ## Open Questions
 [Anything unresolved that needs human input]
@@ -127,6 +154,14 @@ REFRAMED SUCCESS CRITERIA:
 ```
 
 This lets you loop, retry, and problem-solve toward a clear goal rather than guessing what "faster" means.
+
+**Success criteria must be technology-agnostic.** Describe observable user outcomes, not implementation choices:
+
+| Bad (tech-coupled) | Good (user-focused) |
+|--------------------|---------------------|
+| "Uses Redis for caching" | "Search returns in < 300ms for 95% of queries" |
+| "Migrates to PostgreSQL" | "All existing user data is preserved and queryable after migration" |
+| "Implements React Query" | "UI reflects server state within 2 seconds of a background update" |
 
 ### Phase 2: Plan
 
@@ -191,10 +226,13 @@ The spec is a living document, not a one-time artifact:
 
 ## Verification
 
-Before proceeding to implementation, confirm:
+This is a quality gate — do not advance to PLAN until every item is checked.
 
 - [ ] The spec covers all six core areas
 - [ ] The human has reviewed and approved the spec
-- [ ] Success criteria are specific and testable
+- [ ] Success criteria are specific, testable, and technology-agnostic
 - [ ] Boundaries (Always/Ask First/Never) are defined
 - [ ] The spec is saved to a file in the repository
+- [ ] Functional requirements are numbered (FR-1, FR-2…) so tasks can reference them
+- [ ] Out of Scope section exists with at least one explicit exclusion
+- [ ] No `[NEEDS CLARIFICATION]` markers remain

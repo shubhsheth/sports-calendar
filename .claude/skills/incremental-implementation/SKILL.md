@@ -32,6 +32,8 @@ SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
 
 Do not begin implementation until a spec exists, a plan is approved, and tasks are broken down and reviewed.
 
+Implement in the same phase order established in the plan. Complete all Setup tasks before Foundation, all Foundation before Core, and so on. Do not jump ahead to Core tasks while Foundation tasks have unresolved acceptance criteria — each layer must be validated before building on top of it.
+
 ## The Increment Cycle
 
 ```
@@ -143,6 +145,8 @@ If you notice something worth improving outside your task scope, note it — don
 NOTICED BUT NOT TOUCHING:
 - src/utils/format.ts has an unused import (unrelated to this task)
 - The auth middleware could use better error messages (separate task)
+- [Spec gap] FR-4 is ambiguous about whether X applies to Y
+  → Pause and clarify before implementing, or document the assumption made.
 → Want me to create tasks for these?
 ```
 
@@ -209,6 +213,19 @@ nothing is broken."
 ```
 
 Be explicit about what's in scope and what's NOT in scope for each increment.
+
+## Task Completion Gate
+
+Before marking a task complete, validate against its acceptance criteria — not just its tests:
+
+```
+TASK COMPLETION GATE:
+- [ ] Each acceptance criterion from the task definition is explicitly met
+- [ ] The FR(s) this task implements (per its "Implements" field) are verifiable end-to-end
+- [ ] No acceptance criterion is "assumed" to be met — check each one manually or via test
+```
+
+Passing tests is necessary but not sufficient. Tests prove the code does what the code does. Acceptance criteria prove the code does what the spec requires.
 
 ## Increment Checklist
 
