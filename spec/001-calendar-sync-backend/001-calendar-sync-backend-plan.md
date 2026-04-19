@@ -256,6 +256,8 @@ jobs:
 
 Path filter ensures the worker only redeploys when worker or shared code changes — a frontend-only commit won't trigger it.
 
+**No PR preview for the worker.** The existing `preview.yml` deploys the frontend to a per-PR GitHub Pages subdirectory. The CF Worker has no equivalent — it deploys to production on merge to `main` only. PR preview frontends will continue to hit the production worker URL.
+
 **Prerequisites:** `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` must be added as GitHub repository secrets before this workflow runs.
 
 **Verification:** Pushing a change to `packages/worker/` triggers the workflow and the live worker URL serves an updated response.
