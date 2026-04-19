@@ -1,28 +1,28 @@
-import type { NflEvent, NflEventFilters } from "../types/nfl.ts";
-import { isEventPast } from "../lib/eventStatus.ts";
-import { NFL_DURATION_MINUTES } from "../lib/durations.ts";
+import type { NbaEvent, NbaEventFilters } from "./types.ts";
+import { isEventPast } from "../../lib/eventStatus.ts";
+import { NBA_DURATION_MINUTES } from "./durations.ts";
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
 }
 
-export function filterNflEvents(events: NflEvent[], filters: NflEventFilters) {
-  const filteredEvents: NflEvent[] = [];
+export function filterNbaEvents(events: NbaEvent[], filters: NbaEventFilters) {
+  const filteredEvents: NbaEvent[] = [];
   for (const event of events) {
-    const filteredEvent = filterNflEvent(event, filters);
+    const filteredEvent = filterNbaEvent(event, filters);
     if (filteredEvent) filteredEvents.push(filteredEvent);
   }
   return filteredEvents;
 }
 
-export function filterNflEvent(
-  event: NflEvent,
-  filters: NflEventFilters
-): NflEvent | null {
+export function filterNbaEvent(
+  event: NbaEvent,
+  filters: NbaEventFilters
+): NbaEvent | null {
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, NFL_DURATION_MINUTES)
+      isEventPast(competition.date, NBA_DURATION_MINUTES)
     ) {
       return false;
     }

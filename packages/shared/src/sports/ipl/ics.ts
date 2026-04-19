@@ -1,4 +1,4 @@
-import type { IplEvent } from "../types/ipl.ts";
+import type { IplEvent } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 

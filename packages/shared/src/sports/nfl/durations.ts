@@ -1,0 +1,1 @@
+export const NFL_DURATION_MINUTES = 210;

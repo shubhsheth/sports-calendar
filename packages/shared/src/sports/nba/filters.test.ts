@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { filterNbaEvents, filterNbaEvent } from "./nba.ts";
-import type { NbaEvent, NbaEventFilters } from "../types/nba.ts";
-import * as eventStatus from "../lib/eventStatus.ts";
+import { filterNbaEvents, filterNbaEvent } from "./filters.ts";
+import type { NbaEvent, NbaEventFilters } from "./types.ts";
+import * as eventStatus from "../../lib/eventStatus.ts";
 
 function makeEvent(overrides: Partial<NbaEvent> = {}): NbaEvent {
   return {

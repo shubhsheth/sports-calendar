@@ -1,6 +1,6 @@
-import type { IplEvent, IplEventFilters } from "../types/ipl.ts";
-import { isEventPast } from "../lib/eventStatus.ts";
-import { IPL_DURATION_MINUTES } from "../lib/durations.ts";
+import type { IplEvent, IplEventFilters } from "./types.ts";
+import { isEventPast } from "../../lib/eventStatus.ts";
+import { IPL_DURATION_MINUTES } from "./durations.ts";
 
 export function filterIplEvents(
   events: IplEvent[],

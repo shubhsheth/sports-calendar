@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { filterF1Events } from "./f1.ts";
-import type { F1Event, F1EventFilters } from "../types/f1.ts";
-import * as eventStatus from "../lib/eventStatus.ts";
+import { filterF1Events } from "./filters.ts";
+import type { F1Event, F1EventFilters } from "./types.ts";
+import * as eventStatus from "../../lib/eventStatus.ts";
 
 function makeF1Event(typeIds: string[] = ["3"]): F1Event {
   return {

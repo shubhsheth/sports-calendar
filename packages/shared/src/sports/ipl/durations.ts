@@ -1,0 +1,1 @@
+export const IPL_DURATION_MINUTES = 240;

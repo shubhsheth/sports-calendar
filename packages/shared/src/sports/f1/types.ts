@@ -1,4 +1,4 @@
-import type { BaseEvent } from "./base";
+import type { BaseEvent } from "../../lib/base.ts";
 
 export type F1Event = BaseEvent & {
   competitions: F1EventCompetition[];
