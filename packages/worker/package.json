@@ -1,0 +1,24 @@
+{
+  "name": "@sports-calendar/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@sports-calendar/shared": "*",
+    "hono": "^4.7.0",
+    "ics": "^3.8.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250620.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.4",
+    "wrangler": "^4.0.0"
+  }
+}

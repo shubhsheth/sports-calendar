@@ -1,8 +1,9 @@
 {
-  "name": "calendar-2",
+  "name": "sports-calendar",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": ["packages/*"],
   "scripts": {
     "dev": "vite",
     "build": "vite build && cp dist/index.html dist/404.html",
