@@ -2,7 +2,7 @@ import type { NbaEvent, NflEvent, F1Event } from "@sports-calendar/shared";
 import { fetchAllEventRefsBySeason } from "./fetchEventRefs.ts";
 import { fetchEventDetails } from "./fetchEventDetails.ts";
 import { fetchAllIplEvents } from "./fetchIplEvents.ts";
-import { mapWithConcurrency } from "./utils.ts";
+import { mapWithConcurrency } from "./concurrency.ts";
 import type { IplEvent } from "@sports-calendar/shared";
 
 const CONCURRENCY = 8;

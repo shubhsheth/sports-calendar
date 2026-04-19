@@ -1,5 +1,5 @@
 import type { IplEvent } from "@sports-calendar/shared";
-import { mapWithConcurrency } from "./utils.ts";
+import { mapWithConcurrency } from "./concurrency.ts";
 
 const LEAGUE_ID = "8048";
 const IPL_START_DATE = "2026-03-28";

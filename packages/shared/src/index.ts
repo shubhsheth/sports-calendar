@@ -35,8 +35,8 @@ export {
 export {
   translateF1EventTypeAbbr,
   translateF1EventTypeId,
-  cleanUpSponsorName,
-} from "./lib/f1Helpers.ts";
+} from "./lib/translateF1EventType.ts";
+export { cleanUpSponsorName } from "./lib/cleanUpSponsorName.ts";
 
 export { filterNbaEvents, filterNbaEvent } from "./filters/nba.ts";
 export { filterNflEvents, filterNflEvent } from "./filters/nfl.ts";
