@@ -5,7 +5,7 @@ import {
   transformF1EventsToIcs,
 } from "@sports-calendar/shared";
 import { parseF1Params } from "../params.ts";
-import { fetchAllF1Events } from "../espn/leagues.ts";
+import { fetchAllF1Events } from "../espn/leagues/f1.ts";
 import { withCache } from "../cache.ts";
 
 export const f1Route = new Hono();

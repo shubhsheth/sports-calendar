@@ -32,10 +32,8 @@ export {
   IPL_DURATION_MINUTES,
   F1_SESSION_DURATIONS,
 } from "./lib/durations.ts";
-export {
-  translateF1EventTypeAbbr,
-  translateF1EventTypeId,
-} from "./lib/translateF1EventType.ts";
+export { translateF1EventTypeAbbr } from "./lib/translateF1EventTypeAbbr.ts";
+export { translateF1EventTypeId } from "./lib/translateF1EventTypeId.ts";
 export { cleanUpSponsorName } from "./lib/cleanUpSponsorName.ts";
 
 export { filterNbaEvents, filterNbaEvent } from "./filters/nba.ts";

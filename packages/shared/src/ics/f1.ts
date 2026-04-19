@@ -1,7 +1,7 @@
 import type { F1Event } from "../types/f1.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { translateF1EventTypeAbbr } from "../lib/translateF1EventType.ts";
+import { translateF1EventTypeAbbr } from "../lib/translateF1EventTypeAbbr.ts";
 import { cleanUpSponsorName } from "../lib/cleanUpSponsorName.ts";
 import { F1_SESSION_DURATIONS } from "../lib/durations.ts";
 

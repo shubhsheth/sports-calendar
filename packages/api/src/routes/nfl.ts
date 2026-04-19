@@ -5,7 +5,7 @@ import {
   transformNflEventsToIcs,
 } from "@sports-calendar/shared";
 import { parseNflParams } from "../params.ts";
-import { fetchAllNflEvents } from "../espn/leagues.ts";
+import { fetchAllNflEvents } from "../espn/leagues/nfl.ts";
 import { withCache } from "../cache.ts";
 
 export const nflRoute = new Hono();

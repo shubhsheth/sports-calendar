@@ -5,7 +5,7 @@ import {
   transformIplEventsToIcs,
 } from "@sports-calendar/shared";
 import { parseIplParams } from "../params.ts";
-import { fetchAllIplEvents } from "../espn/leagues.ts";
+import { fetchAllIplEvents } from "../espn/leagues/ipl.ts";
 import { withCache } from "../cache.ts";
 
 export const iplRoute = new Hono();

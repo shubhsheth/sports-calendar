@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   NbaEventFilters,
   NflEventFilters,
@@ -7,91 +8,65 @@ import type {
 
 type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
-const VALID_F1_TYPES = new Set(["1", "2", "3", "4", "6"]);
+const VALID_F1_TYPES = ["1", "2", "3", "4", "6"] as const;
 
-function parseShowPastEvents(raw: string | undefined): boolean {
-  if (raw === undefined) return true;
-  if (raw === "true") return true;
-  if (raw === "false") return false;
-  return null as never; // signal invalid — handled by callers
-}
+const showPastEventsSchema = z
+  .enum(["true", "false"])
+  .optional()
+  .transform(v => v !== "false");
 
-function isValidShowPastEvents(raw: string | undefined): boolean {
-  return raw === undefined || raw === "true" || raw === "false";
-}
+const teamIdsSchema = z
+  .string()
+  .optional()
+  .transform(v => (v ? v.split(",").filter(id => id.length > 0) : []));
 
-function parseTeamIds(raw: string | undefined): string[] {
-  if (!raw) return [];
-  return raw.split(",").filter(id => id.length > 0);
+const baseSchema = z.object({
+  showPastEvents: showPastEventsSchema,
+  teamIds: teamIdsSchema,
+});
+
+const f1Schema = z.object({
+  showPastEvents: showPastEventsSchema,
+  types: z
+    .string()
+    .optional()
+    .transform(v =>
+      v ? v.split(",").filter(t => t.length > 0) : [...VALID_F1_TYPES]
+    )
+    .refine(types => types.every(t => (VALID_F1_TYPES as readonly string[]).includes(t)), {
+      message: `Invalid F1 session type. Valid types: ${VALID_F1_TYPES.join(", ")}`,
+    }),
+});
+
+function safeParse<TSchema extends z.ZodTypeAny, TOut>(
+  schema: TSchema,
+  query: Record<string, string>
+): ParseResult<TOut> {
+  const result = schema.safeParse(query);
+  if (result.success) return { ok: true, value: result.data as TOut };
+  return { ok: false, error: result.error.errors[0]?.message ?? "Invalid params" };
 }
 
 export function parseNbaParams(
   query: Record<string, string>
 ): ParseResult<NbaEventFilters> {
-  if (!isValidShowPastEvents(query["showPastEvents"])) {
-    return { ok: false, error: "showPastEvents must be 'true' or 'false'" };
-  }
-  return {
-    ok: true,
-    value: {
-      showPastEvents: parseShowPastEvents(query["showPastEvents"]),
-      teamIds: parseTeamIds(query["teamIds"]),
-    },
-  };
+  return safeParse(baseSchema, query);
 }
 
 export function parseNflParams(
   query: Record<string, string>
 ): ParseResult<NflEventFilters> {
-  if (!isValidShowPastEvents(query["showPastEvents"])) {
-    return { ok: false, error: "showPastEvents must be 'true' or 'false'" };
-  }
-  return {
-    ok: true,
-    value: {
-      showPastEvents: parseShowPastEvents(query["showPastEvents"]),
-      teamIds: parseTeamIds(query["teamIds"]),
-    },
-  };
+  return safeParse(baseSchema, query);
 }
 
 export function parseF1Params(
   query: Record<string, string>
 ): ParseResult<F1EventFilters> {
-  if (!isValidShowPastEvents(query["showPastEvents"])) {
-    return { ok: false, error: "showPastEvents must be 'true' or 'false'" };
-  }
-  const rawTypes = query["types"];
-  const types = rawTypes
-    ? rawTypes.split(",").filter(t => t.length > 0)
-    : ["1", "2", "3", "4", "6"]; // default: all session types
-  const invalid = types.find(t => !VALID_F1_TYPES.has(t));
-  if (invalid) {
-    return {
-      ok: false,
-      error: `Invalid F1 session type: '${invalid}'. Valid types: 1, 2, 3, 4, 6`,
-    };
-  }
-  return {
-    ok: true,
-    value: {
-      showPastEvents: parseShowPastEvents(query["showPastEvents"]),
-      types,
-    },
-  };
+  return safeParse(f1Schema, query);
 }
 
 export function parseIplParams(
   query: Record<string, string>
 ): ParseResult<IplEventFilters> {
-  if (!isValidShowPastEvents(query["showPastEvents"])) {
-    return { ok: false, error: "showPastEvents must be 'true' or 'false'" };
-  }
-  return {
-    ok: true,
-    value: {
-      showPastEvents: parseShowPastEvents(query["showPastEvents"]),
-      teamIds: parseTeamIds(query["teamIds"]),
-    },
-  };
+  return safeParse(baseSchema, query);
 }
