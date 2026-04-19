@@ -20,6 +20,8 @@ F: packages/worker — routes                 ← parallel: F1 F2 F3 F4 can run 
 G: Tests
    ↓
 H: Wrangler config + deploy
+   ↓
+I: CI/CD — guard existing GH Pages workflows + add deploy-worker.yml
 ```
 
 ---
@@ -202,6 +204,61 @@ compatibility_flags = ["nodejs_compat"]
 **Deploy command:** `npx wrangler deploy` from `packages/worker/`.
 
 **Verification:** Live worker URL responds to `/calendar/nba.ics` with a valid ICS. Subscribe URL works in Apple Calendar.
+
+---
+
+## Phase I — CI/CD: GitHub Actions
+
+**Goal:** Existing GitHub Pages workflows keep working after the monorepo conversion, and the CF Worker deploys automatically on push to `main`.
+
+### I1 — Guard existing workflows against monorepo
+
+Both `deploy.yml` and `preview.yml` run `npm run lint`, `npm run test:run`, and `npm run build` at the workspace root. After Phase A these commands could inadvertently include worker code (which needs `@cloudflare/vitest-pool-workers`, a different test runner). Changes needed:
+
+- Root `package.json` `test:run` script: scope to frontend only, e.g. `vitest run --project frontend`  
+  OR add a workspace-aware script: `npm run test:run -w packages/shared && npm run test:run` (frontend stays at root)
+- Root `package.json` `lint` script: confirm it doesn't glob into `packages/worker/` with incompatible tsconfig — add an `.eslintignore` entry or scope the glob if needed
+- `npm run build` at root remains the Vite frontend build; worker has its own `build` scoped to `packages/worker`
+- No changes to the `peaceiris/actions-gh-pages` or `rossjrw/pr-preview-action` steps — they still publish `./dist`
+
+**Verification:** Both `deploy.yml` and `preview.yml` pass on a test PR after Phase A lands.
+
+### I2 — New `deploy-worker.yml` workflow
+
+Triggers on push to `main` (after `deploy.yml` succeeds, or in parallel — worker deploy is independent of GitHub Pages).
+
+```yaml
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/worker/**'
+      - 'packages/shared/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm install
+      - run: npx wrangler deploy
+        working-directory: packages/worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
+
+Path filter ensures the worker only redeploys when worker or shared code changes — a frontend-only commit won't trigger it.
+
+**Prerequisites:** `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` must be added as GitHub repository secrets before this workflow runs.
+
+**Verification:** Pushing a change to `packages/worker/` triggers the workflow and the live worker URL serves an updated response.
 
 ---
 
