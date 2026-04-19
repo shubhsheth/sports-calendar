@@ -22,8 +22,16 @@ function makeEvent(overrides: Partial<NbaEvent> = {}): NbaEvent {
         bracketAvailable: false,
         gameSource: { id: "1", description: "ESPN", state: "full" },
         competitors: [
-          { $ref: "", homeAway: "home", team: { $ref: "https://example.com/teams/10" } },
-          { $ref: "", homeAway: "away", team: { $ref: "https://example.com/teams/20" } },
+          {
+            $ref: "",
+            homeAway: "home",
+            team: { $ref: "https://example.com/teams/10" },
+          },
+          {
+            $ref: "",
+            homeAway: "away",
+            team: { $ref: "https://example.com/teams/20" },
+          },
         ],
       },
     ],
@@ -46,26 +54,38 @@ describe("filterNbaEvents", () => {
   it("removes past events when showPastEvents=false", () => {
     vi.spyOn(eventStatus, "isEventPast").mockReturnValue(true);
     const events = [makeEvent()];
-    const result = filterNbaEvents(events, { ...defaultFilters, showPastEvents: false });
+    const result = filterNbaEvents(events, {
+      ...defaultFilters,
+      showPastEvents: false,
+    });
     expect(result).toHaveLength(0);
   });
 
   it("keeps future events when showPastEvents=false", () => {
     vi.spyOn(eventStatus, "isEventPast").mockReturnValue(false);
     const events = [makeEvent()];
-    const result = filterNbaEvents(events, { ...defaultFilters, showPastEvents: false });
+    const result = filterNbaEvents(events, {
+      ...defaultFilters,
+      showPastEvents: false,
+    });
     expect(result).toHaveLength(1);
   });
 
   it("filters by teamId — keeps event with matching team", () => {
     const events = [makeEvent()];
-    const result = filterNbaEvents(events, { ...defaultFilters, teamIds: ["10"] });
+    const result = filterNbaEvents(events, {
+      ...defaultFilters,
+      teamIds: ["10"],
+    });
     expect(result).toHaveLength(1);
   });
 
   it("filters by teamId — removes event without matching team", () => {
     const events = [makeEvent()];
-    const result = filterNbaEvents(events, { ...defaultFilters, teamIds: ["99"] });
+    const result = filterNbaEvents(events, {
+      ...defaultFilters,
+      teamIds: ["99"],
+    });
     expect(result).toHaveLength(0);
   });
 
@@ -77,6 +97,8 @@ describe("filterNbaEvents", () => {
 
   it("returns null from filterNbaEvent when all competitions filtered out", () => {
     vi.spyOn(eventStatus, "isEventPast").mockReturnValue(true);
-    expect(filterNbaEvent(makeEvent(), { ...defaultFilters, showPastEvents: false })).toBeNull();
+    expect(
+      filterNbaEvent(makeEvent(), { ...defaultFilters, showPastEvents: false })
+    ).toBeNull();
   });
 });

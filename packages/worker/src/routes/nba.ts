@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { createEvents } from "ics";
-import { filterNbaEvents, transformNbaEventsToIcs } from "@sports-calendar/shared";
+import {
+  filterNbaEvents,
+  transformNbaEventsToIcs,
+} from "@sports-calendar/shared";
 import { parseNbaParams } from "../params.ts";
 import { fetchAllNbaEvents } from "../espn/leagues.ts";
 import { withCache } from "../cache.ts";
@@ -14,7 +17,9 @@ nbaRoute.get("/", async c => {
   return withCache(new Request(c.req.url), c.executionCtx, async () => {
     const events = await fetchAllNbaEvents();
     const filtered = filterNbaEvents(events, params.value);
-    const { value: icsString, error } = createEvents(transformNbaEventsToIcs(filtered));
+    const { value: icsString, error } = createEvents(
+      transformNbaEventsToIcs(filtered)
+    );
     if (!icsString) throw new Error(`ICS generation failed: ${String(error)}`);
     return icsString;
   });

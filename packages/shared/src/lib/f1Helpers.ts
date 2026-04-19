@@ -58,7 +58,5 @@ export function cleanUpSponsorName(name: string): string {
       ""
     );
   }
-  return cleanedName
-    .replace(/^[\s-]+|[\s-]+$/g, "")
-    .replace(/\s{2,}/g, " ");
+  return cleanedName.replace(/^[\s-]+|[\s-]+$/g, "").replace(/\s{2,}/g, " ");
 }

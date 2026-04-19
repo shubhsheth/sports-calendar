@@ -1,4 +1,8 @@
-import type { NbaEvent, NbaEventFilters, NbaTeam } from "@sports-calendar/shared";
+import type {
+  NbaEvent,
+  NbaEventFilters,
+  NbaTeam,
+} from "@sports-calendar/shared";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import type { EventRef } from "@sports-calendar/shared";

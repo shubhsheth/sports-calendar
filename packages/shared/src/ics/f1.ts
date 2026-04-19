@@ -1,7 +1,10 @@
 import type { F1Event } from "../types/f1.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { translateF1EventTypeAbbr, cleanUpSponsorName } from "../lib/f1Helpers.ts";
+import {
+  translateF1EventTypeAbbr,
+  cleanUpSponsorName,
+} from "../lib/f1Helpers.ts";
 import { F1_SESSION_DURATIONS } from "../lib/durations.ts";
 
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
@@ -9,7 +12,9 @@ export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {
       const start = dayjs(competition.date);
-      const sessionName = translateF1EventTypeAbbr(competition.type.abbreviation);
+      const sessionName = translateF1EventTypeAbbr(
+        competition.type.abbreviation
+      );
       const raceName = cleanUpSponsorName(mainEvent.shortName);
       const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
       icsEvents.push({

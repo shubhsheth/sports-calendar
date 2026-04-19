@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { createEvents } from "ics";
-import { filterIplEvents, transformIplEventsToIcs } from "@sports-calendar/shared";
+import {
+  filterIplEvents,
+  transformIplEventsToIcs,
+} from "@sports-calendar/shared";
 import { parseIplParams } from "../params.ts";
 import { fetchAllIplEvents } from "../espn/leagues.ts";
 import { withCache } from "../cache.ts";
@@ -14,7 +17,9 @@ iplRoute.get("/", async c => {
   return withCache(new Request(c.req.url), c.executionCtx, async () => {
     const events = await fetchAllIplEvents();
     const filtered = filterIplEvents(events, params.value);
-    const { value: icsString, error } = createEvents(transformIplEventsToIcs(filtered));
+    const { value: icsString, error } = createEvents(
+      transformIplEventsToIcs(filtered)
+    );
     if (!icsString) throw new Error(`ICS generation failed: ${String(error)}`);
     return icsString;
   });

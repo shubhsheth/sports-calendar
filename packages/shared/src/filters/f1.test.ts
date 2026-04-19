@@ -26,14 +26,19 @@ function makeF1Event(typeIds: string[] = ["3"]): F1Event {
   };
 }
 
-const defaultFilters: F1EventFilters = { showPastEvents: true, types: ["1", "2", "3", "4", "6"] };
+const defaultFilters: F1EventFilters = {
+  showPastEvents: true,
+  types: ["1", "2", "3", "4", "6"],
+};
 
 describe("filterF1Events", () => {
   beforeEach(() => vi.restoreAllMocks());
 
   it("returns all sessions when all types included", () => {
     const events = [makeF1Event(["1", "2", "3"])];
-    expect(filterF1Events(events, defaultFilters)[0]?.competitions).toHaveLength(3);
+    expect(
+      filterF1Events(events, defaultFilters)[0]?.competitions
+    ).toHaveLength(3);
   });
 
   it("filters to only specified types", () => {
@@ -52,7 +57,10 @@ describe("filterF1Events", () => {
   it("removes past sessions when showPastEvents=false", () => {
     vi.spyOn(eventStatus, "isEventPast").mockReturnValue(true);
     const events = [makeF1Event(["3"])];
-    const result = filterF1Events(events, { ...defaultFilters, showPastEvents: false });
+    const result = filterF1Events(events, {
+      ...defaultFilters,
+      showPastEvents: false,
+    });
     expect(result).toHaveLength(0);
   });
 });

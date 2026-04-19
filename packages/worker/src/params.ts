@@ -67,7 +67,10 @@ export function parseF1Params(
     : ["1", "2", "3", "4", "6"]; // default: all session types
   const invalid = types.find(t => !VALID_F1_TYPES.has(t));
   if (invalid) {
-    return { ok: false, error: `Invalid F1 session type: '${invalid}'. Valid types: 1, 2, 3, 4, 6` };
+    return {
+      ok: false,
+      error: `Invalid F1 session type: '${invalid}'. Valid types: 1, 2, 3, 4, 6`,
+    };
   }
   return {
     ok: true,

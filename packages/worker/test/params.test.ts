@@ -1,15 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { parseNbaParams, parseNflParams, parseF1Params, parseIplParams } from "../src/params.ts";
+import {
+  parseNbaParams,
+  parseNflParams,
+  parseF1Params,
+  parseIplParams,
+} from "../src/params.ts";
 
 describe("parseNbaParams", () => {
   it("defaults showPastEvents to true", () => {
     const result = parseNbaParams({});
-    expect(result).toEqual({ ok: true, value: { showPastEvents: true, teamIds: [] } });
+    expect(result).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: [] },
+    });
   });
 
   it("parses showPastEvents=false", () => {
     const result = parseNbaParams({ showPastEvents: "false" });
-    expect(result).toMatchObject({ ok: true, value: { showPastEvents: false } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { showPastEvents: false },
+    });
   });
 
   it("returns error for invalid showPastEvents", () => {
@@ -19,7 +30,10 @@ describe("parseNbaParams", () => {
 
   it("parses comma-separated teamIds", () => {
     const result = parseNbaParams({ teamIds: "10,20,30" });
-    expect(result).toMatchObject({ ok: true, value: { teamIds: ["10", "20", "30"] } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { teamIds: ["10", "20", "30"] },
+    });
   });
 
   it("returns empty teamIds for empty string", () => {
@@ -31,7 +45,10 @@ describe("parseNbaParams", () => {
 describe("parseF1Params", () => {
   it("defaults to all session types when types not provided", () => {
     const result = parseF1Params({});
-    expect(result).toMatchObject({ ok: true, value: { types: ["1", "2", "3", "4", "6"] } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { types: ["1", "2", "3", "4", "6"] },
+    });
   });
 
   it("parses valid types", () => {
@@ -53,13 +70,19 @@ describe("parseF1Params", () => {
 describe("parseNflParams", () => {
   it("parses valid params", () => {
     const result = parseNflParams({ showPastEvents: "true", teamIds: "1" });
-    expect(result).toEqual({ ok: true, value: { showPastEvents: true, teamIds: ["1"] } });
+    expect(result).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: ["1"] },
+    });
   });
 });
 
 describe("parseIplParams", () => {
   it("parses valid params", () => {
     const result = parseIplParams({ showPastEvents: "false", teamIds: "abc" });
-    expect(result).toEqual({ ok: true, value: { showPastEvents: false, teamIds: ["abc"] } });
+    expect(result).toEqual({
+      ok: true,
+      value: { showPastEvents: false, teamIds: ["abc"] },
+    });
   });
 });

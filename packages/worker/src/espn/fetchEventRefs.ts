@@ -21,8 +21,9 @@ export async function fetchEventRefsBySeason(
   const pageNumber = pagination?.pageNumber ?? 1;
   const url = `https://sports.core.api.espn.com/v2/sports/${sportId}/leagues/${leagueId}/seasons/${seasonId}/types/${seasonTypeId}/events/?limit=${pageSize}&page=${pageNumber}`;
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`ESPN API error: ${response.status} ${url}`);
-  const data = await response.json() as Record<string, unknown>;
+  if (!response.ok)
+    throw new Error(`ESPN API error: ${response.status} ${url}`);
+  const data = (await response.json()) as Record<string, unknown>;
   return {
     items: data["items"] as EventRef[],
     pageCount: data["pageCount"] as number,

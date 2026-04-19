@@ -55,7 +55,10 @@ function normalizeEvent(event: ScoreboardEvent): IplEvent {
     fullStatus: {
       type: {
         id: competition?.status.type.id ?? "0",
-        state: (competition?.status.type.state ?? "pre") as "pre" | "in" | "post",
+        state: (competition?.status.type.state ?? "pre") as
+          | "pre"
+          | "in"
+          | "post",
         description: competition?.status.type.description ?? "",
         detail: competition?.status.type.detail ?? "",
         shortDetail: competition?.status.type.shortDetail ?? "",
@@ -74,15 +77,19 @@ function normalizeEvent(event: ScoreboardEvent): IplEvent {
       score: c.score,
       logo: c.team.logo,
     })),
-    venue: competition?.venue ? { fullName: competition.venue.fullName } : undefined,
+    venue: competition?.venue
+      ? { fullName: competition.venue.fullName }
+      : undefined,
   };
 }
 
-export async function fetchIplEventsByDate(dateStr: string): Promise<IplEvent[]> {
+export async function fetchIplEventsByDate(
+  dateStr: string
+): Promise<IplEvent[]> {
   const url = `https://site.api.espn.com/apis/site/v2/sports/cricket/${LEAGUE_ID}/scoreboard?dates=${dateStr}`;
   const response = await fetch(url);
   if (!response.ok) return [];
-  const data = await response.json() as { events?: ScoreboardEvent[] };
+  const data = (await response.json()) as { events?: ScoreboardEvent[] };
   return (data.events ?? []).map(normalizeEvent);
 }
 

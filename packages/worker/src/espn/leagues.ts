@@ -13,7 +13,12 @@ async function fetchAllEventsForSport<T>(
   seasonId: string,
   seasonTypeIds: number[]
 ): Promise<T[]> {
-  const refs = await fetchAllEventRefsBySeason(sportId, leagueId, seasonId, seasonTypeIds);
+  const refs = await fetchAllEventRefsBySeason(
+    sportId,
+    leagueId,
+    seasonId,
+    seasonTypeIds
+  );
   return mapWithConcurrency(refs, CONCURRENCY, ref =>
     fetchEventDetails<T>(ref.$ref)
   );
@@ -21,21 +26,27 @@ async function fetchAllEventsForSport<T>(
 
 export async function fetchAllNbaEvents(): Promise<NbaEvent[]> {
   return fetchAllEventsForSport<NbaEvent>(
-    "basketball", "nba", "2026",
+    "basketball",
+    "nba",
+    "2026",
     [1, 2, 5, 3] // preseason, regular, play-in, playoffs
   );
 }
 
 export async function fetchAllNflEvents(): Promise<NflEvent[]> {
   return fetchAllEventsForSport<NflEvent>(
-    "football", "nfl", "2025",
+    "football",
+    "nfl",
+    "2025",
     [1, 2, 3] // preseason, regular, playoffs
   );
 }
 
 export async function fetchAllF1Events(): Promise<F1Event[]> {
   return fetchAllEventsForSport<F1Event>(
-    "racing", "f1", "2026",
+    "racing",
+    "f1",
+    "2026",
     [2] // regular season
   );
 }
