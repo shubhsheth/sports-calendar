@@ -1,5 +1,5 @@
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
-import type { NbaTeam } from "@/types/nba";
+import type { NbaTeam } from "@sports-calendar/shared";
 
 export async function fetchNbaTeams(): Promise<NbaTeam[]> {
   const url =

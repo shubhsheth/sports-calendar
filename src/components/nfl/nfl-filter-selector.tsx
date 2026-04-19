@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { NflEventFilters } from "@/types/nfl";
+import type { NflEventFilters } from "@sports-calendar/shared";
 import {
   Sheet,
   SheetClose,

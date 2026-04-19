@@ -3,7 +3,7 @@ import { createEvents } from "ics";
 import fileDownload from "js-file-download";
 import { CalendarPlus, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { IplEvent, IplEventFilters } from "@/types/ipl";
+import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
 import {
   fetchIplEventsByDate,
   getIplSeasonDates,
