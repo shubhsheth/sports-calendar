@@ -16,10 +16,10 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Verify: `tsc --noEmit` from `packages/shared` passes
   - Files: `packages/shared/package.json`, `packages/shared/tsconfig.json`, `packages/shared/src/index.ts`
 
-- [ ] **A3: Scaffold `packages/worker`**
-  - Acceptance: `packages/worker/package.json` exists with `"name": "@sports-calendar/worker"` and deps `hono`, `ics`, `@sports-calendar/shared`; `packages/worker/tsconfig.json` references CF Workers types (`@cloudflare/workers-types`); `packages/worker/src/index.ts` exists with a minimal Hono app that returns 200
-  - Verify: `npm run dev -w packages/worker` (`wrangler dev`) starts without errors; `curl localhost:8787` returns a response
-  - Files: `packages/worker/package.json`, `packages/worker/tsconfig.json`, `packages/worker/wrangler.toml`, `packages/worker/src/index.ts`
+- [ ] **A3: Scaffold `packages/api`**
+  - Acceptance: `packages/api/package.json` exists with `"name": "@sports-calendar/api"` and deps `hono`, `ics`, `@sports-calendar/shared`; `packages/api/tsconfig.json` references CF Workers types (`@cloudflare/workers-types`); `packages/api/src/index.ts` exists with a minimal Hono app that returns 200
+  - Verify: `npm run dev -w packages/api` (`wrangler dev`) starts without errors; `curl localhost:8787` returns a response
+  - Files: `packages/api/package.json`, `packages/api/tsconfig.json`, `packages/api/wrangler.toml`, `packages/api/src/index.ts`
 
 ---
 
@@ -74,72 +74,72 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 ## Phase D — Worker ESPN Fetchers
 
 - [ ] **D1: `fetchEventRefs.ts` + `mapWithConcurrency`** **(parallel with D2, D3)**
-  - Acceptance: `packages/worker/src/espn/fetchEventRefs.ts` exports `fetchEventRefsBySeason(sportId, leagueId, seasonId, pagination)` returning `{ items: EventRef[], pageCount, pageIndex }`; `mapWithConcurrency` exported from `packages/worker/src/espn/utils.ts`; uses only global `fetch`, no Node.js imports
-  - Verify: `tsc --noEmit` from `packages/worker` passes
-  - Files: `packages/worker/src/espn/fetchEventRefs.ts`, `packages/worker/src/espn/utils.ts`
+  - Acceptance: `packages/api/src/espn/fetchEventRefs.ts` exports `fetchEventRefsBySeason(sportId, leagueId, seasonId, pagination)` returning `{ items: EventRef[], pageCount, pageIndex }`; `mapWithConcurrency` exported from `packages/api/src/espn/utils.ts`; uses only global `fetch`, no Node.js imports
+  - Verify: `tsc --noEmit` from `packages/api` passes
+  - Files: `packages/api/src/espn/fetchEventRefs.ts`, `packages/api/src/espn/utils.ts`
 
 - [ ] **D2: `fetchEventDetails.ts`** **(parallel with D1, D3)**
-  - Acceptance: `packages/worker/src/espn/fetchEventDetails.ts` exports generic `fetchEventDetails<T>(url: string): Promise<T>`; uses only global `fetch`
+  - Acceptance: `packages/api/src/espn/fetchEventDetails.ts` exports generic `fetchEventDetails<T>(url: string): Promise<T>`; uses only global `fetch`
   - Verify: `tsc --noEmit` passes
-  - Files: `packages/worker/src/espn/fetchEventDetails.ts`
+  - Files: `packages/api/src/espn/fetchEventDetails.ts`
 
 - [ ] **D3: `fetchIplEvents.ts`** **(parallel with D1, D2)**
-  - Acceptance: `packages/worker/src/espn/fetchIplEvents.ts` exports `fetchIplEventsByDate(dateStr: string): Promise<IplEvent[]>`; uses only global `fetch`
+  - Acceptance: `packages/api/src/espn/fetchIplEvents.ts` exports `fetchIplEventsByDate(dateStr: string): Promise<IplEvent[]>`; uses only global `fetch`
   - Verify: `tsc --noEmit` passes
-  - Files: `packages/worker/src/espn/fetchIplEvents.ts`
+  - Files: `packages/api/src/espn/fetchIplEvents.ts`
 
 - [ ] **D4: Per-league fetch orchestrators**
-  - Acceptance: `packages/worker/src/espn/leagues.ts` exports `fetchAllNbaEvents()`, `fetchAllNflEvents()`, `fetchAllF1Events()`, `fetchAllIplEvents()` — each fetches all pages/dates and resolves all `$ref` event details using `mapWithConcurrency` with limit 8; return typed arrays using shared types
+  - Acceptance: `packages/api/src/espn/leagues.ts` exports `fetchAllNbaEvents()`, `fetchAllNflEvents()`, `fetchAllF1Events()`, `fetchAllIplEvents()` — each fetches all pages/dates and resolves all `$ref` event details using `mapWithConcurrency` with limit 8; return typed arrays using shared types
   - Verify: `wrangler dev` smoke test — hitting a temporary debug route that calls `fetchAllNflEvents()` returns a non-empty array in the response (remove debug route after verification)
-  - Files: `packages/worker/src/espn/leagues.ts`
+  - Files: `packages/api/src/espn/leagues.ts`
 
 ---
 
 ## Phase E — Worker Core
 
 - [ ] **E1: Query param parsing (`params.ts`)**
-  - Acceptance: `packages/worker/src/params.ts` exports `parseNbaParams`, `parseNflParams`, `parseF1Params`, `parseIplParams`; each returns `ParseResult<T>`; `showPastEvents` defaults to `true` when absent; invalid `types` values for F1 return `{ ok: false }`; empty `teamIds` string is treated as no filter (all teams)
+  - Acceptance: `packages/api/src/params.ts` exports `parseNbaParams`, `parseNflParams`, `parseF1Params`, `parseIplParams`; each returns `ParseResult<T>`; `showPastEvents` defaults to `true` when absent; invalid `types` values for F1 return `{ ok: false }`; empty `teamIds` string is treated as no filter (all teams)
   - Verify: unit tests pass (written in task G1 — at minimum, manually confirm via `wrangler dev` that `?teamIds=&showPastEvents=invalid` returns 400)
-  - Files: `packages/worker/src/params.ts`
+  - Files: `packages/api/src/params.ts`
 
 - [ ] **E2: ICS response helpers**
-  - Acceptance: `packages/worker/src/icsHeaders.ts` exports `icsHeaders()` returning a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, and `Access-Control-Allow-Origin: *`
+  - Acceptance: `packages/api/src/icsHeaders.ts` exports `icsHeaders()` returning a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, and `Access-Control-Allow-Origin: *`
   - Verify: `tsc --noEmit` passes
-  - Files: `packages/worker/src/icsHeaders.ts`
+  - Files: `packages/api/src/icsHeaders.ts`
 
 - [ ] **E3: CF Cache API wrapper (`cache.ts`)**
-  - Acceptance: `packages/worker/src/cache.ts` exports `withCache(request, ttl, fn)` that checks `caches.default`, returns cached response if hit, calls `fn()` and stores result via `waitUntil` on miss; silently skips cache operations when `caches` is undefined (local dev)
+  - Acceptance: `packages/api/src/cache.ts` exports `withCache(request, ttl, fn)` that checks `caches.default`, returns cached response if hit, calls `fn()` and stores result via `waitUntil` on miss; silently skips cache operations when `caches` is undefined (local dev)
   - Verify: `tsc --noEmit` passes; `wrangler dev` does not throw on cache operations
-  - Files: `packages/worker/src/cache.ts`
+  - Files: `packages/api/src/cache.ts`
 
 - [ ] **E4: Hono app entry point and route mounting**
-  - Acceptance: `packages/worker/src/index.ts` creates a Hono app with CORS middleware; mounts `/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics` (stub handlers returning 501 for now); returns 404 for all other paths; `OPTIONS` requests return 204 with CORS headers
+  - Acceptance: `packages/api/src/index.ts` creates a Hono app with CORS middleware; mounts `/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics` (stub handlers returning 501 for now); returns 404 for all other paths; `OPTIONS` requests return 204 with CORS headers
   - Verify: `wrangler dev` — `curl -X OPTIONS localhost:8787/calendar/nba.ics` returns 204 with `Access-Control-Allow-Origin: *`; `curl localhost:8787/unknown` returns 404
-  - Files: `packages/worker/src/index.ts`
+  - Files: `packages/api/src/index.ts`
 
 ---
 
 ## Phase F — Worker Routes
 
 - [ ] **F1: NBA route** **(parallel with F2, F3, F4)**
-  - Acceptance: `packages/worker/src/routes/nba.ts` implements the full handler — param parse → cache check → fetch → filter → transform → ICS → cache store → respond; replaces the 501 stub in `index.ts`
+  - Acceptance: `packages/api/src/routes/nba.ts` implements the full handler — param parse → cache check → fetch → filter → transform → ICS → cache store → respond; replaces the 501 stub in `index.ts`
   - Verify: `curl "localhost:8787/calendar/nba.ics?showPastEvents=true"` returns a response with `Content-Type: text/calendar` containing `BEGIN:VCALENDAR`, at least one `BEGIN:VEVENT`, and `UID:` fields
-  - Files: `packages/worker/src/routes/nba.ts`, `packages/worker/src/index.ts`
+  - Files: `packages/api/src/routes/nba.ts`, `packages/api/src/index.ts`
 
 - [ ] **F2: NFL route** **(parallel with F1, F3, F4)**
   - Acceptance: Same as F1 for NFL endpoint
   - Verify: `curl "localhost:8787/calendar/nfl.ics"` returns valid ICS
-  - Files: `packages/worker/src/routes/nfl.ts`, `packages/worker/src/index.ts`
+  - Files: `packages/api/src/routes/nfl.ts`, `packages/api/src/index.ts`
 
 - [ ] **F3: F1 route** **(parallel with F1, F2, F4)**
   - Acceptance: Same pattern; `?types=2,3` returns only Qualifying and Race sessions; `?types=9` returns 400
   - Verify: `curl "localhost:8787/calendar/f1.ics?types=3"` returns ICS with only Race events; `curl "localhost:8787/calendar/f1.ics?types=99"` returns 400
-  - Files: `packages/worker/src/routes/f1.ts`, `packages/worker/src/index.ts`
+  - Files: `packages/api/src/routes/f1.ts`, `packages/api/src/index.ts`
 
 - [ ] **F4: IPL route** **(parallel with F1, F2, F3)**
   - Acceptance: Same pattern using date-range fetch orchestrator
   - Verify: `curl "localhost:8787/calendar/ipl.ics"` returns valid ICS
-  - Files: `packages/worker/src/routes/ipl.ts`, `packages/worker/src/index.ts`
+  - Files: `packages/api/src/routes/ipl.ts`, `packages/api/src/index.ts`
 
 ---
 
@@ -151,18 +151,18 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Files: `packages/shared/src/filters/*.test.ts`, `packages/shared/src/params.test.ts`
 
 - [ ] **G2: Worker integration tests**
-  - Acceptance: Tests in `packages/worker/test/` use `@cloudflare/vitest-pool-workers` with mocked `fetch` (returning fixture ESPN payloads); assert: (a) each route returns `Content-Type: text/calendar`; (b) ICS body contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`; (c) `?showPastEvents=invalid` returns 400; (d) valid params return 200
-  - Verify: `npm test -w packages/worker` passes
-  - Files: `packages/worker/test/routes/*.test.ts`, `packages/worker/test/fixtures/*.json`
+  - Acceptance: Tests in `packages/api/test/` use `@cloudflare/vitest-pool-workers` with mocked `fetch` (returning fixture ESPN payloads); assert: (a) each route returns `Content-Type: text/calendar`; (b) ICS body contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`; (c) `?showPastEvents=invalid` returns 400; (d) valid params return 200
+  - Verify: `npm test -w packages/api` passes
+  - Files: `packages/api/test/routes/*.test.ts`, `packages/api/test/fixtures/*.json`
 
 ---
 
 ## Phase H — Wrangler Config & Deploy
 
 - [ ] **H1: Finalize `wrangler.toml`**
-  - Acceptance: `packages/worker/wrangler.toml` has `name`, `main`, `compatibility_date`, `compatibility_flags = ["nodejs_compat"]`; no secrets or account IDs hardcoded
-  - Verify: `wrangler deploy --dry-run` from `packages/worker/` completes without config errors
-  - Files: `packages/worker/wrangler.toml`
+  - Acceptance: `packages/api/wrangler.toml` has `name`, `main`, `compatibility_date`, `compatibility_flags = ["nodejs_compat"]`; no secrets or account IDs hardcoded
+  - Verify: `wrangler deploy --dry-run` from `packages/api/` completes without config errors
+  - Files: `packages/api/wrangler.toml`
 
 - [ ] **H2: Deploy to Cloudflare Workers**
   - Acceptance: `wrangler deploy` succeeds; live worker URL (e.g. `https://sports-calendar-worker.{account}.workers.dev`) responds to `/calendar/nba.ics` with valid ICS
@@ -174,11 +174,11 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 ## Phase I — CI/CD
 
 - [ ] **I1: Guard existing GH Pages workflows**
-  - Acceptance: Root `test:run` script and `lint` script do not inadvertently run worker tests or pick up `packages/worker` tsconfig; `deploy.yml` and `preview.yml` pass on CI after the monorepo conversion
+  - Acceptance: Root `test:run` script and `lint` script do not inadvertently run worker tests or pick up `packages/api` tsconfig; `deploy.yml` and `preview.yml` pass on CI after the monorepo conversion
   - Verify: Open a test PR — both `Deploy to GitHub Pages` and `PR Preview` checks go green
   - Files: `package.json`, possibly `.eslintignore` or `eslint.config.*`
 
 - [ ] **I2: Add `deploy-worker.yml` GitHub Actions workflow**
-  - Acceptance: `.github/workflows/deploy-worker.yml` exists; triggers on push to `main` with path filter `packages/worker/**` and `packages/shared/**`; runs `npx wrangler deploy` from `packages/worker/` using `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets
-  - Verify: Merge a change to `packages/worker/` to `main` — the `Deploy Worker` action runs and succeeds; a frontend-only change does not trigger it
+  - Acceptance: `.github/workflows/deploy-worker.yml` exists; triggers on push to `main` with path filter `packages/api/**` and `packages/shared/**`; runs `npx wrangler deploy` from `packages/api/` using `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets
+  - Verify: Merge a change to `packages/api/` to `main` — the `Deploy Worker` action runs and succeeds; a frontend-only change does not trigger it
   - Files: `.github/workflows/deploy-worker.yml`

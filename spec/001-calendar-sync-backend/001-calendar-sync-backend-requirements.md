@@ -68,12 +68,12 @@ Build a lightweight HTTP service (Cloudflare Worker) that generates and serves `
 
 ```
 # From repo root
-Build worker:   npm run build -w packages/worker
-Dev worker:     npm run dev -w packages/worker     # wrangler dev, local port 8787
-Test:           npm test -w packages/worker
+Build worker:   npm run build -w packages/api
+Dev worker:     npm run dev -w packages/api     # wrangler dev, local port 8787
+Test:           npm test -w packages/api
 Test shared:    npm test -w packages/shared
 Lint:           npm run lint
-Deploy:         npm run deploy -w packages/worker  # wrangler deploy
+Deploy:         npm run deploy -w packages/api  # wrangler deploy
 ```
 
 ## Project Structure
@@ -139,7 +139,7 @@ sports-calendar/                   ← repo root
 Match the existing frontend style (TypeScript, named exports). Hono route handlers follow this pattern:
 
 ```typescript
-// packages/worker/src/routes/nba.ts
+// packages/api/src/routes/nba.ts
 import { Hono } from "hono";
 import { filterNbaEvents, transformNbaEventsToIcs } from "@sports-calendar/shared";
 import { parseNbaParams } from "../params";
@@ -178,7 +178,7 @@ type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 - **Framework:** Vitest with `@cloudflare/vitest-pool-workers` for worker tests
 - **Unit tests:** Filter functions, param parsing — colocated as `*.test.ts` in `packages/shared/src/`
-- **Integration tests:** Mock ESPN responses with `msw`, assert valid ICS output per route — in `packages/worker/test/`
+- **Integration tests:** Mock ESPN responses with `msw`, assert valid ICS output per route — in `packages/api/test/`
 - **Coverage target:** 80%+ on filter logic and param parsing; ESPN fetch adapters need smoke tests only
 - **No E2E tests** this iteration
 

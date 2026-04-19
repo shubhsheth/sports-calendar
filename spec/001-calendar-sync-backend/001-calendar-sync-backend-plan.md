@@ -11,11 +11,11 @@ B: packages/shared — types, filters, ICS transforms
    ↓
 C: Frontend wiring (update imports to shared package)
    ↓
-D: packages/worker — ESPN fetchers          ← parallel: D1 D2 D3 can run together
+D: packages/api — ESPN fetchers          ← parallel: D1 D2 D3 can run together
    ↓
-E: packages/worker — core (params, CORS, entry)
+E: packages/api — core (params, CORS, entry)
    ↓
-F: packages/worker — routes                 ← parallel: F1 F2 F3 F4 can run together
+F: packages/api — routes                 ← parallel: F1 F2 F3 F4 can run together
    ↓
 G: Tests
    ↓
@@ -35,10 +35,10 @@ I: CI/CD — guard existing GH Pages workflows + add deploy-worker.yml
 - Root `tsconfig.json`: add path alias `"@sports-calendar/shared": ["packages/shared/src/index.ts"]`
 - Create `packages/shared/package.json` — name `@sports-calendar/shared`, `"main": "src/index.ts"`, no build step (consumed via TypeScript path alias)
 - Create `packages/shared/tsconfig.json` — extends root, references `src/`
-- Create `packages/worker/package.json` — name `@sports-calendar/worker`, deps: `hono`, `ics`, workspace dep on `@sports-calendar/shared`
-- Create `packages/worker/tsconfig.json` — extends root, CF Workers lib types
+- Create `packages/api/package.json` — name `@sports-calendar/api`, deps: `hono`, `ics`, workspace dep on `@sports-calendar/shared`
+- Create `packages/api/tsconfig.json` — extends root, CF Workers lib types
 
-**Verification:** `npm install` from root succeeds; `packages/shared` and `packages/worker` appear in `node_modules/@sports-calendar/`.
+**Verification:** `npm install` from root succeeds; `packages/shared` and `packages/api` appear in `node_modules/@sports-calendar/`.
 
 ---
 
@@ -86,7 +86,7 @@ I: CI/CD — guard existing GH Pages workflows + add deploy-worker.yml
 
 ## Phase D — Worker ESPN Fetchers
 
-**Goal:** Port the ESPN API fetch logic to `packages/worker/src/espn/` using only Web APIs (no Node.js built-ins).
+**Goal:** Port the ESPN API fetch logic to `packages/api/src/espn/` using only Web APIs (no Node.js built-ins).
 
 **Three files, can be written in parallel:**
 
@@ -179,13 +179,13 @@ Each route:
 - Param parsing: valid inputs parse correctly; invalid inputs return `{ ok: false }`
 - Location: colocated `*.test.ts` next to source files
 
-### G2 — `packages/worker` integration tests (`@cloudflare/vitest-pool-workers`)
+### G2 — `packages/api` integration tests (`@cloudflare/vitest-pool-workers`)
 - Mock ESPN API responses with `msw` (or manual `fetch` mock)
 - Assert each route returns `Content-Type: text/calendar`
 - Assert ICS contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`
 - Assert HTTP 400 on bad params, HTTP 200 on valid params
 
-**Verification:** `npm test -w packages/shared` and `npm test -w packages/worker` both pass.
+**Verification:** `npm test -w packages/shared` and `npm test -w packages/api` both pass.
 
 ---
 
@@ -193,7 +193,7 @@ Each route:
 
 **Goal:** `wrangler.toml` configured and worker deployed to CF.
 
-**`packages/worker/wrangler.toml`:**
+**`packages/api/wrangler.toml`:**
 ```toml
 name = "sports-calendar-worker"
 main = "src/index.ts"
@@ -201,7 +201,7 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 ```
 
-**Deploy command:** `npx wrangler deploy` from `packages/worker/`.
+**Deploy command:** `npx wrangler deploy` from `packages/api/`.
 
 **Verification:** Live worker URL responds to `/calendar/nba.ics` with a valid ICS. Subscribe URL works in Apple Calendar.
 
@@ -217,8 +217,8 @@ Both `deploy.yml` and `preview.yml` run `npm run lint`, `npm run test:run`, and 
 
 - Root `package.json` `test:run` script: scope to frontend only, e.g. `vitest run --project frontend`  
   OR add a workspace-aware script: `npm run test:run -w packages/shared && npm run test:run` (frontend stays at root)
-- Root `package.json` `lint` script: confirm it doesn't glob into `packages/worker/` with incompatible tsconfig — add an `.eslintignore` entry or scope the glob if needed
-- `npm run build` at root remains the Vite frontend build; worker has its own `build` scoped to `packages/worker`
+- Root `package.json` `lint` script: confirm it doesn't glob into `packages/api/` with incompatible tsconfig — add an `.eslintignore` entry or scope the glob if needed
+- `npm run build` at root remains the Vite frontend build; worker has its own `build` scoped to `packages/api`
 - No changes to the `peaceiris/actions-gh-pages` or `rossjrw/pr-preview-action` steps — they still publish `./dist`
 
 **Verification:** Both `deploy.yml` and `preview.yml` pass on a test PR after Phase A lands.
@@ -234,7 +234,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/worker/**'
+      - 'packages/api/**'
       - 'packages/shared/**'
 
 jobs:
@@ -248,7 +248,7 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npx wrangler deploy
-        working-directory: packages/worker
+        working-directory: packages/api
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -260,7 +260,7 @@ Path filter ensures the worker only redeploys when worker or shared code changes
 
 **Prerequisites:** `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` must be added as GitHub repository secrets before this workflow runs.
 
-**Verification:** Pushing a change to `packages/worker/` triggers the workflow and the live worker URL serves an updated response.
+**Verification:** Pushing a change to `packages/api/` triggers the workflow and the live worker URL serves an updated response.
 
 ---
 
