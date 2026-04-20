@@ -1,7 +1,8 @@
 import type { F1Event } from "../types/f1";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { translateF1EventTypeAbbr, translateF1EventTypeId, cleanUpF1SponsorNames } from "../lib/f1Helpers";
+import { translateF1EventTypeAbbr, translateF1EventTypeId } from "../lib/translateF1EventType";
+import { cleanUpF1SponsorNames } from "../lib/cleanUpF1SponsorNames";
 import { F1_SESSION_DURATIONS } from "../lib/f1SessionDurations";
 
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {

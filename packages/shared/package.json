@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "dependencies": {
-    "dayjs": "*",
-    "ics": "*"
+    "dayjs": "^1.11.19",
+    "ics": "^3.8.1"
   }
 }
