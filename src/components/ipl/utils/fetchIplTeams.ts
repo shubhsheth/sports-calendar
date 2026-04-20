@@ -1,4 +1,4 @@
-import type { IplTeam } from "@sports-calendar/shared";
+import type { IplTeam } from "@/types/ipl";
 import { IPL_2026 } from "./fetchIplEvents";
 
 function teamLogoUrl(id: string): string {

@@ -1,10 +1,10 @@
-import type { BaseEvent, BaseTeam } from "../../lib/base.ts";
+import type { BaseEvent, BaseTeam } from "./base";
 
-export type NflEvent = BaseEvent & {
-  competitions: NflEventCompetition[];
+export type NbaEvent = BaseEvent & {
+  competitions: NbaEventCompetition[];
 };
 
-export type NflEventCompetition = {
+export type NbaEventCompetition = {
   $ref: string;
   id: string;
   date: string;
@@ -32,10 +32,10 @@ export type NflEventCompetition = {
       state: string;
     };
   };
-  competitors: NflCompetitor[];
+  competitors: NbaCompetitor[];
 };
 
-export type NflCompetitor = {
+export type NbaCompetitor = {
   $ref: string;
   homeAway: "home" | "away";
   winner?: boolean;
@@ -43,14 +43,14 @@ export type NflCompetitor = {
   score?: { $ref: string };
 };
 
-export type NflTeam = BaseTeam & {
+export type NbaTeam = BaseTeam & {
   logos: {
     href: string;
     rel: string[];
   }[];
 };
 
-export type NflEventFilters = {
+export type NbaEventFilters = {
   showPastEvents: boolean;
   teamIds: string[]; // empty = no filter (all teams shown)
 };

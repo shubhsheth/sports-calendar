@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { NbaEventFilters } from "@sports-calendar/shared";
+import type { NbaEventFilters } from "@/types/nba";
 import { FilterPill } from "@/components/base/filter-pill";
 import { fetchNbaTeams } from "./utils/fetchNbaTeams";
 import {

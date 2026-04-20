@@ -1,4 +1,4 @@
-import type { F1Event, F1EventFilters } from "@sports-calendar/shared";
+import type { F1Event, F1EventFilters } from "@/types/f1";
 import { isEventPast } from "@/lib/eventStatus";
 import { F1_SESSION_DURATIONS } from "./f1SessionDurations";
 

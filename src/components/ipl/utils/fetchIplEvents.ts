@@ -1,4 +1,4 @@
-import type { IplEvent } from "@sports-calendar/shared";
+import type { IplEvent } from "@/types/ipl";
 import dayjs from "dayjs";
 
 const LEAGUE_ID = "8048";

@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { analytics } from "@/lib/analytics";
 import { useInView } from "react-intersection-observer";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
-import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
+import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import IplEventCard from "@/components/ipl/ipl-event-card";
 import IplFilterSelector from "@/components/ipl/ipl-filter-selector";
 import { IplFilterPills } from "@/components/ipl/ipl-filter-pills";

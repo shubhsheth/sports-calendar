@@ -1,4 +1,4 @@
-import type { EventRef } from "@sports-calendar/shared";
+import type { EventRef } from "@/types/base";
 
 export type FetchEventRefsResponse = {
   items: EventRef[];

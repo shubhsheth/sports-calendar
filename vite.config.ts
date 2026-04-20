@@ -13,16 +13,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@sports-calendar/shared": path.resolve(
-        __dirname,
-        "./packages/shared/src/index.ts"
-      ),
     },
   },
   test: {
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
 });

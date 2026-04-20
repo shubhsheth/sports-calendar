@@ -1,1 +1,0 @@
-export const NBA_DURATION_MINUTES = 150;

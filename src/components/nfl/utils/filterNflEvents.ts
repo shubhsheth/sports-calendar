@@ -1,4 +1,4 @@
-import type { NflEvent, NflEventFilters } from "@sports-calendar/shared";
+import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import { isEventPast } from "@/lib/eventStatus";
 import { NFL_DURATION_MINUTES } from "./nflEventDuration";
 

@@ -1,4 +1,4 @@
-import type { NbaEvent } from "@sports-calendar/shared";
+import type { NbaEvent } from "@/types/nba";
 import { transformNbaEventsToIcs } from "./transformNbaEventsToIcs";
 
 function makeEvent(overrides: Partial<NbaEvent> = {}): NbaEvent {

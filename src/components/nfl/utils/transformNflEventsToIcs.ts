@@ -1,4 +1,4 @@
-import type { NflEvent } from "@sports-calendar/shared";
+import type { NflEvent } from "@/types/nfl";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 

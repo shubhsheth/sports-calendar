@@ -1,4 +1,4 @@
-import type { IplEvent } from "@sports-calendar/shared";
+import type { IplEvent } from "@/types/ipl";
 import { transformIplEventsToIcs } from "./transformIplEventsToIcs";
 
 function makeEvent(overrides: Partial<IplEvent> = {}): IplEvent {

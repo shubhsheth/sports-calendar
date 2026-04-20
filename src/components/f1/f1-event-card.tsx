@@ -1,11 +1,11 @@
-import type { F1Event, F1EventFilters } from "@sports-calendar/shared";
+import type { F1Event, F1EventFilters } from "@/types/f1";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { translateF1EventTypeAbbr } from "./utils/translateF1EventType";
 import { cleanUpSponsorName } from "./utils/cleanUpSponsorName";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useQuery } from "@tanstack/react-query";
-import type { EventRef } from "@sports-calendar/shared";
+import type { EventRef } from "@/types/base";
 import { filterF1Event } from "./utils/filterF1Events";
 import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
 import { LiveBadge } from "@/components/ui/live-badge";

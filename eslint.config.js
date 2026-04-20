@@ -8,7 +8,7 @@ import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
 
 export default defineConfig([
-  globalIgnores(["dist", "packages/"]),
+  globalIgnores(["dist"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [

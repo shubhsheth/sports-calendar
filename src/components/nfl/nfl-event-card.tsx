@@ -1,11 +1,7 @@
-import type {
-  NflEvent,
-  NflEventFilters,
-  NflTeam,
-} from "@sports-calendar/shared";
+import type { NflEvent, NflEventFilters, NflTeam } from "@/types/nfl";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
-import type { EventRef } from "@sports-calendar/shared";
+import type { EventRef } from "@/types/base";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNflEvent } from "./utils/filterNflEvents";

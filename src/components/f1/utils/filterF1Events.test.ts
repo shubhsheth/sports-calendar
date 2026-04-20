@@ -1,8 +1,4 @@
-import type {
-  F1Event,
-  F1EventCompetition,
-  F1EventFilters,
-} from "@sports-calendar/shared";
+import type { F1Event, F1EventCompetition, F1EventFilters } from "@/types/f1";
 import {
   filterF1Event,
   filterF1Events,

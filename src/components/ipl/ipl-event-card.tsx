@@ -1,4 +1,4 @@
-import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
+import type { IplEvent, IplEventFilters } from "@/types/ipl";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { filterIplEvent } from "./utils/filterIplEvents";

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
-import type { NflEvent, NflEventFilters } from "@sports-calendar/shared";
+import type { NflEvent, NflEventFilters } from "@/types/nfl";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import NflEventCard from "@/components/nfl/nfl-event-card";

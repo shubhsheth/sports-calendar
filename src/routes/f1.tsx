@@ -4,7 +4,7 @@ import F1EventCard from "@/components/f1/f1-event-card";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import F1FilterSelector from "@/components/f1/f1-filter-selector";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
-import type { F1Event, F1EventFilters } from "@sports-calendar/shared";
+import type { F1Event, F1EventFilters } from "@/types/f1";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
 import { filterF1Events } from "@/components/f1/utils/filterF1Events";
