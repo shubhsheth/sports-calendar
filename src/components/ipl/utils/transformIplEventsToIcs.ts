@@ -1,4 +1,4 @@
-import type { IplEvent } from "@/types/ipl";
+import type { IplEvent } from "@sports-calendar/shared";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 

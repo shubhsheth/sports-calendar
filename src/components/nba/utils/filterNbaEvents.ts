@@ -1,4 +1,4 @@
-import type { NbaEvent, NbaEventFilters } from "@/types/nba";
+import type { NbaEvent, NbaEventFilters } from "@sports-calendar/shared";
 import { isEventPast } from "@/lib/eventStatus";
 import { NBA_DURATION_MINUTES } from "./nbaEventDuration";
 

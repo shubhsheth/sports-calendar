@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { IplEventFilters } from "@/types/ipl";
+import type { IplEventFilters } from "@sports-calendar/shared";
 import { FilterPill } from "@/components/base/filter-pill";
 import { fetchIplTeams } from "./utils/fetchIplTeams";
 import {
