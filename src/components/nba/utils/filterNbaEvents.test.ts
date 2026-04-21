@@ -2,7 +2,7 @@ import type {
   NbaEvent,
   NbaEventCompetition,
   NbaEventFilters,
-} from "@/types/nba";
+} from "@sports-calendar/shared";
 import {
   filterNbaEvent,
   filterNbaEvents,

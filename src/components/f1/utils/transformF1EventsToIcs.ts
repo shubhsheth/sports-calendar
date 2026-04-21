@@ -1,4 +1,4 @@
-import type { F1Event } from "@/types/f1";
+import type { F1Event } from "@sports-calendar/shared";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 import { translateF1EventTypeAbbr } from "./translateF1EventType";

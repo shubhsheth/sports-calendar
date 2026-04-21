@@ -1,4 +1,4 @@
-import type { IplEvent, IplEventFilters } from "@/types/ipl";
+import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
 import { isEventPast } from "@/lib/eventStatus";
 import { IPL_DURATION_MINUTES } from "./iplEventDuration";
 
