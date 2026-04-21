@@ -1,5 +1,8 @@
 import type { IplEvent } from "@sports-calendar/shared";
-import { fetchIplEventsByDate, getIplSeasonDates } from "@sports-calendar/shared";
+import {
+  fetchIplEventsByDate,
+  getIplSeasonDates,
+} from "@sports-calendar/shared";
 import { mapWithConcurrency } from "./mapWithConcurrency";
 
 export async function fetchAllIplEvents(): Promise<IplEvent[]> {
