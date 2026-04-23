@@ -1,0 +1,56 @@
+{
+  "events": [
+    {
+      "id": "701",
+      "uid": "s:0~l:8048~e:701",
+      "date": "2099-06-01T10:00:00Z",
+      "name": "Punjab Kings v Mumbai Indians",
+      "shortName": "PBKS v MI",
+      "competitions": [
+        {
+          "date": "2099-06-01T10:00:00Z",
+          "timeValid": true,
+          "status": {
+            "type": {
+              "id": "1",
+              "state": "pre",
+              "description": "Scheduled",
+              "detail": "Scheduled",
+              "shortDetail": "Scheduled"
+            },
+            "summary": "Scheduled"
+          },
+          "venue": { "fullName": "Punjab Cricket Association Stadium" },
+          "competitors": [
+            {
+              "uid": "s:0~l:8048~t:pbks",
+              "order": 1,
+              "homeAway": "home",
+              "winner": false,
+              "score": "",
+              "team": {
+                "id": "pbks",
+                "displayName": "Punjab Kings",
+                "abbreviation": "PBKS",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/pbks.png"
+              }
+            },
+            {
+              "uid": "s:0~l:8048~t:mi",
+              "order": 2,
+              "homeAway": "away",
+              "winner": false,
+              "score": "",
+              "team": {
+                "id": "mi",
+                "displayName": "Mumbai Indians",
+                "abbreviation": "MI",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/mi.png"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
