@@ -1,6 +1,9 @@
 import type { Context } from "hono";
 import { createEvents } from "ics";
-import { filterF1Events, transformF1EventsToIcs } from "@sports-calendar/shared";
+import {
+  filterF1Events,
+  transformF1EventsToIcs,
+} from "@sports-calendar/shared";
 import { fetchAllF1Events } from "../espn/fetchAllF1Events";
 import { parseF1Params } from "../params";
 import { icsHeaders } from "../icsHeaders";

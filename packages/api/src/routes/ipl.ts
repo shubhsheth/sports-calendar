@@ -1,6 +1,9 @@
 import type { Context } from "hono";
 import { createEvents } from "ics";
-import { filterIplEvents, transformIplEventsToIcs } from "@sports-calendar/shared";
+import {
+  filterIplEvents,
+  transformIplEventsToIcs,
+} from "@sports-calendar/shared";
 import { fetchAllIplEvents } from "../espn/fetchAllIplEvents";
 import { parseIplParams } from "../params";
 import { icsHeaders } from "../icsHeaders";
