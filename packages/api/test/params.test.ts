@@ -9,7 +9,10 @@ import {
 describe("parseNbaParams", () => {
   it("defaults showPastEvents to true and teamIds to [] when no query", () => {
     const result = parseNbaParams({});
-    expect(result).toEqual({ ok: true, value: { showPastEvents: true, teamIds: [] } });
+    expect(result).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: [] },
+    });
   });
 
   it("parses showPastEvents=true", () => {
@@ -19,7 +22,10 @@ describe("parseNbaParams", () => {
 
   it("parses showPastEvents=false", () => {
     const result = parseNbaParams({ showPastEvents: "false" });
-    expect(result).toMatchObject({ ok: true, value: { showPastEvents: false } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { showPastEvents: false },
+    });
   });
 
   it("returns error for invalid showPastEvents", () => {
@@ -40,7 +46,10 @@ describe("parseNbaParams", () => {
 
 describe("parseNflParams", () => {
   it("defaults showPastEvents to true and teamIds to []", () => {
-    expect(parseNflParams({})).toEqual({ ok: true, value: { showPastEvents: true, teamIds: [] } });
+    expect(parseNflParams({})).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: [] },
+    });
   });
 
   it("returns error for invalid showPastEvents", () => {
@@ -83,13 +92,19 @@ describe("parseF1Params", () => {
 
   it("parses showPastEvents=false", () => {
     const result = parseF1Params({ showPastEvents: "false" });
-    expect(result).toMatchObject({ ok: true, value: { showPastEvents: false } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { showPastEvents: false },
+    });
   });
 });
 
 describe("parseIplParams", () => {
   it("defaults showPastEvents to true and teamIds to []", () => {
-    expect(parseIplParams({})).toEqual({ ok: true, value: { showPastEvents: true, teamIds: [] } });
+    expect(parseIplParams({})).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: [] },
+    });
   });
 
   it("returns error for invalid showPastEvents", () => {

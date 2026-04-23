@@ -25,7 +25,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ["packages/*/vitest.config.ts"],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

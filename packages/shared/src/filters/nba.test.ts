@@ -28,7 +28,9 @@ function makeCompetition(
   };
 }
 
-function makeEvent(competitions: NbaEventCompetition[] = [makeCompetition()]): NbaEvent {
+function makeEvent(
+  competitions: NbaEventCompetition[] = [makeCompetition()]
+): NbaEvent {
   return {
     $ref: "https://ref",
     id: "evt1",
@@ -50,13 +52,19 @@ describe("filterNbaEvent", () => {
 
   it("keeps future competition when showPastEvents is false", () => {
     const event = makeEvent([makeCompetition({ date: FUTURE_DATE })]);
-    const result = filterNbaEvent(event, { showPastEvents: false, teamIds: [] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).not.toBeNull();
   });
 
   it("removes past competition when showPastEvents is false", () => {
     const event = makeEvent([makeCompetition({ date: PAST_DATE })]);
-    const result = filterNbaEvent(event, { showPastEvents: false, teamIds: [] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).toBeNull();
   });
 
@@ -68,19 +76,28 @@ describe("filterNbaEvent", () => {
 
   it("keeps competition when home team id matches teamIds filter", () => {
     const event = makeEvent();
-    const result = filterNbaEvent(event, { showPastEvents: true, teamIds: ["9"] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: true,
+      teamIds: ["9"],
+    });
     expect(result).not.toBeNull();
   });
 
   it("keeps competition when away team id matches teamIds filter", () => {
     const event = makeEvent();
-    const result = filterNbaEvent(event, { showPastEvents: true, teamIds: ["14"] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: true,
+      teamIds: ["14"],
+    });
     expect(result).not.toBeNull();
   });
 
   it("removes competition when no competitor matches teamIds filter", () => {
     const event = makeEvent();
-    const result = filterNbaEvent(event, { showPastEvents: true, teamIds: ["999"] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: true,
+      teamIds: ["999"],
+    });
     expect(result).toBeNull();
   });
 
@@ -95,7 +112,10 @@ describe("filterNbaEvent", () => {
     const past = makeCompetition({ id: "past", date: PAST_DATE });
     const future = makeCompetition({ id: "future", date: FUTURE_DATE });
     const event = makeEvent([past, future]);
-    const result = filterNbaEvent(event, { showPastEvents: false, teamIds: [] });
+    const result = filterNbaEvent(event, {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).not.toBeNull();
     expect(result!.competitions).toHaveLength(1);
     expect(result!.competitions[0].id).toBe("future");
@@ -105,20 +125,30 @@ describe("filterNbaEvent", () => {
 describe("filterNbaEvents", () => {
   it("drops events where all competitions are filtered out", () => {
     const past = makeEvent([makeCompetition({ date: PAST_DATE })]);
-    const future = makeEvent([makeCompetition({ id: "comp2", date: FUTURE_DATE })]);
+    const future = makeEvent([
+      makeCompetition({ id: "comp2", date: FUTURE_DATE }),
+    ]);
     future.id = "evt2";
-    const result = filterNbaEvents([past, future], { showPastEvents: false, teamIds: [] });
+    const result = filterNbaEvents([past, future], {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("evt2");
   });
 
   it("returns all events when nothing is filtered", () => {
     const events = [makeEvent(), { ...makeEvent(), id: "evt2" }];
-    const result = filterNbaEvents(events, { showPastEvents: true, teamIds: [] });
+    const result = filterNbaEvents(events, {
+      showPastEvents: true,
+      teamIds: [],
+    });
     expect(result).toHaveLength(2);
   });
 
   it("returns empty array when input is empty", () => {
-    expect(filterNbaEvents([], { showPastEvents: true, teamIds: [] })).toEqual([]);
+    expect(filterNbaEvents([], { showPastEvents: true, teamIds: [] })).toEqual(
+      []
+    );
   });
 });

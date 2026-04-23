@@ -28,7 +28,9 @@ function makeCompetition(
   };
 }
 
-function makeEvent(competitions: NflEventCompetition[] = [makeCompetition()]): NflEvent {
+function makeEvent(
+  competitions: NflEventCompetition[] = [makeCompetition()]
+): NflEvent {
   return {
     $ref: "https://ref",
     id: "evt1",
@@ -42,7 +44,10 @@ function makeEvent(competitions: NflEventCompetition[] = [makeCompetition()]): N
 
 describe("filterNflEvent", () => {
   it("returns event unchanged when no filters apply", () => {
-    const result = filterNflEvent(makeEvent(), { showPastEvents: true, teamIds: [] });
+    const result = filterNflEvent(makeEvent(), {
+      showPastEvents: true,
+      teamIds: [],
+    });
     expect(result).not.toBeNull();
     expect(result!.competitions).toHaveLength(1);
   });
@@ -72,22 +77,34 @@ describe("filterNflEvent", () => {
   });
 
   it("keeps competition when home team id matches teamIds filter", () => {
-    const result = filterNflEvent(makeEvent(), { showPastEvents: true, teamIds: ["1"] });
+    const result = filterNflEvent(makeEvent(), {
+      showPastEvents: true,
+      teamIds: ["1"],
+    });
     expect(result).not.toBeNull();
   });
 
   it("keeps competition when away team id matches teamIds filter", () => {
-    const result = filterNflEvent(makeEvent(), { showPastEvents: true, teamIds: ["2"] });
+    const result = filterNflEvent(makeEvent(), {
+      showPastEvents: true,
+      teamIds: ["2"],
+    });
     expect(result).not.toBeNull();
   });
 
   it("removes competition when no competitor matches teamIds filter", () => {
-    const result = filterNflEvent(makeEvent(), { showPastEvents: true, teamIds: ["999"] });
+    const result = filterNflEvent(makeEvent(), {
+      showPastEvents: true,
+      teamIds: ["999"],
+    });
     expect(result).toBeNull();
   });
 
   it("returns all events when teamIds is empty", () => {
-    const result = filterNflEvent(makeEvent(), { showPastEvents: true, teamIds: [] });
+    const result = filterNflEvent(makeEvent(), {
+      showPastEvents: true,
+      teamIds: [],
+    });
     expect(result).not.toBeNull();
   });
 
@@ -96,7 +113,10 @@ describe("filterNflEvent", () => {
       makeCompetition({ id: "past", date: PAST_DATE }),
       makeCompetition({ id: "future", date: FUTURE_DATE }),
     ]);
-    const result = filterNflEvent(event, { showPastEvents: false, teamIds: [] });
+    const result = filterNflEvent(event, {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).not.toBeNull();
     expect(result!.competitions).toHaveLength(1);
     expect(result!.competitions[0].id).toBe("future");
@@ -107,17 +127,24 @@ describe("filterNflEvents", () => {
   it("drops events where all competitions are filtered out", () => {
     const past = makeEvent([makeCompetition({ date: PAST_DATE })]);
     const future = { ...makeEvent(), id: "evt2" };
-    const result = filterNflEvents([past, future], { showPastEvents: false, teamIds: [] });
+    const result = filterNflEvents([past, future], {
+      showPastEvents: false,
+      teamIds: [],
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("evt2");
   });
 
   it("returns all events when nothing is filtered", () => {
     const events = [makeEvent(), { ...makeEvent(), id: "evt2" }];
-    expect(filterNflEvents(events, { showPastEvents: true, teamIds: [] })).toHaveLength(2);
+    expect(
+      filterNflEvents(events, { showPastEvents: true, teamIds: [] })
+    ).toHaveLength(2);
   });
 
   it("returns empty array when input is empty", () => {
-    expect(filterNflEvents([], { showPastEvents: true, teamIds: [] })).toEqual([]);
+    expect(filterNflEvents([], { showPastEvents: true, teamIds: [] })).toEqual(
+      []
+    );
   });
 });
