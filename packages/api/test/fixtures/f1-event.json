@@ -1,0 +1,24 @@
+{
+  "$ref": "https://sports.core.api.espn.com/v2/sports/racing/leagues/f1/events/600125342",
+  "id": "600125342",
+  "date": "2099-07-27T00:00:00Z",
+  "name": "Formula 1 Belgian Grand Prix",
+  "shortName": "Belgian GP",
+  "season": {
+    "$ref": "https://sports.core.api.espn.com/v2/sports/racing/leagues/f1/seasons/2026"
+  },
+  "competitions": [
+    {
+      "$ref": "https://sports.core.api.espn.com/v2/sports/racing/leagues/f1/events/600125342/competitions/600125342",
+      "id": "600125342",
+      "date": "2099-07-27T13:00:00Z",
+      "type": { "id": "3", "text": "Race", "abbreviation": "Race" },
+      "timeValid": true,
+      "recent": false,
+      "bracketAvailable": false,
+      "gameSource": { "id": "1", "description": "ESPN", "state": "full" },
+      "status": { "$ref": "https://status" },
+      "session": 5
+    }
+  ]
+}
