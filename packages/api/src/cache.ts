@@ -1,7 +1,7 @@
 export async function withCache(
   key: string,
   ttl: number,
-  fn: () => Promise<string>,
+  fn: () => Promise<string>
 ): Promise<string> {
   if (typeof caches === "undefined") {
     return fn();
