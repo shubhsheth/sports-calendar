@@ -21,10 +21,10 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Verify: `npm run build -w client` completes without module-not-found errors
   - Files: `client/package.json`, `vite.config.ts`
 
-- [ ] **A4: Delete `packages/api/` and add Supabase config**
-  - Acceptance: `packages/api/` deleted; `config.toml` at repo root with `[functions.calendar] verify_jwt = false`; `functions/import_map.json` created with `{ "imports": { "@sports-calendar/shared": "../../shared/src/index.ts" } }`
+- [ ] **A4: Delete `packages/api/` and initialize Supabase**
+  - Acceptance: `packages/api/` deleted; `supabase init` run from repo root (creates `supabase/config.toml`); `[functions.calendar] verify_jwt = false` added to `supabase/config.toml`; `supabase/functions/deno.json` created with `{ "imports": { "@sports-calendar/shared": "../../../shared/src/index.ts" } }`
   - Verify: `supabase start` initializes without config errors
-  - Files: `config.toml`, `functions/import_map.json`
+  - Files: `supabase/config.toml`, `supabase/functions/deno.json`
 
 ---
 
@@ -83,24 +83,24 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase D — Function-Specific Shared Code
 
-- [ ] **D1: `functions/_shared/params.ts`** **(parallel with D2)**
+- [ ] **D1: `supabase/functions/_shared/params.ts`** **(parallel with D2)**
   - Acceptance: Exports `parseNbaParams`, `parseNflParams`, `parseF1Params`, `parseIplParams`; each returns `ParseResult<T>`; `showPastEvents` defaults to `true` when absent; invalid `types` values for F1 return `{ ok: false }`; empty `teamIds` is treated as no filter
-  - Verify: `deno check functions/_shared/params.ts` passes
-  - Files: `functions/_shared/params.ts`
+  - Verify: `deno check supabase/functions/_shared/params.ts` passes
+  - Files: `supabase/functions/_shared/params.ts`
 
-- [ ] **D2: `functions/_shared/icsHeaders.ts`** **(parallel with D1)**
+- [ ] **D2: `supabase/functions/_shared/icsHeaders.ts`** **(parallel with D1)**
   - Acceptance: Exports `icsHeaders()` returning a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, `Access-Control-Allow-Origin: *`
-  - Verify: `deno check functions/_shared/icsHeaders.ts` passes
-  - Files: `functions/_shared/icsHeaders.ts`
+  - Verify: `deno check supabase/functions/_shared/icsHeaders.ts` passes
+  - Files: `supabase/functions/_shared/icsHeaders.ts`
 
 ---
 
 ## Phase E — Edge Function Entry Point
 
-- [ ] **E1: `functions/calendar/index.ts`**
+- [ ] **E1: `supabase/functions/calendar/index.ts`**
   - Acceptance: Hono app with CORS middleware; all 4 routes mounted (`/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics`); each route: parse params → 400 on failure → fetch ESPN → filter → transform → ICS → respond with `icsHeaders()`; 404 handler for unmatched routes; `Deno.serve(app.fetch)` as entry
   - Verify: `supabase functions serve` — `curl -X OPTIONS localhost:54321/functions/v1/calendar/calendar/nba.ics` returns 204 with `Access-Control-Allow-Origin: *`; `curl localhost:54321/functions/v1/calendar/unknown` returns 404
-  - Files: `functions/calendar/index.ts`
+  - Files: `supabase/functions/calendar/index.ts`
 
 - [ ] **E2: Smoke-test each route**
   - Acceptance: Each of the 4 routes returns `Content-Type: text/calendar` and an ICS body containing `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:` against the live ESPN API via `supabase functions serve`
@@ -111,10 +111,10 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase F — Supabase Config & Deploy
 
-- [ ] **F1: Finalize `config.toml`**
-  - Acceptance: `config.toml` at repo root specifies `[functions.calendar] verify_jwt = false`; no secrets or project refs hardcoded
+- [ ] **F1: Finalize `supabase/config.toml`**
+  - Acceptance: `supabase/config.toml` specifies `[functions.calendar] verify_jwt = false`; no secrets or project refs hardcoded
   - Verify: `supabase start` and `supabase functions serve` both start without config errors
-  - Files: `config.toml`
+  - Files: `supabase/config.toml`
 
 - [ ] **F2: Deploy to Supabase**
   - Acceptance: `supabase functions deploy calendar` succeeds; live function URL responds to `/calendar/nba.ics` with valid ICS
@@ -128,12 +128,12 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 - [ ] **G1: Shared package unit tests**
   - Acceptance: Vitest tests colocated in `shared/src/` cover: (a) `showPastEvents=false` removes past events; (b) `teamIds` filter excludes non-matching teams; (c) empty `teamIds` returns all events; (d) F1 `types` filter includes only specified session types; (e) valid params parse to `{ ok: true }`; (f) invalid `showPastEvents` value parses to `{ ok: false }`; (g) `mapWithConcurrency` respects the concurrency limit; (h) ESPN fetch orchestrators return typed arrays when `fetch` is mocked
   - Verify: `npm test -w shared` passes with all cases green
-  - Files: `shared/src/nba/filters.test.ts`, `shared/src/f1/filters.test.ts`, `shared/src/espn/mapWithConcurrency.test.ts`, `functions/_shared/params.test.ts`
+  - Files: `shared/src/nba/filters.test.ts`, `shared/src/f1/filters.test.ts`, `shared/src/espn/mapWithConcurrency.test.ts`, `supabase/functions/_shared/params.test.ts`
 
 - [ ] **G2: Edge Function integration tests**
-  - Acceptance: Tests in `functions/calendar/` mock ESPN `fetch` responses (fixture JSON); assert: (a) each route returns `Content-Type: text/calendar`; (b) ICS body contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`; (c) `?showPastEvents=invalid` returns 400; (d) valid params return 200
+  - Acceptance: Tests in `supabase/functions/calendar/` mock ESPN `fetch` responses (fixture JSON); assert: (a) each route returns `Content-Type: text/calendar`; (b) ICS body contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`; (c) `?showPastEvents=invalid` returns 400; (d) valid params return 200
   - Verify: Tests pass against local Supabase (`supabase start`)
-  - Files: `functions/calendar/index.test.ts`, `functions/calendar/fixtures/*.json`
+  - Files: `supabase/functions/calendar/index.test.ts`, `supabase/functions/calendar/fixtures/*.json`
 
 ---
 
@@ -145,6 +145,6 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Files: `package.json`, possibly `.eslintignore` or `eslint.config.*`
 
 - [ ] **H2: Add `deploy-functions.yml` GitHub Actions workflow**
-  - Acceptance: `.github/workflows/deploy-functions.yml` exists; triggers on push to `main` with path filter `functions/**` and `shared/**`; runs `supabase functions deploy calendar` using `SUPABASE_ACCESS_TOKEN` secret
-  - Verify: Merge a change to `functions/` to `main` — the `Deploy Edge Functions` action runs and succeeds; a `client/`-only change does not trigger it
+  - Acceptance: `.github/workflows/deploy-functions.yml` exists; triggers on push to `main` with path filter `supabase/functions/**` and `shared/**`; runs `supabase functions deploy calendar` using `SUPABASE_ACCESS_TOKEN` secret
+  - Verify: Merge a change to `supabase/functions/` to `main` — the `Deploy Edge Functions` action runs and succeeds; a `client/`-only change does not trigger it
   - Files: `.github/workflows/deploy-functions.yml`

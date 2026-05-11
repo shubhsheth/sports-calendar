@@ -5,15 +5,15 @@
 Six sequential phases. Each phase must build and pass its verification step before the next begins. Phases D and F contain parallel tracks within them.
 
 ```
-A: Monorepo restructure (src/ → client/, packages/shared/ → shared/)
+A: Monorepo restructure (src/ → client/, packages/shared/ → shared/, supabase init)
    ↓
 B: shared/ — types, filters, ICS transforms, ESPN fetchers (reorganized by league)
    ↓
 C: Frontend wiring (update client/ imports to new shared paths)
    ↓
-D: functions/_shared/ — params, icsHeaders          ← parallel: D1 D2
+D: supabase/functions/_shared/ — params, icsHeaders          ← parallel: D1 D2
    ↓
-E: functions/calendar/index.ts — Hono app entry point
+E: supabase/functions/calendar/index.ts — Hono app entry point
    ↓
 F: Supabase config + deploy
    ↓
@@ -26,18 +26,18 @@ H: CI/CD — guard existing GH Pages workflows + add deploy-functions.yml
 
 ## Phase A — Monorepo Restructure
 
-**Goal:** Flatten the repo from `packages/*` workspaces to root-level `shared/` and `client/`. Add Supabase config.
+**Goal:** Flatten the repo from `packages/*` workspaces to root-level `shared/` and `client/`. Initialize Supabase project.
 
 **Changes:**
 - Root `package.json`: change `"workspaces"` from `["packages/*"]` to `["shared", "client"]`
 - Rename `packages/shared/` → `shared/`; update `shared/package.json` name to `@sports-calendar/shared`
 - Rename `src/` → `client/`; update `client/package.json` name to `@sports-calendar/client`
-- Delete `packages/api/` (replaced by `functions/`)
-- Add `config.toml` at repo root with minimal Supabase project config
+- Delete `packages/api/` (replaced by `supabase/functions/`)
+- Run `supabase init` from repo root — creates `supabase/config.toml` and `supabase/functions/`
 - Update root `tsconfig.json` path alias: `"@sports-calendar/shared": ["shared/src/index.ts"]`
 - Update `vite.config.ts` `resolve.alias` (or `vite-tsconfig-paths`) to point at `shared/src/index.ts`
 
-**Verification:** `npm install` from root succeeds; `shared/` and `client/` appear in `node_modules/@sports-calendar/`.
+**Verification:** `npm install` from root succeeds; `shared/` and `client/` appear in `node_modules/@sports-calendar/`; `supabase start` initializes without errors.
 
 ---
 
@@ -132,7 +132,7 @@ shared/src/
 
 **Two files, can be written in parallel:**
 
-### D1 — `functions/_shared/params.ts`
+### D1 — `supabase/functions/_shared/params.ts`
 Query param parsing and validation for all four leagues. Returns `ParseResult<T>` discriminated union.
 
 ```typescript
@@ -149,10 +149,10 @@ Validation rules:
 - `showPastEvents`: must be `"true"` or `"false"` if present; defaults to `true`
 - `types` (F1): each value must be one of `["1","2","3","4","6"]`
 
-### D2 — `functions/_shared/icsHeaders.ts`
+### D2 — `supabase/functions/_shared/icsHeaders.ts`
 Returns a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, and `Access-Control-Allow-Origin: *`.
 
-**Verification:** `tsc --noEmit` from `functions/` (using Deno check) passes.
+**Verification:** `deno check supabase/functions/_shared/params.ts` passes.
 
 ---
 
@@ -160,7 +160,7 @@ Returns a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `C
 
 **Goal:** Hono app wiring all four routes. No cache logic.
 
-**`functions/calendar/index.ts`:**
+**`supabase/functions/calendar/index.ts`:**
 - Register Hono CORS middleware (`Access-Control-Allow-Origin: *`)
 - Mount routes: `/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics`
 - Each route: parse params → fetch ESPN (from `@sports-calendar/shared`) → filter → transform → ICS → respond
@@ -173,19 +173,19 @@ Returns a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `C
 
 ## Phase F — Supabase Config & Deploy
 
-**Goal:** `config.toml` configured and Edge Function deployed to Supabase.
+**Goal:** `supabase/config.toml` configured and Edge Function deployed to Supabase.
 
-**`config.toml` (repo root):**
+**`supabase/config.toml`** (created by `supabase init`; add the functions section):
 ```toml
 [functions.calendar]
 verify_jwt = false
 ```
 
-**`functions/import_map.json`:**
+**`supabase/functions/deno.json`:**
 ```json
 {
   "imports": {
-    "@sports-calendar/shared": "../../shared/src/index.ts"
+    "@sports-calendar/shared": "../../../shared/src/index.ts"
   }
 }
 ```
@@ -206,7 +206,7 @@ verify_jwt = false
 - ESPN fetch orchestrators: smoke tests with mocked `fetch` return typed arrays
 - Location: colocated `*.test.ts` next to source files (e.g. `shared/src/nba/filters.test.ts`)
 
-### G2 — `functions/calendar/` integration tests
+### G2 — `supabase/functions/calendar/` integration tests
 - Use Supabase local dev (`supabase start`) with mocked ESPN responses
 - Assert each route returns `Content-Type: text/calendar`
 - Assert ICS contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`
@@ -226,13 +226,13 @@ Both `deploy.yml` and `preview.yml` run `npm run lint`, `npm run test:run`, and 
 
 - Root `package.json` `test:run` script: scope to `npm run test:run -w shared && npm run test:run -w client`
 - Root `package.json` `build` script: remains the Vite frontend build scoped to `client/`
-- Confirm lint globs don't pick up `functions/` Deno code
+- Confirm lint globs don't pick up `supabase/functions/` Deno code
 
 **Verification:** Both `deploy.yml` and `preview.yml` pass on a test PR after Phase A lands.
 
 ### H2 — New `deploy-functions.yml` workflow
 
-Triggers on push to `main` when `functions/` or `shared/` changes.
+Triggers on push to `main` when `supabase/functions/` or `shared/` changes.
 
 ```yaml
 name: Deploy Edge Functions
@@ -241,7 +241,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'functions/**'
+      - 'supabase/functions/**'
       - 'shared/**'
 
 jobs:
@@ -272,4 +272,4 @@ jobs:
 | Hono `npm:hono` behaves differently from Node Hono | Low | Hono officially supports Deno; verify CORS middleware and route matching in Phase E. |
 | Frontend build breaks after Phase C import migration | Low | Run `npm run build -w client` as Phase C verification gate before deleting old files. |
 | Supabase Edge Function wall-clock limit (150s) | Low | ESPN full-season fetch is ~10s; well within limit. Monitor after deploy. |
-| Deno can't resolve `@sports-calendar/shared` without import map | Certain | `functions/import_map.json` handles this; Node/Vite resolve via workspace symlinks. |
+| Deno can't resolve `@sports-calendar/shared` without import map | Certain | `supabase/functions/deno.json` handles this; Node/Vite resolve via workspace symlinks. |

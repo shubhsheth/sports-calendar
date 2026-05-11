@@ -83,7 +83,6 @@ This is a monorepo. The existing frontend (`src/`) moves to `client/` and stays 
 ```
 sports-calendar/                   ← repo root
 ├── package.json                   ← workspaces: ["shared", "client"]
-├── config.toml                    ← Supabase project config
 ├── shared/                        ← shared logic (used by both client and functions)
 │   ├── package.json               ← name: @sports-calendar/shared
 │   ├── tsconfig.json
@@ -115,24 +114,26 @@ sports-calendar/                   ← repo root
 │       ├── eventStatus.ts             ← EventStatus enum/type (cross-league)
 │       └── index.ts                   ← re-exports everything
 ├── client/                        ← existing frontend (was src/, unchanged in content)
-├── functions/                     ← Supabase Edge Functions
-│   ├── import_map.json            ← maps @sports-calendar/shared to local path
-│   ├── _shared/                   ← function-only code (never used by client)
-│   │   ├── params.ts              ← parseNbaParams(), parseNflParams() etc.
-│   │   └── icsHeaders.ts          ← icsHeaders()
-│   └── calendar/
-│       └── index.ts               ← Hono app, all 4 routes + Deno.serve
+├── supabase/                      ← Supabase project root (required by CLI)
+│   ├── config.toml                ← Supabase project config
+│   └── functions/                 ← Supabase Edge Functions
+│       ├── deno.json              ← maps @sports-calendar/shared to local path
+│       ├── _shared/               ← function-only code (never used by client)
+│       │   ├── params.ts          ← parseNbaParams(), parseNflParams() etc.
+│       │   └── icsHeaders.ts      ← icsHeaders()
+│       └── calendar/
+│           └── index.ts           ← Hono app, all 4 routes + Deno.serve
 └── ...
 ```
 
-`functions/` is Deno code and is not an npm workspace. Node workspaces are `["shared", "client"]` only.
+`supabase/functions/` is Deno code and is not an npm workspace. Node workspaces are `["shared", "client"]` only.
 
 ## Code Style
 
 Match the existing frontend style (TypeScript, named exports). Hono route handlers in the Edge Function follow this pattern:
 
 ```typescript
-// functions/calendar/index.ts
+// supabase/functions/calendar/index.ts
 import { Hono } from 'npm:hono'
 import { createEvents } from 'npm:ics'
 import { filterNbaEvents, transformNbaEventsToIcs, fetchAllNbaEvents } from '@sports-calendar/shared'
@@ -162,24 +163,24 @@ Param parsing returns a discriminated union:
 type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 ```
 
-The `import_map.json` maps the shared package name for Deno (npm workspaces handle this automatically for Node/Vite):
+The `deno.json` maps the shared package name for Deno (npm workspaces handle this automatically for Node/Vite):
 
 ```json
-{ "imports": { "@sports-calendar/shared": "../../shared/src/index.ts" } }
+{ "imports": { "@sports-calendar/shared": "../../../shared/src/index.ts" } }
 ```
 
 ## Testing Strategy
 
 - **Framework:** Vitest for shared package; Supabase local dev (`supabase start`) for integration tests
 - **Unit tests:** Filter functions, param parsing, ICS transforms — colocated as `*.test.ts` in `shared/src/`
-- **Integration tests:** Mock ESPN responses, assert valid ICS output per route — in `functions/calendar/`
+- **Integration tests:** Mock ESPN responses, assert valid ICS output per route — in `supabase/functions/calendar/`
 - **Coverage target:** 80%+ on filter logic and param parsing; ESPN fetch adapters need smoke tests only
 - **No E2E tests** this iteration
 
 ## Boundaries
 
 - **Always:** Validate and sanitize all query params before use; never interpolate raw user strings into ESPN URLs beyond known numeric/string IDs
-- **Ask first:** Adding new leagues, changing the deployment platform, adding a `config.toml` secret
+- **Ask first:** Adding new leagues, changing the deployment platform, adding a `supabase/config.toml` secret
 - **Never:** Commit Supabase service role keys or API tokens; bypass ESPN concurrency limits (keep cap at 8)
 
 ## Success Criteria
