@@ -9,19 +9,26 @@ export default defineConfig({
   base:
     process.env.VITE_BASE_PATH ??
     (process.env.NODE_ENV === "production" ? "/sports-calendar/" : "/"),
-  plugins: [tanstackRouter(), react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({
+      routesDirectory: "./client/routes",
+      generatedRouteTree: "./client/routeTree.gen.ts",
+    }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./client"),
       "@sports-calendar/shared": path.resolve(
         __dirname,
-        "./packages/shared/src/index.ts"
+        "./shared/src/index.ts"
       ),
     },
   },
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./client/test/setup.ts"],
   },
 });

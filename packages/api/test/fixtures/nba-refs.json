@@ -1,9 +1,0 @@
-{
-  "items": [
-    {
-      "$ref": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/401767890"
-    }
-  ],
-  "pageCount": 1,
-  "pageIndex": 1
-}
