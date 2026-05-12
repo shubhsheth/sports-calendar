@@ -2,120 +2,137 @@
 
 ## Overview
 
-Six sequential phases. Each phase must build and pass its verification step before the next begins. Phases D–F (ESPN fetchers, worker core, routes) contain parallel tracks within them.
+Six sequential phases. Each phase must build and pass its verification step before the next begins. Phases D and F contain parallel tracks within them.
 
 ```
-A: Monorepo foundation
+A: Monorepo restructure (src/ → client/, packages/shared/ → shared/, supabase init)
    ↓
-B: packages/shared — types, filters, ICS transforms
+B: shared/ — types, filters, ICS transforms, ESPN fetchers (reorganized by league)
    ↓
-C: Frontend wiring (update imports to shared package)
+C: Frontend wiring (update client/ imports to new shared paths)
    ↓
-D: packages/api — ESPN fetchers          ← parallel: D1 D2 D3 can run together
+D: supabase/functions/_shared/ — params, icsHeaders          ← parallel: D1 D2
    ↓
-E: packages/api — core (params, CORS, entry)
+E: supabase/functions/calendar/index.ts — Hono app entry point
    ↓
-F: packages/api — routes                 ← parallel: F1 F2 F3 F4 can run together
+F: Supabase config + deploy
    ↓
 G: Tests
    ↓
-H: Wrangler config + deploy
-   ↓
-I: CI/CD — guard existing GH Pages workflows + add deploy-worker.yml
+H: CI/CD — guard existing GH Pages workflows + add deploy-functions.yml
 ```
 
 ---
 
-## Phase A — Monorepo Foundation
+## Phase A — Monorepo Restructure
 
-**Goal:** Make the repo an npm workspace so `packages/*` are resolvable as local packages.
+**Goal:** Flatten the repo from `packages/*` workspaces to root-level `shared/` and `client/`. Initialize Supabase project.
 
 **Changes:**
-- Root `package.json`: add `"workspaces": ["packages/*"]`
-- Root `tsconfig.json`: add path alias `"@sports-calendar/shared": ["packages/shared/src/index.ts"]`
-- Create `packages/shared/package.json` — name `@sports-calendar/shared`, `"main": "src/index.ts"`, no build step (consumed via TypeScript path alias)
-- Create `packages/shared/tsconfig.json` — extends root, references `src/`
-- Create `packages/api/package.json` — name `@sports-calendar/api`, deps: `hono`, `ics`, workspace dep on `@sports-calendar/shared`
-- Create `packages/api/tsconfig.json` — extends root, CF Workers lib types
+- Root `package.json`: change `"workspaces"` from `["packages/*"]` to `["shared", "client"]`
+- Rename `packages/shared/` → `shared/`; update `shared/package.json` name to `@sports-calendar/shared`
+- Rename `src/` → `client/`; update `client/package.json` name to `@sports-calendar/client`
+- Delete `packages/api/` (replaced by `supabase/functions/`)
+- Run `supabase init` from repo root — creates `supabase/config.toml` and `supabase/functions/`
+- Update root `tsconfig.json` path alias: `"@sports-calendar/shared": ["shared/src/index.ts"]`
+- Update `vite.config.ts` `resolve.alias` (or `vite-tsconfig-paths`) to point at `shared/src/index.ts`
 
-**Verification:** `npm install` from root succeeds; `packages/shared` and `packages/api` appear in `node_modules/@sports-calendar/`.
+**Verification:** `npm install` from root succeeds; `shared/` and `client/` appear in `node_modules/@sports-calendar/`; `supabase start` initializes without errors.
 
 ---
 
-## Phase B — Shared Package
+## Phase B — Shared Package (league-based layout)
 
-**Goal:** Extract all league-agnostic logic that both the frontend and worker will use.
+**Goal:** Reorganize `shared/src/` by league and extend it to include ESPN fetchers. Each league directory owns its types, filters, ESPN fetch orchestrator, and ICS transform.
 
-**What moves to `packages/shared/src/`:**
+**New `shared/src/` layout:**
 
-| Source (frontend) | Destination (shared) | Notes |
+```
+shared/src/
+├── espn/
+│   ├── fetchEventRefs.ts      ← adapted from src/api/espn/fetchEventRefs.ts
+│   ├── fetchEventDetails.ts   ← adapted from src/api/espn/fetchEventDetails.ts
+│   └── mapWithConcurrency.ts  ← extracted from download-ical-button.tsx
+├── nba/
+│   ├── types.ts               ← moved from src/types/nba.ts
+│   ├── filters.ts             ← moved from src/components/nba/utils/filterNbaEvents.ts
+│   ├── fetch.ts               ← fetchAllNbaEvents() (new — pages through season types [2,3])
+│   └── transform.ts           ← moved from src/components/nba/utils/transformNbaEventsToIcs.ts
+├── nfl/
+│   ├── types.ts
+│   ├── filters.ts
+│   ├── fetch.ts               ← fetchAllNflEvents() (season types [1,2,3])
+│   └── transform.ts
+├── f1/
+│   ├── types.ts               ← merged from src/types/f1.ts + translateF1* helpers
+│   ├── filters.ts
+│   ├── fetch.ts               ← fetchAllF1Events() (season type [2])
+│   └── transform.ts
+├── ipl/
+│   ├── types.ts
+│   ├── filters.ts
+│   ├── fetch.ts               ← fetchAllIplEvents() (date range 2026-03-28–2026-06-01)
+│   └── transform.ts
+├── eventStatus.ts             ← moved from src/lib/eventStatus.ts
+└── index.ts                   ← re-exports everything
+```
+
+**Migration table (from original `packages/shared/`):**
+
+| Source | Destination | Notes |
 |---|---|---|
-| `src/types/base.ts` | `types/base.ts` | Verbatim copy |
-| `src/types/nba.ts` | `types/nba.ts` | Verbatim copy |
-| `src/types/nfl.ts` | `types/nfl.ts` | Verbatim copy |
-| `src/types/f1.ts` | `types/f1.ts` | Verbatim copy |
-| `src/types/ipl.ts` | `types/ipl.ts` | Verbatim copy |
-| `src/lib/eventStatus.ts` | `lib/eventStatus.ts` | Verbatim copy |
-| `src/components/*/utils/*Duration.ts` | `lib/durations.ts` | Consolidate all 4 into one file |
-| `src/components/f1/utils/translateF1*.ts` | `lib/f1Helpers.ts` | Verbatim copy |
-| `src/components/*/utils/filter*.ts` | `filters/nba.ts` etc. | Update import paths only |
-| `src/components/*/utils/transform*ToIcs.ts` | `ics/nba.ts` etc. | Update import paths only |
+| `src/types/base.ts` | `eventStatus.ts` + inline in league types | Base types absorbed |
+| `src/types/nba.ts` | `nba/types.ts` | Verbatim copy |
+| `src/types/nfl.ts` | `nfl/types.ts` | Verbatim copy |
+| `src/types/f1.ts` | `f1/types.ts` | Verbatim copy |
+| `src/types/ipl.ts` | `ipl/types.ts` | Verbatim copy |
+| `src/lib/eventStatus.ts` | `eventStatus.ts` | Verbatim copy |
+| `src/components/*/utils/filter*.ts` | `<league>/filters.ts` | Update import paths |
+| `src/components/*/utils/transform*ToIcs.ts` | `<league>/transform.ts` | Update import paths; add `uid` + `description` |
+| `src/components/*/utils/*Duration.ts` | `<league>/transform.ts` | Inline duration constants where used |
+| `src/components/f1/utils/translateF1*.ts` | `f1/types.ts` | Merge into types file |
+| `src/api/espn/fetchEventRefs.ts` | `espn/fetchEventRefs.ts` | Adapt to standard `fetch` (no CF-specific API) |
+| `src/api/espn/fetchEventDetails.ts` | `espn/fetchEventDetails.ts` | Adapt to standard `fetch` |
+| `mapWithConcurrency` (download-ical-button.tsx) | `espn/mapWithConcurrency.ts` | Extract to own file |
+| `src/components/*/utils/fetchIplEvents.ts` | `ipl/fetch.ts` | Adapt, rename to `fetchAllIplEvents()` |
+| *(new)* | `nba/fetch.ts` | `fetchAllNbaEvents()` — pages + resolves refs |
+| *(new)* | `nfl/fetch.ts` | `fetchAllNflEvents()` |
+| *(new)* | `f1/fetch.ts` | `fetchAllF1Events()` |
 
-**`packages/shared/src/index.ts`** re-exports everything.
+**`shared/src/index.ts`** re-exports all types, filters, ICS transforms, fetch orchestrators, espn utilities, and `eventStatus`.
 
 **Important:** Frontend source files are **not deleted** in this phase — both paths coexist until Phase C confirms imports work.
 
-**Verification:** `tsc --noEmit` from `packages/shared` passes with zero errors.
+**FR-5 additions** (add in `<league>/transform.ts`):
+- `uid`: `"{event.id}@sports-calendar"`
+- `description`: `"{league}: {teams} — {status}"` string
+
+**Verification:** `tsc --noEmit` from `shared/` passes with zero errors.
 
 ---
 
 ## Phase C — Frontend Wiring
 
-**Goal:** Frontend imports types and shared logic from `@sports-calendar/shared` rather than local paths, confirming the shared package is a drop-in replacement.
+**Goal:** `client/` imports types and shared logic from `@sports-calendar/shared` (new league-based paths), confirming the shared package is a drop-in replacement.
 
 **Changes:**
-- Update `vite.config.ts` to resolve `@sports-calendar/shared` via the TypeScript path alias (already in tsconfig, Vite needs `resolve.alias` or `vite-tsconfig-paths` plugin)
-- Update imports in `src/components/*/utils/filter*.ts` → import types from `@sports-calendar/shared`
-- Update imports in `src/components/*/utils/transform*ToIcs.ts` → same
-- Update imports in `src/routes/*.tsx` as needed
-- Delete the now-redundant local copies in `src/types/` **only after** confirming the build passes
+- Update imports in `client/src/components/*/utils/filter*.ts` → import types from `@sports-calendar/shared`
+- Update imports in `client/src/components/*/utils/transform*ToIcs.ts` → same
+- Update imports in `client/src/routes/*.tsx` as needed
+- Update imports in `client/src/api/espn/` to use `@sports-calendar/shared` espn utilities (or keep local copies if frontend fetch patterns diverge)
+- Delete the now-redundant local copies in `client/src/types/` **only after** confirming the build passes
 
-**Verification:** `npm run build` (Vite) succeeds with zero TypeScript errors. App loads in browser (`npm run dev`).
-
----
-
-## Phase D — Worker ESPN Fetchers
-
-**Goal:** Port the ESPN API fetch logic to `packages/api/src/espn/` using only Web APIs (no Node.js built-ins).
-
-**Three files, can be written in parallel:**
-
-### D1 — `fetchEventRefs.ts`
-Adapts `src/api/espn/fetchEventRefs.ts`. Uses global `fetch`. Returns `{ items: EventRef[], pageCount, pageIndex }`. Includes `mapWithConcurrency` utility (copied from `download-ical-button.tsx`).
-
-### D2 — `fetchEventDetails.ts`
-Adapts `src/api/espn/fetchEventDetails.ts`. Generic `fetchEventDetails<T>(url: string): Promise<T>`.
-
-### D3 — `fetchIplEvents.ts`
-Adapts `src/components/ipl/utils/fetchIplEvents.ts`. Iterates date range 2026-03-28 to 2026-06-01, fetching one day at a time with concurrency cap 8.
-
-**Per-league fetch orchestrators** (also in `espn/`):
-- `fetchAllNbaEvents()` — pages through all season type IDs [2, 3], fetches all event details
-- `fetchAllNflEvents()` — season type IDs [1, 2, 3]
-- `fetchAllF1Events()` — season type ID [2]
-- `fetchAllIplEvents()` — date range iteration
-
-**Risk:** ESPN APIs may behave differently when called from CF edge IPs. Mitigation: verify in `wrangler dev` with real ESPN calls before writing route handlers.
-
-**Verification:** Manual `wrangler dev` test — calling each fetch orchestrator returns a non-empty array of typed events.
+**Verification:** `npm run build -w client` succeeds with zero TypeScript errors. App loads in browser.
 
 ---
 
-## Phase E — Worker Core
+## Phase D — Function-Specific Shared Code
 
-**Goal:** Shared infrastructure all routes depend on.
+**Goal:** Two files that are HTTP handler concerns only — never imported by `client/`.
 
-### E1 — `params.ts`
+**Two files, can be written in parallel:**
+
+### D1 — `supabase/functions/_shared/params.ts`
 Query param parsing and validation for all four leagues. Returns `ParseResult<T>` discriminated union.
 
 ```typescript
@@ -128,45 +145,54 @@ parseIplParams(query)  // → ParseResult<IplEventFilters>
 ```
 
 Validation rules:
-- `teamIds`: comma-separated; each segment must be a non-empty string (not validated as numeric — ESPN IDs are strings)
+- `teamIds`: comma-separated; each segment must be a non-empty string; empty string treated as no filter
 - `showPastEvents`: must be `"true"` or `"false"` if present; defaults to `true`
 - `types` (F1): each value must be one of `["1","2","3","4","6"]`
 
-### E2 — `index.ts` (Hono app entry)
-- Register Hono CORS middleware (`Access-Control-Allow-Origin: *`)
-- Mount routes: `/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics`
-- 404 handler for unmatched routes
+### D2 — `supabase/functions/_shared/icsHeaders.ts`
+Returns a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, and `Access-Control-Allow-Origin: *`.
 
-### E3 — `cache.ts` (CF Cache API wrapper)
-Thin wrapper around `caches.default` that gracefully no-ops when running outside CF (local Vitest, non-CF environments):
-
-```typescript
-async function withCache(key: string, ttl: number, fn: () => Promise<string>): Promise<string>
-```
-
-**Verification:** `wrangler dev` responds to `OPTIONS /calendar/nba.ics` with 204 and CORS headers. Unknown routes return 404.
+**Verification:** `deno check supabase/functions/_shared/params.ts` passes.
 
 ---
 
-## Phase F — Worker Routes
+## Phase E — Edge Function Entry Point
 
-**Goal:** Four route handlers, each following the same pattern. Can be implemented in parallel after E is complete.
+**Goal:** Hono app wiring all four routes. No cache logic.
 
-Each route:
-1. Parses + validates query params → 400 on failure
-2. Checks CF Cache API for a cached response
-3. Fetches all events from ESPN
-4. Filters using `@sports-calendar/shared` filter function
-5. Transforms using `@sports-calendar/shared` ICS transform function
-6. Calls `createEvents()` from `ics` package → 500 on failure
-7. Builds response with `icsHeaders()` (`Content-Type: text/calendar`, `Cache-Control: public, max-age=3600`, `REFRESH-INTERVAL: PT1H`)
-8. Stores in CF Cache API via `waitUntil`
+**`supabase/functions/calendar/index.ts`:**
+- Register Hono CORS middleware (`Access-Control-Allow-Origin: *`)
+- Mount routes: `/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics`
+- Each route: parse params → fetch ESPN (from `@sports-calendar/shared`) → filter → transform → ICS → respond
+- 404 handler for unmatched routes
+- `Deno.serve(app.fetch)` as entry point (replaces CF Worker `export default { fetch }`)
 
-**FR-5 additions** (not currently in frontend transforms — add in the shared `ics/` functions):
-- `uid`: `"{eventId}@sports-calendar"`
-- `description`: league + teams + status string
+**Verification:** `supabase functions serve` — `OPTIONS /calendar/nba.ics` returns 204 with CORS headers. Unknown routes return 404.
 
-**Verification:** `wrangler dev` — each route returns a syntactically valid `.ics` file (validate with [ical.tools](https://ical.tools) or `node-ical` parse check in tests).
+---
+
+## Phase F — Supabase Config & Deploy
+
+**Goal:** `supabase/config.toml` configured and Edge Function deployed to Supabase.
+
+**`supabase/config.toml`** (created by `supabase init`; add the functions section):
+```toml
+[functions.calendar]
+verify_jwt = false
+```
+
+**`supabase/functions/deno.json`:**
+```json
+{
+  "imports": {
+    "@sports-calendar/shared": "../../../shared/src/index.ts"
+  }
+}
+```
+
+**Deploy command:** `supabase functions deploy calendar` from repo root.
+
+**Verification:** Live function URL responds to `/calendar/nba.ics` with a valid ICS. Subscribe URL works in Apple Calendar.
 
 ---
 
@@ -174,93 +200,66 @@ Each route:
 
 **Goal:** Verify filter logic correctness and route output validity.
 
-### G1 — `packages/shared` unit tests (Vitest)
-- Filter functions: test `showPastEvents=false` removes past events; `teamIds` filters correctly; empty `teamIds` returns all; F1 `types` filter works
-- Param parsing: valid inputs parse correctly; invalid inputs return `{ ok: false }`
-- Location: colocated `*.test.ts` next to source files
+### G1 — `shared/` unit tests (Vitest)
+- Filter functions: `showPastEvents=false` removes past events; `teamIds` filters correctly; empty `teamIds` returns all; F1 `types` filter works
+- Param parsing: valid inputs parse to `{ ok: true }`; invalid inputs return `{ ok: false }`
+- ESPN fetch orchestrators: smoke tests with mocked `fetch` return typed arrays
+- Location: colocated `*.test.ts` next to source files (e.g. `shared/src/nba/filters.test.ts`)
 
-### G2 — `packages/api` integration tests (`@cloudflare/vitest-pool-workers`)
-- Mock ESPN API responses with `msw` (or manual `fetch` mock)
+### G2 — `supabase/functions/calendar/` integration tests
+- Use Supabase local dev (`supabase start`) with mocked ESPN responses
 - Assert each route returns `Content-Type: text/calendar`
 - Assert ICS contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`
 - Assert HTTP 400 on bad params, HTTP 200 on valid params
 
-**Verification:** `npm test -w packages/shared` and `npm test -w packages/api` both pass.
+**Verification:** `npm test -w shared` passes; function integration tests pass against local Supabase.
 
 ---
 
-## Phase H — Wrangler Config & Deploy
+## Phase H — CI/CD: GitHub Actions
 
-**Goal:** `wrangler.toml` configured and worker deployed to CF.
+**Goal:** Existing GitHub Pages workflows keep working after the monorepo restructure, and the Supabase Edge Function deploys automatically on push to `main`.
 
-**`packages/api/wrangler.toml`:**
-```toml
-name = "sports-calendar-worker"
-main = "src/index.ts"
-compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
-```
+### H1 — Guard existing GH Pages workflows
 
-**Deploy command:** `npx wrangler deploy` from `packages/api/`.
+Both `deploy.yml` and `preview.yml` run `npm run lint`, `npm run test:run`, and `npm run build` at the workspace root. After Phase A these should scope to `client/` and `shared/` only.
 
-**Verification:** Live worker URL responds to `/calendar/nba.ics` with a valid ICS. Subscribe URL works in Apple Calendar.
-
----
-
-## Phase I — CI/CD: GitHub Actions
-
-**Goal:** Existing GitHub Pages workflows keep working after the monorepo conversion, and the CF Worker deploys automatically on push to `main`.
-
-### I1 — Guard existing workflows against monorepo
-
-Both `deploy.yml` and `preview.yml` run `npm run lint`, `npm run test:run`, and `npm run build` at the workspace root. After Phase A these commands could inadvertently include worker code (which needs `@cloudflare/vitest-pool-workers`, a different test runner). Changes needed:
-
-- Root `package.json` `test:run` script: scope to frontend only, e.g. `vitest run --project frontend`  
-  OR add a workspace-aware script: `npm run test:run -w packages/shared && npm run test:run` (frontend stays at root)
-- Root `package.json` `lint` script: confirm it doesn't glob into `packages/api/` with incompatible tsconfig — add an `.eslintignore` entry or scope the glob if needed
-- `npm run build` at root remains the Vite frontend build; worker has its own `build` scoped to `packages/api`
-- No changes to the `peaceiris/actions-gh-pages` or `rossjrw/pr-preview-action` steps — they still publish `./dist`
+- Root `package.json` `test:run` script: scope to `npm run test:run -w shared && npm run test:run -w client`
+- Root `package.json` `build` script: remains the Vite frontend build scoped to `client/`
+- Confirm lint globs don't pick up `supabase/functions/` Deno code
 
 **Verification:** Both `deploy.yml` and `preview.yml` pass on a test PR after Phase A lands.
 
-### I2 — New `deploy-worker.yml` workflow
+### H2 — New `deploy-functions.yml` workflow
 
-Triggers on push to `main` (after `deploy.yml` succeeds, or in parallel — worker deploy is independent of GitHub Pages).
+Triggers on push to `main` when `supabase/functions/` or `shared/` changes.
 
 ```yaml
-name: Deploy Worker
+name: Deploy Edge Functions
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/api/**'
-      - 'packages/shared/**'
+      - 'supabase/functions/**'
+      - 'shared/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: supabase/setup-cli@v1
         with:
-          node-version: 20
-          cache: "npm"
-      - run: npm install
-      - run: npx wrangler deploy
-        working-directory: packages/api
+          version: latest
+      - run: supabase functions deploy calendar
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 ```
 
-Path filter ensures the worker only redeploys when worker or shared code changes — a frontend-only commit won't trigger it.
+**Prerequisites:** `SUPABASE_ACCESS_TOKEN` must be added as a GitHub repository secret.
 
-**No PR preview for the worker.** The existing `preview.yml` deploys the frontend to a per-PR GitHub Pages subdirectory. The CF Worker has no equivalent — it deploys to production on merge to `main` only. PR preview frontends will continue to hit the production worker URL.
-
-**Prerequisites:** `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` must be added as GitHub repository secrets before this workflow runs.
-
-**Verification:** Pushing a change to `packages/api/` triggers the workflow and the live worker URL serves an updated response.
+**Verification:** Pushing a change to `functions/` triggers the workflow and the live function URL serves an updated response.
 
 ---
 
@@ -268,8 +267,9 @@ Path filter ensures the worker only redeploys when worker or shared code changes
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| `ics` package uses Node.js built-ins incompatible with CF Workers | Low | `ics` is pure JS; verify in Phase D with `wrangler dev`. Fall back to hand-rolled RFC 5545 string if needed. |
-| ESPN APIs blocked from CF edge IPs | Low | Test in Phase D with real `wrangler dev` calls. Can proxy via a public CORS proxy as fallback. |
-| CF Cache API unavailable in local dev | Certain | Phase E3 wrapper silently skips cache when `caches` is unavailable — confirmed CF behavior. |
-| Worker CPU time exceeded (30ms free-tier limit) | Medium | Network I/O doesn't count against CPU time. Actual computation (filter + ICS gen) is under 1ms. Monitor after deploy. |
-| Frontend build breaks after Phase C import migration | Low | Run `npm run build` as the Phase C verification gate before deleting old files. |
+| `ics` npm package incompatible with Deno's `npm:` import | Low | `ics` is pure JS; verify with `deno run` locally before building routes. |
+| ESPN APIs blocked from Supabase edge IPs | Low | Test in `supabase functions serve` with real ESPN calls during Phase E. |
+| Hono `npm:hono` behaves differently from Node Hono | Low | Hono officially supports Deno; verify CORS middleware and route matching in Phase E. |
+| Frontend build breaks after Phase C import migration | Low | Run `npm run build -w client` as Phase C verification gate before deleting old files. |
+| Supabase Edge Function wall-clock limit (150s) | Low | ESPN full-season fetch is ~10s; well within limit. Monitor after deploy. |
+| Deno can't resolve `@sports-calendar/shared` without import map | Certain | `supabase/functions/deno.json` handles this; Node/Vite resolve via workspace symlinks. |
