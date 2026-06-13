@@ -1,4 +1,7 @@
-import { fetchEventRefsBySeason, type EventRef } from "../espn/fetchEventRefs.ts";
+import {
+  fetchEventRefsBySeason,
+  type EventRef,
+} from "../espn/fetchEventRefs.ts";
 import { fetchEventDetails } from "../espn/fetchEventDetails.ts";
 import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
 import type { F1Event } from "./types.ts";
