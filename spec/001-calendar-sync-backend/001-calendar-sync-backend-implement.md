@@ -130,9 +130,9 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Verify: `npm test -w shared` passes (cases a–d, g, h). NOTE: `params.test.ts` (cases e, f) lives under `supabase/functions/_shared/` (Deno function code, outside the `shared` workspace), so it runs via the root `npm run test:run` — vitest auto-collects it. Both suites green.
   - Files: `shared/src/nba/filters.test.ts`, `shared/src/f1/filters.test.ts`, `shared/src/espn/mapWithConcurrency.test.ts`, `supabase/functions/_shared/params.test.ts`
 
-- [ ] **G2: Edge Function integration tests**
+- [x] **G2: Edge Function integration tests**
   - Acceptance: Tests in `supabase/functions/calendar/` mock ESPN `fetch` responses (fixture JSON); assert: (a) each route returns `Content-Type: text/calendar`; (b) ICS body contains `BEGIN:VCALENDAR`, `BEGIN:VEVENT`, `UID:`, `DTSTART:`; (c) `?showPastEvents=invalid` returns 400; (d) valid params return 200
-  - Verify: Tests pass against local Supabase (`supabase start`)
+  - Verify: `deno test -A --config supabase/functions/deno.json supabase/functions/calendar/index.test.ts` — 2 tests green. NOTE: tests run via `app.request()` with a stubbed global `fetch` (fixtures), not a running `supabase start`; this is Docker-free, deterministic, and exercises the same Hono app. The function's only change is `export const app`; `Deno.serve` is stubbed during a dynamic import in the test so no port binds.
   - Files: `supabase/functions/calendar/index.test.ts`, `supabase/functions/calendar/fixtures/*.json`
 
 ---

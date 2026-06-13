@@ -1,0 +1,41 @@
+{
+  "$ref": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/401",
+  "id": "401",
+  "date": "2099-12-01T20:00:00Z",
+  "name": "Houston Rockets at Oklahoma City Thunder",
+  "shortName": "HOU @ OKC",
+  "season": { "$ref": "https://example.test/season" },
+  "competitions": [
+    {
+      "$ref": "https://example.test/comp",
+      "id": "401",
+      "date": "2099-12-01T20:00:00Z",
+      "type": { "id": "2", "text": "Regular Season", "abbreviation": "RS" },
+      "timeValid": true,
+      "recent": false,
+      "bracketAvailable": false,
+      "gameSource": { "id": "1", "description": "ESPN", "state": "full" },
+      "venue": {
+        "$ref": "https://example.test/venue",
+        "fullName": "Paycom Center",
+        "address": { "city": "Oklahoma City", "state": "OK" }
+      },
+      "competitors": [
+        {
+          "$ref": "https://example.test/c1",
+          "homeAway": "home",
+          "team": {
+            "$ref": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/teams/25"
+          }
+        },
+        {
+          "$ref": "https://example.test/c2",
+          "homeAway": "away",
+          "team": {
+            "$ref": "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/teams/10"
+          }
+        }
+      ]
+    }
+  ]
+}

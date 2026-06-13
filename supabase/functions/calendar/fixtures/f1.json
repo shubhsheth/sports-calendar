@@ -1,0 +1,22 @@
+{
+  "$ref": "https://sports.core.api.espn.com/v2/sports/racing/leagues/f1/events/601",
+  "id": "601",
+  "date": "2099-05-25T13:00:00Z",
+  "name": "Monaco Grand Prix",
+  "shortName": "Monaco Grand Prix",
+  "season": { "$ref": "https://example.test/season" },
+  "competitions": [
+    {
+      "$ref": "https://example.test/comp",
+      "id": "601",
+      "date": "2099-05-25T13:00:00Z",
+      "type": { "id": "3", "text": "Race", "abbreviation": "Race" },
+      "timeValid": true,
+      "recent": false,
+      "bracketAvailable": false,
+      "gameSource": { "id": "1", "description": "ESPN", "state": "full" },
+      "status": { "$ref": "https://example.test/status" },
+      "session": 1
+    }
+  ]
+}
