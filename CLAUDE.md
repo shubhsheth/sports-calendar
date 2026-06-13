@@ -1,25 +1,89 @@
 # Claude Instructions
 
-## Spec-Driven Development
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-Whenever asked to build, implement, add, or create a new feature, ALWAYS invoke the `spec-driven-development` skill first by calling `/spec-driven-development` before writing any code. Do not skip this step even if the requirements seem clear.
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 0. Spec-Driven Development
+
+**Before implementing any feature, run the spec skill.**
+
+Invoke the `specify` skill before writing any code for new features. The skill defines when a full spec, a lightweight spec, or no spec is needed — defer to its **When to Use** criteria rather than applying it unconditionally.
+
+The workflow has four interaction modes:
+1. **Clarify** — ask the human questions conversationally to establish direction and scope before writing anything
+2. **Build** — once direction is confirmed, write all three spec files autonomously without pausing for review between them
+3. **Implement** — execute one task at a time; present a summary and wait for human approval before each task; on rejection, cascade changes through all three spec files and re-present
+4. **Ship** — once every task in `tasks.md` is checked off, open the PR, monitor CI, and run a spec-compliance/cleanliness review loop (via the `ship` skill) until the PR is green and review-clean
 
 ### Spec File Naming & Structure
 
-All spec documents must follow this convention:
-
 - Live under `spec/` at the repo root
-- Each feature gets its own numbered subdirectory: `spec/NNN-slug/`
-- Files within that directory are named: `NNN-slug-phase.md`
-- Valid phases: `requirements`, `plan`, `implement`
+- Each feature: `spec/NNN-slug/`
+- Files: `NNN-slug-{specify,tasks,implement}.md`
+- Increment NNN for each new feature (001, 002, 003…)
 
-Example:
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+
 ```
-spec/
-└── 001-calendar-sync-backend/
-    ├── 001-calendar-sync-backend-requirements.md
-    ├── 001-calendar-sync-backend-plan.md
-    └── 001-calendar-sync-backend-implement.md
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-Increment `NNN` for each new feature (001, 002, 003…).
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
