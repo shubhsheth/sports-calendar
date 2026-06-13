@@ -1,4 +1,4 @@
-import { fetchEventRefsBySeason } from "@/api/espn/fetchEventRefs";
+import { fetchEventRefsBySeason } from "@sports-calendar/shared";
 
 export const fetchF1EventRefs = async (
   pageNumber?: number,

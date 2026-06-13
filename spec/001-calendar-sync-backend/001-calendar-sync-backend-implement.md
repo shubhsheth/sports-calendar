@@ -64,17 +64,17 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase C — Frontend Wiring
 
-- [ ] **C1: Update client filter and transform imports**
+- [x] **C1: Update client filter and transform imports**
   - Acceptance: All `filter*.ts` and `transform*ToIcs.ts` files under `client/src/components/*/utils/` import their types from `@sports-calendar/shared`; no logic changes
   - Verify: `npm run build -w client` succeeds; `npm run dev -w client` loads app without console errors
   - Files: `client/src/components/*/utils/filter*.ts`, `client/src/components/*/utils/transform*ToIcs.ts`
 
-- [ ] **C2: Update client ESPN API imports**
+- [x] **C2: Update client ESPN API imports**
   - Acceptance: `client/src/api/espn/` imports base ESPN utilities from `@sports-calendar/shared` where applicable; or keeps local copies if frontend fetch patterns diverge (document the decision)
   - Verify: `npm run build -w client` succeeds
   - Files: `client/src/api/espn/*.ts`
 
-- [ ] **C3: Delete redundant client type files**
+- [x] **C3: Delete redundant client type files**
   - Acceptance: `client/src/types/` directory deleted; all former consumers import from `@sports-calendar/shared`; lint and build still pass
   - Verify: `npm run build -w client && npm run lint` both pass with zero errors
   - Files: `client/src/types/*.ts` (deleted)

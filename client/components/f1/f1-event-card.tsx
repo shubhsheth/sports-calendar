@@ -1,13 +1,13 @@
-import type {
-  F1Event,
-  F1EventFilters,
-  EventRef,
+import {
+  type F1Event,
+  type F1EventFilters,
+  type EventRef,
+  fetchEventDetails,
 } from "@sports-calendar/shared";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { translateF1EventTypeAbbr } from "./utils/translateF1EventType";
 import { cleanUpSponsorName } from "./utils/cleanUpSponsorName";
-import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useQuery } from "@tanstack/react-query";
 
 import { filterF1Event } from "./utils/filterF1Events";
