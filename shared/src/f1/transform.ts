@@ -21,6 +21,7 @@ const SPONSORS = [
   "Tag Heuer",
   "Singapore Airlines",
   "Etihad Airways",
+  "Moët & Chandon",
 ];
 
 function cleanUpF1SponsorNames(name: string): string {
