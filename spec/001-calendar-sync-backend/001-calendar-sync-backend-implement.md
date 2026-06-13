@@ -125,9 +125,9 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase G — Tests
 
-- [ ] **G1: Shared package unit tests**
+- [x] **G1: Shared package unit tests**
   - Acceptance: Vitest tests colocated in `shared/src/` cover: (a) `showPastEvents=false` removes past events; (b) `teamIds` filter excludes non-matching teams; (c) empty `teamIds` returns all events; (d) F1 `types` filter includes only specified session types; (e) valid params parse to `{ ok: true }`; (f) invalid `showPastEvents` value parses to `{ ok: false }`; (g) `mapWithConcurrency` respects the concurrency limit; (h) ESPN fetch orchestrators return typed arrays when `fetch` is mocked
-  - Verify: `npm test -w shared` passes with all cases green
+  - Verify: `npm test -w shared` passes (cases a–d, g, h). NOTE: `params.test.ts` (cases e, f) lives under `supabase/functions/_shared/` (Deno function code, outside the `shared` workspace), so it runs via the root `npm run test:run` — vitest auto-collects it. Both suites green.
   - Files: `shared/src/nba/filters.test.ts`, `shared/src/f1/filters.test.ts`, `shared/src/espn/mapWithConcurrency.test.ts`, `supabase/functions/_shared/params.test.ts`
 
 - [ ] **G2: Edge Function integration tests**

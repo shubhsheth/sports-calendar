@@ -1,0 +1,60 @@
+import { describe, it, expect } from "vitest";
+import {
+  parseNbaParams,
+  parseNflParams,
+  parseIplParams,
+  parseF1Params,
+} from "./params.ts";
+
+describe("parseNbaParams (team-filtered leagues)", () => {
+  it("parses valid params to { ok: true }", () => {
+    const result = parseNbaParams({ teamIds: "9,14", showPastEvents: "false" });
+    expect(result).toEqual({
+      ok: true,
+      value: { showPastEvents: false, teamIds: ["9", "14"] },
+    });
+  });
+
+  it("defaults showPastEvents to true when absent", () => {
+    expect(parseNbaParams({})).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: [] },
+    });
+  });
+
+  it("treats empty teamIds as no filter", () => {
+    const result = parseNbaParams({ teamIds: "" });
+    expect(result.ok && result.value.teamIds).toEqual([]);
+  });
+
+  it("rejects an invalid showPastEvents value with { ok: false }", () => {
+    expect(parseNbaParams({ showPastEvents: "maybe" }).ok).toBe(false);
+  });
+
+  it("nfl and ipl share the same team-filter parsing", () => {
+    expect(parseNflParams({ teamIds: "1" }).ok).toBe(true);
+    expect(parseIplParams({ showPastEvents: "nope" }).ok).toBe(false);
+  });
+});
+
+describe("parseF1Params", () => {
+  it("parses valid session types to { ok: true }", () => {
+    expect(parseF1Params({ types: "2,3", showPastEvents: "true" })).toEqual({
+      ok: true,
+      value: { showPastEvents: true, types: ["2", "3"] },
+    });
+  });
+
+  it("defaults to all valid session types when types is absent", () => {
+    const result = parseF1Params({});
+    expect(result.ok && result.value.types).toEqual(["1", "2", "3", "4", "6"]);
+  });
+
+  it("rejects an invalid session type id with { ok: false }", () => {
+    expect(parseF1Params({ types: "2,5" }).ok).toBe(false);
+  });
+
+  it("rejects an invalid showPastEvents value with { ok: false }", () => {
+    expect(parseF1Params({ showPastEvents: "nope" }).ok).toBe(false);
+  });
+});
