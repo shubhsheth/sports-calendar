@@ -1,14 +1,14 @@
-import type {
-  NbaEvent,
-  NbaEventFilters,
-  NbaTeam,
-  EventRef,
+import {
+  type NbaEvent,
+  type NbaEventFilters,
+  type NbaTeam,
+  type EventRef,
+  fetchEventDetails,
 } from "@sports-calendar/shared";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { filterNbaEvent } from "./utils/filterNbaEvents";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";

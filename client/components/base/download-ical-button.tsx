@@ -1,11 +1,14 @@
 import { createEvents, type EventAttributes } from "ics";
 import fileDownload from "js-file-download";
 import { CalendarPlus, Download, Loader2 } from "lucide-react";
-import type { BaseEvent, EventRef } from "@sports-calendar/shared";
+import {
+  type BaseEvent,
+  type EventRef,
+  type FetchEventRefsResponse,
+  fetchEventDetails,
+} from "@sports-calendar/shared";
 import { Button } from "@/components/ui/button";
-import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
-import { fetchEventDetails } from "@/api/espn/fetchEventDetails";
 import { useState } from "react";
 import {
   Dialog,

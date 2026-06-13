@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import type { EventRef } from "@sports-calendar/shared";
-import type { FetchEventRefsResponse } from "@/api/espn/fetchEventRefs";
+import type { EventRef, FetchEventRefsResponse } from "@sports-calendar/shared";
 import { analytics } from "@/lib/analytics";
 
 interface InfiniteScrollEventsProps {
