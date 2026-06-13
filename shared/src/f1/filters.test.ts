@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { filterF1Event, filterF1Events } from "./filters";
-import type { F1Event, F1EventCompetition } from "./types";
+import { filterF1Event, filterF1Events } from "./filters.ts";
+import type { F1Event, F1EventCompetition } from "./types.ts";
 
 const FUTURE_DATE = "2099-12-01T20:00:00Z";
 const PAST_DATE = "2000-01-01T20:00:00Z";

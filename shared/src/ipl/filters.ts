@@ -1,5 +1,5 @@
-import type { IplEvent, IplEventFilters } from "./types";
-import { isEventPast } from "../eventStatus";
+import type { IplEvent, IplEventFilters } from "./types.ts";
+import { isEventPast } from "../eventStatus.ts";
 
 /** Duration of a T20 IPL match in minutes */
 const IPL_DURATION_MINUTES = 240;

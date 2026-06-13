@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { fetchEventRefsBySeason } from "./fetchEventRefs";
+import { fetchEventRefsBySeason } from "./fetchEventRefs.ts";
 
 const MOCK_RESPONSE = {
   items: [

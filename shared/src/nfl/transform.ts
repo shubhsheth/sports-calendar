@@ -1,4 +1,4 @@
-import type { NflEvent } from "./types";
+import type { NflEvent } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 

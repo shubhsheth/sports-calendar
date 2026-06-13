@@ -1,11 +1,11 @@
-import type { F1Event } from "./types";
+import type { F1Event } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 import {
   F1_SESSION_DURATIONS,
   translateF1EventTypeAbbr,
   translateF1EventTypeId,
-} from "./types";
+} from "./types.ts";
 
 const SPONSORS = [
   "Qatar Airways",

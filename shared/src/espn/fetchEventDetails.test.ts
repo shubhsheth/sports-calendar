@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { fetchEventDetails } from "./fetchEventDetails";
+import { fetchEventDetails } from "./fetchEventDetails.ts";
 
 const MOCK_EVENT = {
   id: "123",

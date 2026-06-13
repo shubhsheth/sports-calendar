@@ -1,4 +1,4 @@
-import type { BaseEvent } from "../espn/fetchEventDetails";
+import type { BaseEvent } from "../espn/fetchEventDetails.ts";
 
 export type NflEvent = BaseEvent & {
   competitions: NflEventCompetition[];

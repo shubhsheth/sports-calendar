@@ -1,7 +1,10 @@
-import { fetchEventRefsBySeason, type EventRef } from "../espn/fetchEventRefs";
-import { fetchEventDetails } from "../espn/fetchEventDetails";
-import { mapWithConcurrency } from "../espn/mapWithConcurrency";
-import type { F1Event } from "./types";
+import {
+  fetchEventRefsBySeason,
+  type EventRef,
+} from "../espn/fetchEventRefs.ts";
+import { fetchEventDetails } from "../espn/fetchEventDetails.ts";
+import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
+import type { F1Event } from "./types.ts";
 
 const SPORT = "racing";
 const LEAGUE = "f1";
