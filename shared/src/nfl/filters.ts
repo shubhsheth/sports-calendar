@@ -1,5 +1,5 @@
-import type { NflEvent, NflEventFilters } from "./types";
-import { isEventPast } from "../eventStatus";
+import type { NflEvent, NflEventFilters } from "./types.ts";
+import { isEventPast } from "../eventStatus.ts";
 
 /** Typical duration of an NFL game in minutes */
 const NFL_DURATION_MINUTES = 210;

@@ -1,5 +1,5 @@
-import type { IplEvent } from "./types";
-import { mapWithConcurrency } from "../espn/mapWithConcurrency";
+import type { IplEvent } from "./types.ts";
+import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
 
 const LEAGUE_ID = "8048";
 const FETCH_CONCURRENCY = 8;

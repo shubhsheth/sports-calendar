@@ -1,5 +1,5 @@
-import type { NbaEvent, NbaEventFilters } from "./types";
-import { isEventPast } from "../eventStatus";
+import type { NbaEvent, NbaEventFilters } from "./types.ts";
+import { isEventPast } from "../eventStatus.ts";
 
 /** Typical duration of an NBA game in minutes */
 const NBA_DURATION_MINUTES = 150;
