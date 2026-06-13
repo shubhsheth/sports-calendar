@@ -1,6 +1,8 @@
 {
   "imports": {
     "@sports-calendar/shared": "../../shared/src/index.ts",
+    "hono": "npm:hono@^4",
+    "hono/cors": "npm:hono@^4/cors",
     "dayjs": "npm:dayjs@^1.11.19",
     "ics": "npm:ics@^3.8.1"
   },

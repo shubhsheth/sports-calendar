@@ -97,7 +97,7 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase E — Edge Function Entry Point
 
-- [ ] **E1: `supabase/functions/calendar/index.ts`**
+- [x] **E1: `supabase/functions/calendar/index.ts`**
   - Acceptance: Hono app with CORS middleware; all 4 routes mounted (`/calendar/nba.ics`, `/calendar/nfl.ics`, `/calendar/f1.ics`, `/calendar/ipl.ics`); each route: parse params → 400 on failure → fetch ESPN → filter → transform → ICS → respond with `icsHeaders()`; 404 handler for unmatched routes; `Deno.serve(app.fetch)` as entry
   - Verify: `supabase functions serve` — `curl -X OPTIONS localhost:54321/functions/v1/calendar/calendar/nba.ics` returns 204 with `Access-Control-Allow-Origin: *`; `curl localhost:54321/functions/v1/calendar/unknown` returns 404
   - Files: `supabase/functions/calendar/index.ts`
