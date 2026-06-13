@@ -29,14 +29,19 @@ This skill owns the **SHIP** phase of the spec-driven workflow — the phase aft
 - Open the PR with `mcp__github__create_pull_request`:
   - **Title**: derived from the spec's Objective, or the feature slug if no spec exists.
   - **Body**: summary bullets, a test plan, and a link back to the spec — "Implements: `spec/NNN-slug/NNN-slug-specify.md`" — per `specify`'s "Reference the spec in PRs" convention.
-- Subscribe to PR activity with `mcp__github__subscribe_pr_activity`, then end the turn. CI results arrive as `<github-webhook-activity>` events — do not poll.
+- Subscribe to PR activity with `mcp__github__subscribe_pr_activity` — this delivers CI *failures* and PR comments.
+- Also arm a CI check-in before ending the turn — CI *success*, new pushes, and merge-conflict transitions are never delivered via the webhook, so this is the only way to detect them:
+  - **If `send_later` (claude-code-remote MCP) is available**: schedule a self check-in roughly an hour out (or sooner if the CI runtime is known to be short).
+  - **Otherwise**: start a persistent `Monitor` task (e.g. `while true; do echo "recheck PR status"; sleep 60; done`) described as a CI check-in for this PR.
+- End the turn. Both the subscription and the check-in stay active until Phase 3 resolves to green.
 
 ## Phase 3: CI Check Loop
 
-On each webhook/check event:
+On each webhook event *or* CI check-in (send_later wake or Monitor ping) — both are live concurrently:
 
 - Inspect status via `mcp__github__pull_request_read`, `mcp__github__actions_list`, and `mcp__github__get_job_logs`.
-- **All checks green** → go to Phase 4.
+- **All checks green** → stop the check-in (cancel the `send_later` schedule, or `TaskStop` the Monitor task), then go to Phase 4.
+- **Still pending/running** → re-arm the check-in (reschedule `send_later`, or leave the Monitor task running) and end the turn again; don't message the human for a no-op check-in.
 - **Any check red**:
   - Diagnose the failure from the logs.
   - Present a CI Fix gate using this format exactly:
@@ -56,7 +61,7 @@ On each webhook/check event:
     Approve or reject?
     ```
 
-  - On approval, apply the fix using `implement`'s Increment Cycle: implement → run tests → commit → push. The push re-triggers CI; stay subscribed and remain in Phase 3.
+  - On approval, apply the fix using `implement`'s Increment Cycle: implement → run tests → commit → push. The push re-triggers CI; stay subscribed, keep the check-in armed (re-arm it if it fired during the fix), and remain in Phase 3.
   - On rejection, revise the proposed fix and re-present — do not re-present the same rejected approach.
   - **Guardrail**: if the same check fails again after a fix attempt, stop looping and report the diagnosis to the human instead of retrying indefinitely.
 
@@ -102,7 +107,7 @@ Once all checks are green, launch one `general-purpose` subagent (Agent tool) wi
 
 - Post a short PR comment summarizing: CI green, spec-compliance and cleanliness review passed.
 - Tell the human the PR is ready. Do not merge automatically — merging is a human decision.
-- Keep the PR-activity subscription active until the human merges or closes the PR, or unsubscribe if they say they'll take it from here.
+- Keep the PR-activity subscription active until the human merges or closes the PR, or unsubscribe if they say they'll take it from here. Confirm the CI check-in is stopped (it should already be stopped by Phase 3's all-green branch) before ending the turn.
 
 ## Cross-References
 
