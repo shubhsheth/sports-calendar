@@ -409,3 +409,4 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.calendar]
 verify_jwt = false
+import_map = "./functions/deno.json"
