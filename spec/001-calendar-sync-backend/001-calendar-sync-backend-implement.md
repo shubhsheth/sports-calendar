@@ -30,32 +30,32 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase B — Shared Package (league-based layout)
 
-- [ ] **B1: Create `shared/src/espn/` base utilities** **(parallel with B2–B5)**
+- [x] **B1: Create `shared/src/espn/` base utilities** **(parallel with B2–B5)**
   - Acceptance: `shared/src/espn/fetchEventRefs.ts` exports `fetchEventRefsBySeason()`; `shared/src/espn/fetchEventDetails.ts` exports `fetchEventDetails<T>()`; `shared/src/espn/mapWithConcurrency.ts` exports `mapWithConcurrency()`; uses only standard `fetch` (no Node or CF-specific APIs)
   - Verify: `tsc --noEmit` from `shared/` passes
   - Files: `shared/src/espn/fetchEventRefs.ts`, `shared/src/espn/fetchEventDetails.ts`, `shared/src/espn/mapWithConcurrency.ts`
 
-- [ ] **B2: Populate `shared/src/nba/`** **(parallel with B1, B3–B5)**
+- [x] **B2: Populate `shared/src/nba/`** **(parallel with B1, B3–B5)**
   - Acceptance: `types.ts` mirrors former `src/types/nba.ts`; `filters.ts` exports `filterNbaEvents()`; `fetch.ts` exports `fetchAllNbaEvents()` using `espn/` base utilities with concurrency cap 8; `transform.ts` exports `transformNbaEventsToIcs()` with `uid: "{event.id}@sports-calendar"` and `description: "NBA: {teams} — {status}"` (FR-5)
   - Verify: `tsc --noEmit` from `shared/` passes
   - Files: `shared/src/nba/*.ts`
 
-- [ ] **B3: Populate `shared/src/nfl/`** **(parallel with B1, B2, B4, B5)**
+- [x] **B3: Populate `shared/src/nfl/`** **(parallel with B1, B2, B4, B5)**
   - Acceptance: Same as B2 for NFL; `fetch.ts` uses season types `[1, 2, 3]`
   - Verify: `tsc --noEmit` passes
   - Files: `shared/src/nfl/*.ts`
 
-- [ ] **B4: Populate `shared/src/f1/`** **(parallel with B1, B2, B3, B5)**
+- [x] **B4: Populate `shared/src/f1/`** **(parallel with B1, B2, B3, B5)**
   - Acceptance: `types.ts` merges former `src/types/f1.ts` and all `translateF1*` helpers (no separate helpers file); `filters.ts` exports `filterF1Events()`; `fetch.ts` exports `fetchAllF1Events()` (season type `[2]`); `transform.ts` exports `transformF1EventsToIcs()` with FR-5 fields
   - Verify: `tsc --noEmit` passes
   - Files: `shared/src/f1/*.ts`
 
-- [ ] **B5: Populate `shared/src/ipl/`** **(parallel with B1, B2, B3, B4)**
+- [x] **B5: Populate `shared/src/ipl/`** **(parallel with B1, B2, B3, B4)**
   - Acceptance: `fetch.ts` exports `fetchAllIplEvents()` iterating date range 2026-03-28–2026-06-01 with concurrency cap 8; other files follow same pattern as B2
   - Verify: `tsc --noEmit` passes
   - Files: `shared/src/ipl/*.ts`
 
-- [ ] **B6: Add `eventStatus.ts` and wire `index.ts`**
+- [x] **B6: Add `eventStatus.ts` and wire `index.ts`**
   - Acceptance: `shared/src/eventStatus.ts` is a verbatim copy of former `src/lib/eventStatus.ts`; `shared/src/index.ts` re-exports all types, filter functions, fetch orchestrators, ICS transforms, espn utilities, and `eventStatus`
   - Verify: `tsc --noEmit` from `shared/` passes with zero errors; importing `{ filterNbaEvents, fetchAllNbaEvents, transformNbaEventsToIcs }` from `@sports-calendar/shared` resolves
   - Files: `shared/src/eventStatus.ts`, `shared/src/index.ts`

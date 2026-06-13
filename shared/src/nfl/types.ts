@@ -1,4 +1,4 @@
-import type { BaseEvent, BaseTeam } from "./base";
+import type { BaseEvent } from "../espn/fetchEventDetails";
 
 export type NflEvent = BaseEvent & {
   competitions: NflEventCompetition[];
@@ -43,7 +43,11 @@ export type NflCompetitor = {
   score?: { $ref: string };
 };
 
-export type NflTeam = BaseTeam & {
+export type NflTeam = {
+  $ref: string;
+  id: string;
+  name: string;
+  displayName: string;
   logos: {
     href: string;
     rel: string[];

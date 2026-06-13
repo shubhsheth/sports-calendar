@@ -1,28 +1,30 @@
-import type { NbaEvent, NbaEventFilters } from "../types/nba";
-import { isEventPast } from "../lib/eventStatus";
-import { NBA_DURATION_MINUTES } from "../lib/nbaEventDuration";
+import type { NflEvent, NflEventFilters } from "./types";
+import { isEventPast } from "../eventStatus";
+
+/** Typical duration of an NFL game in minutes */
+const NFL_DURATION_MINUTES = 210;
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];
 }
 
-export function filterNbaEvents(events: NbaEvent[], filters: NbaEventFilters) {
-  const filteredEvents: NbaEvent[] = [];
+export function filterNflEvents(events: NflEvent[], filters: NflEventFilters) {
+  const filteredEvents: NflEvent[] = [];
   for (const event of events) {
-    const filteredEvent = filterNbaEvent(event, filters);
+    const filteredEvent = filterNflEvent(event, filters);
     if (filteredEvent) filteredEvents.push(filteredEvent);
   }
   return filteredEvents;
 }
 
-export function filterNbaEvent(
-  event: NbaEvent,
-  filters: NbaEventFilters
-): NbaEvent | null {
+export function filterNflEvent(
+  event: NflEvent,
+  filters: NflEventFilters
+): NflEvent | null {
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, NBA_DURATION_MINUTES)
+      isEventPast(competition.date, NFL_DURATION_MINUTES)
     ) {
       return false;
     }

@@ -1,6 +1,6 @@
-import type { F1Event, F1EventFilters } from "../types/f1";
-import { isEventPast } from "../lib/eventStatus";
-import { F1_SESSION_DURATIONS } from "../lib/f1SessionDurations";
+import type { F1Event, F1EventFilters } from "./types";
+import { F1_SESSION_DURATIONS } from "./types";
+import { isEventPast } from "../eventStatus";
 
 export function filterF1Events(events: F1Event[], filters: F1EventFilters) {
   const filteredEvents: F1Event[] = [];
