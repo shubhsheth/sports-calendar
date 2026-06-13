@@ -26,7 +26,7 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["packages/*/vitest.config.ts"],
+          allowDefaultProject: ["shared/vitest.config.ts"],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -45,7 +45,7 @@ export default defineConfig([
   // buttonVariants) and hooks alongside React components. Downgrade the react-refresh
   // rule to warn for these generated files so CI is not blocked.
   {
-    files: ["src/components/ui/**/*.{ts,tsx}"],
+    files: ["client/components/ui/**/*.{ts,tsx}"],
     rules: {
       "react-refresh/only-export-components": "warn",
     },

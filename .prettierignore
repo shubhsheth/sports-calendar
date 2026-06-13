@@ -2,4 +2,4 @@ dist
 node_modules
 *.md
 public
-src/routeTree.gen.ts
+client/routeTree.gen.ts

@@ -7,8 +7,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@sports-calendar/shared": ["packages/shared/src/index.ts"]
+      "@/*": ["./client/*"],
+      "@sports-calendar/shared": ["shared/src/index.ts"]
     }
   }
 }
