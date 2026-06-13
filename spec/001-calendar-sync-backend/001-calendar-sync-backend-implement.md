@@ -116,7 +116,7 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Verify: `supabase start` and `supabase functions serve` both start without config errors
   - Files: `supabase/config.toml`
 
-- [ ] **F2: Deploy to Supabase**
+- [x] **F2: Deploy to Supabase**
   - Acceptance: `supabase functions deploy calendar` succeeds; live function URL responds to `/calendar/nba.ics` with valid ICS
   - Verify: Subscribe URL added to Apple Calendar shows NBA events; same URL in Google Calendar shows the same events
   - Files: none (deploy only)
