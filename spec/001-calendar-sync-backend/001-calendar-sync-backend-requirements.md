@@ -163,10 +163,17 @@ Param parsing returns a discriminated union:
 type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 ```
 
-The `deno.json` maps the shared package name for Deno (npm workspaces handle this automatically for Node/Vite):
+The `deno.json` maps the shared package name for Deno (npm workspaces handle this automatically for Node/Vite). The path is relative to `supabase/functions/`, and Deno also needs the shared package's runtime npm deps mapped plus sloppy-imports enabled (the shared sources use extensionless relative imports for Node/Vite):
 
 ```json
-{ "imports": { "@sports-calendar/shared": "../../../shared/src/index.ts" } }
+{
+  "imports": {
+    "@sports-calendar/shared": "../../shared/src/index.ts",
+    "dayjs": "npm:dayjs@^1.11.19",
+    "ics": "npm:ics@^3.8.1"
+  },
+  "unstable": ["sloppy-imports"]
+}
 ```
 
 ## Testing Strategy

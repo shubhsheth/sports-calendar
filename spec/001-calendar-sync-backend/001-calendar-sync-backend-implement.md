@@ -22,7 +22,7 @@ Tasks are ordered by dependency. Complete each task's verification step before s
   - Files: `client/package.json`, `vite.config.ts`
 
 - [ ] **A4: Delete `packages/api/` and initialize Supabase**
-  - Acceptance: `packages/api/` deleted; `supabase init` run from repo root (creates `supabase/config.toml`); `[functions.calendar] verify_jwt = false` added to `supabase/config.toml`; `supabase/functions/deno.json` created with `{ "imports": { "@sports-calendar/shared": "../../../shared/src/index.ts" } }`
+  - Acceptance: `packages/api/` deleted; `supabase init` run from repo root (creates `supabase/config.toml`); `[functions.calendar] verify_jwt = false` added to `supabase/config.toml`; `supabase/functions/deno.json` created mapping `@sports-calendar/shared` to `../../shared/src/index.ts` (relative to `supabase/functions/`), plus `npm:` mappings for the shared package's runtime deps (`dayjs`, `ics`) and `"unstable": ["sloppy-imports"]` so Deno can consume the Node-style shared package (extensionless relative imports). Drift from the original `../../../shared/...` snippet — that path resolved one level above the repo root and omitted the npm/sloppy bridging Deno needs to type-check the shared graph
   - Verify: `supabase start` initializes without config errors
   - Files: `supabase/config.toml`, `supabase/functions/deno.json`
 
@@ -83,12 +83,12 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase D — Function-Specific Shared Code
 
-- [ ] **D1: `supabase/functions/_shared/params.ts`** **(parallel with D2)**
+- [x] **D1: `supabase/functions/_shared/params.ts`** **(parallel with D2)**
   - Acceptance: Exports `parseNbaParams`, `parseNflParams`, `parseF1Params`, `parseIplParams`; each returns `ParseResult<T>`; `showPastEvents` defaults to `true` when absent; invalid `types` values for F1 return `{ ok: false }`; empty `teamIds` is treated as no filter
   - Verify: `deno check supabase/functions/_shared/params.ts` passes
   - Files: `supabase/functions/_shared/params.ts`
 
-- [ ] **D2: `supabase/functions/_shared/icsHeaders.ts`** **(parallel with D1)**
+- [x] **D2: `supabase/functions/_shared/icsHeaders.ts`** **(parallel with D1)**
   - Acceptance: Exports `icsHeaders()` returning a `Headers` object with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: public, max-age=3600`, `Access-Control-Allow-Origin: *`
   - Verify: `deno check supabase/functions/_shared/icsHeaders.ts` passes
   - Files: `supabase/functions/_shared/icsHeaders.ts`
