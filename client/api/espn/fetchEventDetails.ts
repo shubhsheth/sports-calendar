@@ -1,4 +1,4 @@
-import type { BaseEvent } from "../../types/base";
+import type { BaseEvent } from "@sports-calendar/shared";
 
 export async function fetchEventDetails<T = BaseEvent>(
   refUrl: string
