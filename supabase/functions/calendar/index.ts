@@ -25,7 +25,7 @@ import {
 } from "../_shared/params.ts";
 import { icsHeaders } from "../_shared/icsHeaders.ts";
 
-const app = new Hono();
+export const app = new Hono();
 
 app.use("*", cors());
 

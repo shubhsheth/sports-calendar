@@ -1,0 +1,56 @@
+{
+  "events": [
+    {
+      "id": "701",
+      "uid": "s:1~e:701",
+      "date": "2099-04-01T14:00:00Z",
+      "name": "Punjab Kings v Sunrisers Hyderabad",
+      "shortName": "PBKS v SRH",
+      "competitions": [
+        {
+          "date": "2099-04-01T14:00:00Z",
+          "timeValid": true,
+          "status": {
+            "type": {
+              "id": "1",
+              "state": "pre",
+              "description": "Scheduled",
+              "detail": "Scheduled",
+              "shortDetail": "Scheduled"
+            },
+            "summary": "Starts at 15:30 local time"
+          },
+          "venue": { "fullName": "Punjab Cricket Association IS Bindra Stadium" },
+          "competitors": [
+            {
+              "uid": "s:1~t:1",
+              "order": 1,
+              "homeAway": "home",
+              "winner": false,
+              "score": "",
+              "team": {
+                "id": "1",
+                "displayName": "Punjab Kings",
+                "abbreviation": "PBKS",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/1.png"
+              }
+            },
+            {
+              "uid": "s:1~t:2",
+              "order": 2,
+              "homeAway": "away",
+              "winner": false,
+              "score": "",
+              "team": {
+                "id": "2",
+                "displayName": "Sunrisers Hyderabad",
+                "abbreviation": "SRH",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/2.png"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

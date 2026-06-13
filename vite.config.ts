@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import tanstackRouter from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
+import { configDefaults } from "vitest/config";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -30,5 +31,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./client/test/setup.ts"],
+    // The calendar function's integration tests run under Deno, not vitest.
+    exclude: [...configDefaults.exclude, "supabase/functions/calendar/**"],
   },
 });
