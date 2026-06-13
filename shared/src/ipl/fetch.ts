@@ -1,6 +1,8 @@
-import type { IplEvent } from "../types/ipl";
+import type { IplEvent } from "./types";
+import { mapWithConcurrency } from "../espn/mapWithConcurrency";
 
 const LEAGUE_ID = "8048";
+const FETCH_CONCURRENCY = 8;
 
 export const IPL_2026 = {
   LEAGUE_ID,
@@ -8,6 +10,7 @@ export const IPL_2026 = {
   END_DATE: "2026-06-01",
 };
 
+// Internal types for the scoreboard response (different shape from IplEvent)
 type ScoreboardCompetitor = {
   uid: string;
   order: number;
@@ -107,4 +110,14 @@ export function getIplSeasonDates(): string[] {
     current.setUTCDate(current.getUTCDate() + 1);
   }
   return dates;
+}
+
+export async function fetchAllIplEvents(): Promise<IplEvent[]> {
+  const dates = getIplSeasonDates();
+  const eventsByDate = await mapWithConcurrency(
+    dates,
+    FETCH_CONCURRENCY,
+    date => fetchIplEventsByDate(date)
+  );
+  return eventsByDate.flat();
 }

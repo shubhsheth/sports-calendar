@@ -1,12 +1,44 @@
-import type { F1Event } from "../types/f1";
+import type { F1Event } from "./types";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 import {
+  F1_SESSION_DURATIONS,
   translateF1EventTypeAbbr,
   translateF1EventTypeId,
-} from "../lib/translateF1EventType";
-import { cleanUpF1SponsorNames } from "../lib/cleanUpF1SponsorNames";
-import { F1_SESSION_DURATIONS } from "../lib/f1SessionDurations";
+} from "./types";
+
+const SPONSORS = [
+  "Qatar Airways",
+  "Heineken",
+  "Aramco",
+  "Gulf Air",
+  "STC",
+  "Crypto.com",
+  "Lenovo",
+  "MSC Cruises",
+  "Pirelli",
+  "AWS",
+  "Tag Heuer",
+  "Singapore Airlines",
+  "Etihad Airways",
+];
+
+function cleanUpF1SponsorNames(name: string): string {
+  let cleanedName = name;
+
+  for (const sponsor of SPONSORS) {
+    cleanedName = cleanedName.replace(
+      new RegExp(`\\b${sponsor}\\b[\\s-]*`, "gi"),
+      ""
+    );
+  }
+
+  cleanedName = cleanedName
+    .replace(/^[\s-]+|[\s-]+$/g, "")
+    .replace(/\s{2,}/g, " ");
+
+  return cleanedName;
+}
 
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];

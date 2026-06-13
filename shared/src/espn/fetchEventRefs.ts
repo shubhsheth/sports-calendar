@@ -1,4 +1,6 @@
-import type { EventRef } from "../types/base";
+export type EventRef = {
+  $ref: string;
+};
 
 export type FetchEventRefsResponse = {
   items: EventRef[];

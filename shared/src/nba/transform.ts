@@ -1,7 +1,9 @@
-import type { NbaEvent } from "../types/nba";
+import type { NbaEvent } from "./types";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { NBA_DURATION_MINUTES } from "../lib/nbaEventDuration";
+
+/** Typical duration of an NBA game in minutes */
+const NBA_DURATION_MINUTES = 150;
 
 export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];

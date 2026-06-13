@@ -1,7 +1,9 @@
-import type { IplEvent } from "../types/ipl";
+import type { IplEvent } from "./types";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { IPL_DURATION_MINUTES } from "../lib/iplEventDuration";
+
+/** Duration of a T20 IPL match in minutes */
+const IPL_DURATION_MINUTES = 240;
 
 export function transformIplEventsToIcs(events: IplEvent[]): EventAttributes[] {
   return events.map(event => {

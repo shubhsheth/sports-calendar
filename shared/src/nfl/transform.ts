@@ -1,7 +1,9 @@
-import type { NflEvent } from "../types/nfl";
+import type { NflEvent } from "./types";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-import { NFL_DURATION_MINUTES } from "../lib/nflEventDuration";
+
+/** Typical duration of an NFL game in minutes */
+const NFL_DURATION_MINUTES = 210;
 
 export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];

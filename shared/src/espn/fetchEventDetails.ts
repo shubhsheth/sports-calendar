@@ -1,4 +1,11 @@
-import type { BaseEvent } from "../types/base";
+export type BaseEvent = {
+  $ref: string;
+  id: string;
+  date: string;
+  name: string;
+  shortName: string;
+  season: { $ref: string };
+};
 
 export async function fetchEventDetails<T = BaseEvent>(
   refUrl: string

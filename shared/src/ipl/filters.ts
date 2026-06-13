@@ -1,6 +1,8 @@
-import type { IplEvent, IplEventFilters } from "../types/ipl";
-import { isEventPast } from "../lib/eventStatus";
-import { IPL_DURATION_MINUTES } from "../lib/iplEventDuration";
+import type { IplEvent, IplEventFilters } from "./types";
+import { isEventPast } from "../eventStatus";
+
+/** Duration of a T20 IPL match in minutes */
+const IPL_DURATION_MINUTES = 240;
 
 export function filterIplEvents(
   events: IplEvent[],
