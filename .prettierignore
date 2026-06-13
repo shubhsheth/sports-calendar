@@ -4,3 +4,4 @@ node_modules
 public
 client/routeTree.gen.ts
 supabase/functions
+supabase/.temp

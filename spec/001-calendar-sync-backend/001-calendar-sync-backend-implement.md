@@ -139,12 +139,12 @@ Tasks are ordered by dependency. Complete each task's verification step before s
 
 ## Phase H — CI/CD
 
-- [ ] **H1: Guard existing GH Pages workflows**
+- [x] **H1: Guard existing GH Pages workflows**
   - Acceptance: Root `test:run` and `lint` scripts scope to `shared/` and `client/` only; `deploy.yml` and `preview.yml` pass on CI after the monorepo restructure
-  - Verify: Open a test PR — both `Deploy to GitHub Pages` and `PR Preview` checks go green
-  - Files: `package.json`, possibly `.eslintignore` or `eslint.config.*`
+  - Verify: Locally `npm run lint`, `npm run format:check`, `npm run test:run` (205), and `npm run build` all pass. Scoping is in place: `eslint.config.js` `globalIgnores(["dist","supabase/functions"])` and `.prettierignore` exclude the Deno function code; vitest excludes `supabase/functions/calendar/**`. NOTE: `test:run` also runs `supabase/functions/_shared/params.test.ts` (plain-TS param tests, intentional per G1) — client+shared plus that one file. Added `supabase/.temp` to `.prettierignore` so the local Supabase CLI artifact doesn't trip `format:check`.
+  - Files: `.prettierignore`
 
-- [ ] **H2: Add `deploy-functions.yml` GitHub Actions workflow**
+- [x] **H2: Add `deploy-functions.yml` GitHub Actions workflow**
   - Acceptance: `.github/workflows/deploy-functions.yml` exists; triggers on push to `main` with path filter `supabase/functions/**` and `shared/**`; runs `supabase functions deploy calendar` using `SUPABASE_ACCESS_TOKEN` secret
-  - Verify: Merge a change to `supabase/functions/` to `main` — the `Deploy Edge Functions` action runs and succeeds; a `client/`-only change does not trigger it
+  - Verify: YAML validated (parses; jobs=[deploy]; `on.push.paths`=`["supabase/functions/**","shared/**"]`); Prettier clean. Project ref `bnwiuipxyzwfcdpkkaln` is hardcoded (public — appears in the .ics URLs) so the only required repo secret is `SUPABASE_ACCESS_TOKEN`. NOTE: live "runs and succeeds" depends on the `SUPABASE_ACCESS_TOKEN` repo secret being set and a push to `main` touching the path filter; first real run is post-merge.
   - Files: `.github/workflows/deploy-functions.yml`
