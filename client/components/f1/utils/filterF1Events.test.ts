@@ -45,7 +45,7 @@ function makeEvent(
 
 const allTypesFilter: F1EventFilters = {
   showPastEvents: true,
-  types: ["1", "2", "3", "4", "6"],
+  types: ["1", "2", "3", "5", "6"],
 };
 
 describe("filterF1Event", () => {

@@ -37,7 +37,7 @@ function makeEvent(
   };
 }
 
-const ALL_TYPES = ["1", "2", "3", "4", "6"];
+const ALL_TYPES = ["1", "2", "3", "5", "6"];
 
 describe("filterF1Event", () => {
   it("returns event unchanged when all types included and showPastEvents is true", () => {

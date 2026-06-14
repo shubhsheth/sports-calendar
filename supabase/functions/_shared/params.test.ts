@@ -47,11 +47,11 @@ describe("parseF1Params", () => {
 
   it("defaults to all valid session types when types is absent", () => {
     const result = parseF1Params({});
-    expect(result.ok && result.value.types).toEqual(["1", "2", "3", "4", "6"]);
+    expect(result.ok && result.value.types).toEqual(["1", "2", "3", "5", "6"]);
   });
 
   it("rejects an invalid session type id with { ok: false }", () => {
-    expect(parseF1Params({ types: "2,5" }).ok).toBe(false);
+    expect(parseF1Params({ types: "2,4" }).ok).toBe(false);
   });
 
   it("does not reject an unrecognized showPastEvents value", () => {
