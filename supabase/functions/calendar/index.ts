@@ -15,12 +15,16 @@ import {
   fetchAllIplEvents,
   filterIplEvents,
   transformIplEventsToIcs,
+  fetchAllFifaEvents,
+  filterFifaEvents,
+  transformFifaEventsToIcs,
 } from "@sports-calendar/shared";
 import {
   parseNbaParams,
   parseNflParams,
   parseF1Params,
   parseIplParams,
+  parseFifaParams,
   type ParseResult,
 } from "../_shared/params.ts";
 import { icsHeaders } from "../_shared/icsHeaders.ts";
@@ -86,6 +90,13 @@ registerLeagueRoute(
   fetchAllIplEvents,
   filterIplEvents,
   transformIplEventsToIcs
+);
+registerLeagueRoute(
+  "/calendar/fifa.ics",
+  parseFifaParams,
+  fetchAllFifaEvents,
+  filterFifaEvents,
+  transformFifaEventsToIcs
 );
 
 app.notFound(c => c.text("Not Found", 404));

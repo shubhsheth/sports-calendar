@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 
 function IndexComponent() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-3xl mx-auto">
       <Link
         to="/nba"
         className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
@@ -46,6 +46,13 @@ function IndexComponent() {
         onClick={() => analytics.leagueSelected("ipl")}
       >
         View IPL Schedule
+      </Link>
+      <Link
+        to="/fifa"
+        className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100"
+        onClick={() => analytics.leagueSelected("fifa")}
+      >
+        View FIFA World Cup Schedule
       </Link>
     </div>
   );

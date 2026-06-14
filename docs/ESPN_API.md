@@ -29,9 +29,10 @@ Leagues currently supported by this project:
 
 | League | `sportId`    | `leagueId` | `seasonId` |
 |--------|-------------|------------|------------|
-| NBA    | `basketball` | `nba`      | `2026`     |
-| NFL    | `football`   | `nfl`      | `2025`     |
-| F1     | `racing`     | `f1`       | `2026`     |
+| NBA    | `basketball` | `nba`        | `2026`     |
+| NFL    | `football`   | `nfl`        | `2025`     |
+| F1     | `racing`     | `f1`         | `2026`     |
+| FIFA   | `soccer`     | `fifa.world` | `2026`     |
 
 **Season ID convention:** The season ID is the **calendar year the season starts**, even when it extends into the following year. For example, the 2025 NFL season begins in September 2025 and ends in February 2026, but the API uses `2025`. These are hardcoded in:
 - `src/components/nba/utils/fetchNbaEventRefs.ts`

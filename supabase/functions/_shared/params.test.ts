@@ -3,6 +3,7 @@ import {
   parseNbaParams,
   parseNflParams,
   parseIplParams,
+  parseFifaParams,
   parseF1Params,
 } from "./params.ts";
 
@@ -31,9 +32,13 @@ describe("parseNbaParams (team-filtered leagues)", () => {
     expect(parseNbaParams({ showPastEvents: "maybe" }).ok).toBe(true);
   });
 
-  it("nfl and ipl share the same team-filter parsing", () => {
+  it("nfl, ipl and fifa share the same team-filter parsing", () => {
     expect(parseNflParams({ teamIds: "1" }).ok).toBe(true);
     expect(parseIplParams({ showPastEvents: "nope" }).ok).toBe(true);
+    expect(parseFifaParams({ teamIds: "202,164" })).toEqual({
+      ok: true,
+      value: { showPastEvents: true, teamIds: ["202", "164"] },
+    });
   });
 });
 

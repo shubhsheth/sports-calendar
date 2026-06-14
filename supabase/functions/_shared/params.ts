@@ -1,5 +1,6 @@
 import type {
   F1EventFilters,
+  FifaEventFilters,
   IplEventFilters,
   NbaEventFilters,
   NflEventFilters,
@@ -53,6 +54,10 @@ export function parseNflParams(query: Query): ParseResult<NflEventFilters> {
 }
 
 export function parseIplParams(query: Query): ParseResult<IplEventFilters> {
+  return parseTeamFilters(query);
+}
+
+export function parseFifaParams(query: Query): ParseResult<FifaEventFilters> {
   return parseTeamFilters(query);
 }
 
