@@ -32,7 +32,7 @@ function parseCommaList(raw: string | undefined): string[] {
     .filter(s => s.length > 0);
 }
 
-/** Shared shape for the team-filtered leagues (NBA / NFL / IPL). */
+/** Shared shape for the team-filtered leagues (NBA / NFL / IPL / FIFA). */
 function parseTeamFilters(
   query: Query
 ): ParseResult<{ showPastEvents: boolean; teamIds: string[] }> {
