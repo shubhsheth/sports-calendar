@@ -14,17 +14,13 @@ type Query = Record<string, string>;
 /** Valid F1 session type IDs: Practice, Qualifying, Race, Sprint Qualifying, Sprint Race */
 const F1_VALID_TYPES = ["1", "2", "3", "4", "6"];
 
-/** `showPastEvents` defaults to `true` when absent; any value other than "true"/"false" is an error. */
-function parseShowPastEvents(query: Query): ParseResult<boolean> {
-  const raw = query.showPastEvents;
-  if (raw === undefined) return { ok: true, value: true };
-  if (raw === "true") return { ok: true, value: true };
-  if (raw === "false") return { ok: true, value: false };
-  return {
-    ok: false,
-    error: `Invalid showPastEvents value: "${raw}" (expected "true" or "false")`,
-  };
-}
+/**
+ * Backend feeds always include past events so subscribed calendars retain
+ * full-season history. The shared filter types still require `showPastEvents`,
+ * so we pin it to `true` (which disables the past-event filter) and ignore any
+ * `showPastEvents` query param.
+ */
+const SHOW_PAST_EVENTS = true;
 
 /** Split a comma-separated query value into trimmed, non-empty IDs. Absent/empty = no filter. */
 function parseCommaList(raw: string | undefined): string[] {
@@ -39,12 +35,10 @@ function parseCommaList(raw: string | undefined): string[] {
 function parseTeamFilters(
   query: Query
 ): ParseResult<{ showPastEvents: boolean; teamIds: string[] }> {
-  const showPast = parseShowPastEvents(query);
-  if (!showPast.ok) return showPast;
   return {
     ok: true,
     value: {
-      showPastEvents: showPast.value,
+      showPastEvents: SHOW_PAST_EVENTS,
       teamIds: parseCommaList(query.teamIds),
     },
   };
@@ -63,9 +57,6 @@ export function parseIplParams(query: Query): ParseResult<IplEventFilters> {
 }
 
 export function parseF1Params(query: Query): ParseResult<F1EventFilters> {
-  const showPast = parseShowPastEvents(query);
-  if (!showPast.ok) return showPast;
-
   const requested = parseCommaList(query.types);
   const types = requested.length > 0 ? requested : [...F1_VALID_TYPES];
 
@@ -79,6 +70,6 @@ export function parseF1Params(query: Query): ParseResult<F1EventFilters> {
 
   return {
     ok: true,
-    value: { showPastEvents: showPast.value, types },
+    value: { showPastEvents: SHOW_PAST_EVENTS, types },
   };
 }

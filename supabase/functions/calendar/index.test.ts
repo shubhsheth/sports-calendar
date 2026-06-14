@@ -129,14 +129,14 @@ Deno.test("each league route returns valid text/calendar ICS (200)", async () =>
   }
 });
 
-Deno.test("invalid showPastEvents returns 400 on every route", async () => {
+Deno.test("showPastEvents param is ignored, never 400, on every route", async () => {
   installFetchMock();
   try {
     for (const route of ROUTES) {
       const res = await app.request(
         `/calendar/${route}.ics?showPastEvents=invalid`
       );
-      assert(res.status === 400, `${route}: expected 400, got ${res.status}`);
+      assert(res.status === 200, `${route}: expected 200, got ${res.status}`);
     }
   } finally {
     restoreFetch();

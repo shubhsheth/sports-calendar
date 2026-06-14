@@ -8,15 +8,15 @@ import {
 
 describe("parseNbaParams (team-filtered leagues)", () => {
   it("parses valid params to { ok: true }", () => {
-    const result = parseNbaParams({ teamIds: "9,14", showPastEvents: "false" });
+    const result = parseNbaParams({ teamIds: "9,14" });
     expect(result).toEqual({
       ok: true,
-      value: { showPastEvents: false, teamIds: ["9", "14"] },
+      value: { showPastEvents: true, teamIds: ["9", "14"] },
     });
   });
 
-  it("defaults showPastEvents to true when absent", () => {
-    expect(parseNbaParams({})).toEqual({
+  it("always shows past events, ignoring the showPastEvents param", () => {
+    expect(parseNbaParams({ showPastEvents: "false" })).toEqual({
       ok: true,
       value: { showPastEvents: true, teamIds: [] },
     });
@@ -27,19 +27,19 @@ describe("parseNbaParams (team-filtered leagues)", () => {
     expect(result.ok && result.value.teamIds).toEqual([]);
   });
 
-  it("rejects an invalid showPastEvents value with { ok: false }", () => {
-    expect(parseNbaParams({ showPastEvents: "maybe" }).ok).toBe(false);
+  it("does not reject an unrecognized showPastEvents value", () => {
+    expect(parseNbaParams({ showPastEvents: "maybe" }).ok).toBe(true);
   });
 
   it("nfl and ipl share the same team-filter parsing", () => {
     expect(parseNflParams({ teamIds: "1" }).ok).toBe(true);
-    expect(parseIplParams({ showPastEvents: "nope" }).ok).toBe(false);
+    expect(parseIplParams({ showPastEvents: "nope" }).ok).toBe(true);
   });
 });
 
 describe("parseF1Params", () => {
   it("parses valid session types to { ok: true }", () => {
-    expect(parseF1Params({ types: "2,3", showPastEvents: "true" })).toEqual({
+    expect(parseF1Params({ types: "2,3" })).toEqual({
       ok: true,
       value: { showPastEvents: true, types: ["2", "3"] },
     });
@@ -54,7 +54,7 @@ describe("parseF1Params", () => {
     expect(parseF1Params({ types: "2,5" }).ok).toBe(false);
   });
 
-  it("rejects an invalid showPastEvents value with { ok: false }", () => {
-    expect(parseF1Params({ showPastEvents: "nope" }).ok).toBe(false);
+  it("does not reject an unrecognized showPastEvents value", () => {
+    expect(parseF1Params({ showPastEvents: "nope" }).ok).toBe(true);
   });
 });
