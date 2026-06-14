@@ -268,7 +268,11 @@ Fetched by following `competitor.team.$ref`. **Only used for NBA and NFL** — F
 
 ```ts
 // shared/src/nba/types.ts, shared/src/nfl/types.ts
-type NbaTeam = BaseTeam & {
+type NbaTeam = {
+  $ref: string;
+  id: string;
+  name: string;
+  displayName: string;
   logos: Array<{
     href: string;   // absolute URL to logo image (ESPN CDN)
     rel: string[];  // variant tags, e.g. ["default"] or ["dark"]

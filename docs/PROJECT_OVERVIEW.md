@@ -52,7 +52,7 @@ shared/                          # @sports-calendar/shared — logic reused by c
 └── src/
     ├── espn/
     │   ├── fetchEventRefs.ts    # Paginated event references from ESPN
-    │   ├── fetchEventDetails.ts # Full event details by ref URL (defines BaseEvent / BaseTeam)
+    │   ├── fetchEventDetails.ts # Full event details by ref URL (defines BaseEvent)
     │   └── mapWithConcurrency.ts# Concurrency-capped async map (max N in flight)
     ├── eventStatus.ts           # isEventLive() / isEventPast() helpers
     ├── nba/  nfl/  f1/  ipl/    # Per-league modules, each with:
