@@ -15,7 +15,7 @@ function AddToCalendarFeedLinks({
 }: AddToCalendarFeedLinksProps) {
   const [copied, setCopied] = useState(false);
 
-  if (!import.meta.env.VITE_CALENDAR_FEED_BASE_URL) return null;
+  if (!feedUrl.startsWith("http")) return null;
 
   const webcalUrl = feedUrl.replace(/^https:/, "webcal:");
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl)}`;
