@@ -8,6 +8,7 @@ import NbaFilterSelector from "@/components/nba/nba-filter-selector";
 import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
 import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+import { buildNbaFeedUrl } from "@/components/nba/utils/buildNbaFeedUrl";
 import { NbaFilterPills } from "@/components/nba/nba-filter-pills";
 
 export const Route = createFileRoute("/nba")({
@@ -45,6 +46,7 @@ function NbaPage() {
             fetchEventRefsFn={fetchNbaEventRefs}
             transformEventsToIcsFn={transformNbaEventsToIcs}
             filterEvents={filterNbaEvents}
+            buildFeedUrlFn={buildNbaFeedUrl}
             eventFilters={filters}
           />
           <NbaFilterSelector filters={filters} setFilters={setFilters} />

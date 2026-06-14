@@ -34,6 +34,7 @@ jobs:
         env:
           VITE_BASE_PATH: /sports-calendar/
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+          VITE_CALENDAR_FEED_BASE_URL: ${{ vars.VITE_CALENDAR_FEED_BASE_URL }}
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3

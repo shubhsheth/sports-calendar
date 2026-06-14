@@ -8,6 +8,7 @@ import type { F1Event, F1EventFilters } from "@sports-calendar/shared";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
 import { filterF1Events } from "@/components/f1/utils/filterF1Events";
+import { buildF1FeedUrl } from "@/components/f1/utils/buildF1FeedUrl";
 import { F1FilterPills } from "@/components/f1/f1-filter-pills";
 
 export const Route = createFileRoute("/f1")({
@@ -45,6 +46,7 @@ function F1Page() {
             fetchEventRefsFn={fetchF1EventRefs}
             transformEventsToIcsFn={transformF1EventsToIcs}
             filterEvents={filterF1Events}
+            buildFeedUrlFn={buildF1FeedUrl}
             eventFilters={filters}
           />
           <F1FilterSelector filters={filters} setFilters={setFilters} />

@@ -18,6 +18,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { analytics } from "@/lib/analytics";
+import { buildIplFeedUrl } from "./utils/buildIplFeedUrl";
+import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 
 type IplDownloadIcalButtonProps = {
   filters: IplEventFilters;
@@ -30,6 +32,7 @@ function IplDownloadIcalButton({
 }: IplDownloadIcalButtonProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const feedUrl = buildIplFeedUrl(filters);
 
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const dates = getIplSeasonDates();
@@ -77,7 +80,8 @@ function IplDownloadIcalButton({
           <DialogHeader>
             <DialogTitle>Add to Calendar</DialogTitle>
             <DialogDescription>
-              Download a calendar file to import into your calendar app.
+              Download a one-time calendar file, or subscribe to a live feed
+              that updates automatically.
             </DialogDescription>
           </DialogHeader>
           <div className="px-5 pb-5 pt-2">
@@ -99,6 +103,7 @@ function IplDownloadIcalButton({
               )}
             </Button>
           </div>
+          <AddToCalendarFeedLinks league="ipl" feedUrl={feedUrl} />
         </DialogContent>
       </Dialog>
     </>

@@ -1,0 +1,18 @@
+import type { NflEventFilters } from "@sports-calendar/shared";
+import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
+
+/**
+ * Builds the live, auto-updating NFL `.ics` subscription feed URL for the given
+ * filters. `showPastEvents` is intentionally omitted — the live feed always
+ * includes past events.
+ *
+ * @param filters - The current NFL event filters (only `teamIds` is used).
+ * @returns The subscription feed URL.
+ */
+export function buildNflFeedUrl(filters: NflEventFilters): string {
+  const params = new URLSearchParams();
+  if (filters.teamIds.length > 0) {
+    params.set("teamIds", filters.teamIds.join(","));
+  }
+  return buildCalendarFeedUrl("nfl", params);
+}
