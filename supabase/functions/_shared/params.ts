@@ -1,5 +1,6 @@
 import type {
   F1EventFilters,
+  FifaEventFilters,
   IplEventFilters,
   NbaEventFilters,
   NflEventFilters,
@@ -31,7 +32,7 @@ function parseCommaList(raw: string | undefined): string[] {
     .filter(s => s.length > 0);
 }
 
-/** Shared shape for the team-filtered leagues (NBA / NFL / IPL). */
+/** Shared shape for the team-filtered leagues (NBA / NFL / IPL / FIFA). */
 function parseTeamFilters(
   query: Query
 ): ParseResult<{ showPastEvents: boolean; teamIds: string[] }> {
@@ -53,6 +54,10 @@ export function parseNflParams(query: Query): ParseResult<NflEventFilters> {
 }
 
 export function parseIplParams(query: Query): ParseResult<IplEventFilters> {
+  return parseTeamFilters(query);
+}
+
+export function parseFifaParams(query: Query): ParseResult<FifaEventFilters> {
   return parseTeamFilters(query);
 }
 

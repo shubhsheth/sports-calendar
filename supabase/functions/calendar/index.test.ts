@@ -18,6 +18,7 @@ async function fixture(name: string): Promise<unknown> {
 const nbaDetail = await fixture("nba.json");
 const nflDetail = await fixture("nfl.json");
 const f1Detail = await fixture("f1.json");
+const fifaDetail = await fixture("fifa.json");
 const iplScoreboard = await fixture("ipl-scoreboard.json");
 
 // Import the app without binding a port: stub Deno.serve for the duration of
@@ -38,6 +39,7 @@ const DETAILS: Record<string, unknown> = {
   "/events/401": nbaDetail,
   "/events/501": nflDetail,
   "/events/601": f1Detail,
+  "/events/801": fifaDetail,
 };
 
 const REFS: Record<string, { firstType: string; ref: string }> = {
@@ -52,6 +54,10 @@ const REFS: Record<string, { firstType: string; ref: string }> = {
   "/leagues/f1/": {
     firstType: "/types/2/",
     ref: "https://sports.core.api.espn.com/v2/sports/racing/leagues/f1/events/601",
+  },
+  "/leagues/fifa.world/": {
+    firstType: "/types/1/",
+    ref: "https://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world/events/801",
   },
 };
 
@@ -104,7 +110,7 @@ function restoreFetch(): void {
   globalThis.fetch = realFetch;
 }
 
-const ROUTES = ["nba", "nfl", "f1", "ipl"];
+const ROUTES = ["nba", "nfl", "f1", "ipl", "fifa"];
 
 Deno.test("each league route returns valid text/calendar ICS (200)", async () => {
   installFetchMock();

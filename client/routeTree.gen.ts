@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as NflRouteImport } from './routes/nfl'
 import { Route as NbaRouteImport } from './routes/nba'
 import { Route as IplRouteImport } from './routes/ipl'
+import { Route as FifaRouteImport } from './routes/fifa'
 import { Route as F1RouteImport } from './routes/f1'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const IplRoute = IplRouteImport.update({
   path: '/ipl',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FifaRoute = FifaRouteImport.update({
+  id: '/fifa',
+  path: '/fifa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const F1Route = F1RouteImport.update({
   id: '/f1',
   path: '/f1',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/f1': typeof F1Route
+  '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/f1': typeof F1Route
+  '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
@@ -59,21 +67,23 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/f1': typeof F1Route
+  '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/f1' | '/ipl' | '/nba' | '/nfl'
+  fullPaths: '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/f1' | '/ipl' | '/nba' | '/nfl'
-  id: '__root__' | '/' | '/f1' | '/ipl' | '/nba' | '/nfl'
+  to: '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
+  id: '__root__' | '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   F1Route: typeof F1Route
+  FifaRoute: typeof FifaRoute
   IplRoute: typeof IplRoute
   NbaRoute: typeof NbaRoute
   NflRoute: typeof NflRoute
@@ -102,6 +112,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IplRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fifa': {
+      id: '/fifa'
+      path: '/fifa'
+      fullPath: '/fifa'
+      preLoaderRoute: typeof FifaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/f1': {
       id: '/f1'
       path: '/f1'
@@ -122,6 +139,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   F1Route: F1Route,
+  FifaRoute: FifaRoute,
   IplRoute: IplRoute,
   NbaRoute: NbaRoute,
   NflRoute: NflRoute,
