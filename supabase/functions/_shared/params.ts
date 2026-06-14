@@ -12,7 +12,7 @@ export type ParseResult<T> =
 type Query = Record<string, string>;
 
 /** Valid F1 session type IDs: Practice, Qualifying, Race, Sprint Qualifying, Sprint Race */
-const F1_VALID_TYPES = ["1", "2", "3", "4", "6"];
+const F1_VALID_TYPES = ["1", "2", "3", "5", "6"];
 
 /**
  * Backend feeds always include past events so subscribed calendars retain

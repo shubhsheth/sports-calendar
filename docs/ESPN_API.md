@@ -244,14 +244,14 @@ For F1, `competition.type.id` identifies the **session within the race weekend**
 | `"1"` | `"FP1"` / `"FP2"` / `"FP3"` | Free Practice 1 / 2 / 3 | Hidden |
 | `"2"` | `"Qual"` | Qualifying | Shown |
 | `"3"` | `"Race"` | Race | Shown |
-| `"4"` | `"Sprint"` | Sprint Qualifying | Shown |
+| `"5"` | `"SS"` | Sprint Qualifying (Sprint Shootout) | Shown |
 | `"6"` | `"SR"` | Sprint Race | Shown |
 
 Notes:
 - Type ID `"1"` covers all free practice sessions; `abbreviation` ("FP1", "FP2", "FP3") differentiates them
-- Type ID `"5"` is unaccounted for — its meaning is unknown
-- Sprint weekends replace some practice sessions with Sprint Qualifying (`"4"`) and Sprint Race (`"6"`); the exact session set may vary
-- Default filter in `src/routes/f1.tsx`: `types: ["2", "3", "4", "6"]` — practice hidden by default
+- Type ID `"4"` (`"Sprint"`) is the legacy pre-2023 sprint format and does not appear in current seasons — it is intentionally unmapped
+- Sprint weekends replace some practice sessions with Sprint Qualifying (`"5"`) and Sprint Race (`"6"`); the exact session set may vary
+- Default filter in `src/routes/f1.tsx`: `types: ["2", "3", "5", "6"]` — practice hidden by default
 
 ### F1 event names and sponsor cleanup
 

@@ -9,8 +9,8 @@ describe("translateF1EventTypeAbbr", () => {
     ["FP2", "Free Practice 2"],
     ["FP3", "Free Practice 3"],
     ["Qual", "Qualifying"],
-    ["Sprint", "Spring Qualifying"],
-    ["SR", "Spring Race"],
+    ["SS", "Sprint Qualifying"],
+    ["SR", "Sprint Race"],
   ])("translates %s to %s", (input, expected) => {
     expect(translateF1EventTypeAbbr(input)).toBe(expected);
   });
@@ -26,14 +26,14 @@ describe("translateF1EventTypeId", () => {
     ["1", "Practice"],
     ["2", "Qualifying"],
     ["3", "Race"],
-    ["4", "Spring Qualifying"],
-    ["6", "Spring Race"],
+    ["5", "Sprint Qualifying"],
+    ["6", "Sprint Race"],
   ])("translates id %s to %s", (input, expected) => {
     expect(translateF1EventTypeId(input)).toBe(expected);
   });
 
   it('returns "Other" for unknown IDs', () => {
-    expect(translateF1EventTypeId("5")).toBe("Other");
+    expect(translateF1EventTypeId("4")).toBe("Other");
     expect(translateF1EventTypeId("99")).toBe("Other");
     expect(translateF1EventTypeId("")).toBe("Other");
   });

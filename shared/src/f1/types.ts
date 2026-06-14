@@ -35,7 +35,7 @@ export const F1_SESSION_DURATIONS: Record<string, number> = {
   "1": 60, // Practice (FP1 / FP2 / FP3)
   "2": 60, // Qualifying
   "3": 120, // Race
-  "4": 45, // Sprint Qualifying
+  "5": 45, // Sprint Qualifying (Sprint Shootout)
   "6": 30, // Sprint Race
 };
 
@@ -47,10 +47,10 @@ export function translateF1EventTypeAbbr(type: string): string {
       return "Free Practice 2";
     case "FP3":
       return "Free Practice 3";
-    case "Sprint":
-      return "Spring Qualifying";
+    case "SS":
+      return "Sprint Qualifying";
     case "SR":
-      return "Spring Race";
+      return "Sprint Race";
     case "Qual":
       return "Qualifying";
     default:
@@ -66,10 +66,10 @@ export function translateF1EventTypeId(type: string): string {
       return "Qualifying";
     case "3":
       return "Race";
-    case "4":
-      return "Spring Qualifying";
+    case "5":
+      return "Sprint Qualifying";
     case "6":
-      return "Spring Race";
+      return "Sprint Race";
     default:
       return "Other";
   }

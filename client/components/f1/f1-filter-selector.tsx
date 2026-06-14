@@ -30,7 +30,7 @@ type F1FilterSelectorProps = {
 };
 
 function F1FilterSelector({ filters, setFilters }: F1FilterSelectorProps) {
-  const eventTypeIds = ["1", "2", "3", "4", "6"];
+  const eventTypeIds = ["1", "2", "3", "5", "6"];
 
   return (
     <Sheet>

@@ -32,7 +32,7 @@ const F1_SEASON_TYPE_IDS = [2];
 function F1Page() {
   const [filters, setFilters] = useLocalStorageState<F1EventFilters>(
     "sports-calendar:f1-filters",
-    { showPastEvents: false, types: ["2", "3", "4", "6"] }
+    { showPastEvents: false, types: ["2", "3", "5", "6"] }
   );
 
   return (
