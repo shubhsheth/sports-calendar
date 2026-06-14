@@ -6,5 +6,6 @@ export function buildNflFeedUrl(filters: NflEventFilters): string {
   if (filters.teamIds.length > 0) {
     params.set("teamIds", filters.teamIds.join(","));
   }
+  // showPastEvents is intentionally omitted: the live feed always includes past events.
   return buildCalendarFeedUrl("nfl", params);
 }

@@ -6,5 +6,6 @@ export function buildF1FeedUrl(filters: F1EventFilters): string {
   if (filters.types.length > 0) {
     params.set("types", filters.types.join(","));
   }
+  // showPastEvents is intentionally omitted: the live feed always includes past events.
   return buildCalendarFeedUrl("f1", params);
 }
