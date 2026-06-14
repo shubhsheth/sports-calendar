@@ -21,10 +21,7 @@ import { analytics } from "@/lib/analytics";
 import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 
-type DownloadIcalButtonProps<
-  T extends BaseEvent,
-  F extends { teamIds?: string[]; types?: string[] },
-> = {
+type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   league: string;
   seasonTypeIds: number[];
   fetchEventRefsFn: (
@@ -37,10 +34,7 @@ type DownloadIcalButtonProps<
   filename?: string;
 };
 
-function DownloadIcalButton<
-  T extends BaseEvent,
-  F extends { teamIds?: string[]; types?: string[] },
->({
+function DownloadIcalButton<T extends BaseEvent, F>({
   league,
   seasonTypeIds,
   fetchEventRefsFn,
@@ -52,7 +46,10 @@ function DownloadIcalButton<
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const feedUrl = buildCalendarFeedUrl(league, eventFilters);
+  const feedUrl = buildCalendarFeedUrl(
+    league,
+    eventFilters as { teamIds?: string[]; types?: string[] }
+  );
 
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const allEvents = await fetchAllEvents<T>(
