@@ -47,6 +47,12 @@ export const analytics = {
     capture("calendar_download_opened", { league }),
   calendarDownloaded: (league: string) =>
     capture("calendar_downloaded", { league }),
+  calendarFeedUrlCopied: (league: string) =>
+    capture("calendar_feed_url_copied", { league }),
+  calendarFeedAppleClicked: (league: string) =>
+    capture("calendar_feed_apple_clicked", { league }),
+  calendarFeedGoogleClicked: (league: string) =>
+    capture("calendar_feed_google_clicked", { league }),
   scheduleNextPageLoaded: (league: string, pageNumber: number) =>
     capture("schedule_next_page_loaded", { league, page_number: pageNumber }),
 };

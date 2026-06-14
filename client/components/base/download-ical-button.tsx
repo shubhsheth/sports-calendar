@@ -18,8 +18,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { analytics } from "@/lib/analytics";
+import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
+import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 
-type DownloadIcalButtonProps<T extends BaseEvent, F> = {
+type DownloadIcalButtonProps<
+  T extends BaseEvent,
+  F extends { teamIds?: string[]; types?: string[] },
+> = {
   league: string;
   seasonTypeIds: number[];
   fetchEventRefsFn: (
@@ -32,7 +37,10 @@ type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   filename?: string;
 };
 
-function DownloadIcalButton<T extends BaseEvent, F>({
+function DownloadIcalButton<
+  T extends BaseEvent,
+  F extends { teamIds?: string[]; types?: string[] },
+>({
   league,
   seasonTypeIds,
   fetchEventRefsFn,
@@ -44,6 +52,7 @@ function DownloadIcalButton<T extends BaseEvent, F>({
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const feedUrl = buildCalendarFeedUrl(league, eventFilters);
 
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const allEvents = await fetchAllEvents<T>(
@@ -92,7 +101,8 @@ function DownloadIcalButton<T extends BaseEvent, F>({
           <DialogHeader>
             <DialogTitle>Add to Calendar</DialogTitle>
             <DialogDescription>
-              Download a calendar file to import into your calendar app.
+              Download a one-time calendar file, or subscribe to a live feed
+              that updates automatically.
             </DialogDescription>
           </DialogHeader>
           <div className="px-5 pb-5 pt-2">
@@ -114,6 +124,7 @@ function DownloadIcalButton<T extends BaseEvent, F>({
               )}
             </Button>
           </div>
+          <AddToCalendarFeedLinks league={league} feedUrl={feedUrl} />
         </DialogContent>
       </Dialog>
     </>
