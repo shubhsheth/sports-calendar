@@ -35,9 +35,9 @@ Leagues currently supported by this project:
 | FIFA   | `soccer`     | `fifa.world` | `2026`     |
 
 **Season ID convention:** The season ID is the **calendar year the season starts**, even when it extends into the following year. For example, the 2025 NFL season begins in September 2025 and ends in February 2026, but the API uses `2025`. These are hardcoded in:
-- `src/components/nba/utils/fetchNbaEventRefs.ts`
-- `src/components/nfl/utils/fetchNflEventRefs.ts`
-- `src/components/f1/utils/fetchF1EventRefs.ts`
+- `client/components/nba/utils/fetchNbaEventRefs.ts`
+- `client/components/nfl/utils/fetchNflEventRefs.ts`
+- `client/components/f1/utils/fetchF1EventRefs.ts`
 
 ---
 
@@ -52,10 +52,10 @@ The Core API never returns full nested objects inline. Every sub-resource is rep
 To get the actual data, you follow the URL with a second fetch. This project implements two generic ref-followers:
 
 ```ts
-// src/api/espn/fetchEventDetails.ts
+// shared/src/espn/fetchEventDetails.ts
 export async function fetchEventDetails<T = BaseEvent>(refUrl: string): Promise<T>
 
-// src/api/espn/fetchTeamDetails.ts
+// client/api/espn/fetchTeamDetails.ts
 export async function fetchTeamDetails<T = BaseTeam>(refUrl: string): Promise<T>
 ```
 
@@ -80,8 +80,8 @@ GET /v2/sports/{sportId}/leagues/{leagueId}/seasons/{seasonId}/types/{seasonType
     ?limit={pageSize}&page={pageNumber}
 ```
 
-Implemented in `src/api/espn/fetchEventRefs.ts` → `fetchEventRefsBySeason()`.  
-Per-sport wrappers set `pageSize: 30` and pass `pageNumber` from the infinite scroll cursor.
+Implemented in `shared/src/espn/fetchEventRefs.ts` → `fetchEventRefsBySeason()`.  
+Per-sport wrappers (in `client/components/<league>/utils/`) set `pageSize: 30` and pass `pageNumber` from the infinite scroll cursor.
 
 ### Response shape
 
@@ -116,7 +116,7 @@ These IDs are hardcoded because their full range of valid values is not well-und
 
 ## 5. Event Structure
 
-Every event `$ref` from the items list resolves to an object that extends `BaseEvent` (`src/types/base.ts`):
+Every event `$ref` from the items list resolves to an object that extends `BaseEvent` (defined in `shared/src/espn/fetchEventDetails.ts`):
 
 ```ts
 type BaseEvent = {
@@ -139,7 +139,7 @@ For F1, one event = one race weekend with 4–6 competitions (one per session).
 
 ### `NbaEvent` / `NflEvent` (virtually identical structures)
 
-Defined in `src/types/nba.ts` and `src/types/nfl.ts`.
+Defined in `shared/src/nba/types.ts` and `shared/src/nfl/types.ts`.
 
 ```ts
 type NbaEventCompetition = {
@@ -182,7 +182,7 @@ Notes:
 
 `competition.type` reflects the **nature of the game**, not always the season phase. Even when fetching via `types/2` (Regular Season), the competition's own `type.id` is returned and can be used for display or filtering.
 
-**Known values** (from `src/components/nba/utils/translateNbaEventType.ts`; NFL is identical):
+**Known values** (from `client/components/nba/utils/translateNbaEventType.ts`; NFL is identical):
 
 | `id` | `abbreviation` | Human-readable |
 |------|---------------|----------------|
@@ -200,7 +200,7 @@ The full set of IDs is not confirmed. Additional values may exist for the NBA In
 
 ### `F1Event`
 
-Defined in `src/types/f1.ts`.
+Defined in `shared/src/f1/types.ts`.
 
 ```ts
 type F1EventCompetition = {
@@ -238,7 +238,7 @@ type F1EventCompetition = {
 
 For F1, `competition.type.id` identifies the **session within the race weekend**, not the season phase. This is a fundamental semantic difference from how NBA/NFL use the same `type` field.
 
-**Known values** (from `src/components/f1/utils/translateF1EventType.ts`):
+**Known values** (from `client/components/f1/utils/translateF1EventType.ts`):
 
 | `id` | `abbreviation` | Human-readable | Default filter |
 |------|---------------|----------------|----------------|
@@ -252,11 +252,11 @@ Notes:
 - Type ID `"1"` covers all free practice sessions; `abbreviation` ("FP1", "FP2", "FP3") differentiates them
 - Type ID `"4"` (`"Sprint"`) is the legacy pre-2023 sprint format and does not appear in current seasons — it is intentionally unmapped
 - Sprint weekends replace some practice sessions with Sprint Qualifying (`"5"`) and Sprint Race (`"6"`); the exact session set may vary
-- Default filter in `src/routes/f1.tsx`: `types: ["2", "3", "5", "6"]` — practice hidden by default
+- Default filter in `client/routes/f1.tsx`: `types: ["2", "3", "5", "6"]` — practice hidden by default
 
 ### F1 event names and sponsor cleanup
 
-F1 event names contain title sponsor prefixes (e.g. `"Qatar Airways Bahrain Grand Prix"`). `cleanUpSponsorName()` in `src/components/f1/utils/cleanUpSponsorName.ts` strips known sponsors for display and ICS titles.
+F1 event names contain title sponsor prefixes (e.g. `"Qatar Airways Bahrain Grand Prix"`). `cleanUpSponsorName()` in `client/components/f1/utils/cleanUpSponsorName.ts` strips known sponsors for display and ICS titles.
 
 Current sponsor list: Qatar Airways, Heineken, Aramco, Gulf Air, STC, Crypto.com, Lenovo, MSC Cruises, Pirelli, AWS, Tag Heuer, Singapore Airlines, Etihad Airways.
 
@@ -267,7 +267,7 @@ Current sponsor list: Qatar Airways, Heineken, Aramco, Gulf Air, STC, Crypto.com
 Fetched by following `competitor.team.$ref`. **Only used for NBA and NFL** — F1 has no competitor data.
 
 ```ts
-// src/types/nba.ts, src/types/nfl.ts
+// shared/src/nba/types.ts, shared/src/nfl/types.ts
 type NbaTeam = BaseTeam & {
   logos: Array<{
     href: string;   // absolute URL to logo image (ESPN CDN)
@@ -316,7 +316,7 @@ React Query is configured globally with `staleTime: 30m` and `gcTime: 60m`, so n
 
 ### Concurrency during ICS export
 
-`DownloadIcalButton` (`src/components/base/download-ical-button.tsx`) fetches all event details at once for the full season export. It uses a custom `mapWithConcurrency(items, 8, fn)` to cap simultaneous requests at 8. The limit of 8 is **arbitrary** — chosen to avoid overwhelming the user's device with too many parallel network requests, not to work around any known ESPN server-side rate limit.
+`DownloadIcalButton` (`client/components/base/download-ical-button.tsx`) fetches all event details at once for the full season export. It uses `mapWithConcurrency(items, 8, fn)` (`shared/src/espn/mapWithConcurrency.ts`) to cap simultaneous requests at 8. The limit of 8 is **arbitrary** — chosen to avoid overwhelming the user's device with too many parallel network requests, not to work around any known ESPN server-side rate limit. The same helper backs the per-league `fetch.ts` orchestrators in `shared/`, which the calendar feed backend uses (see `docs/BACKEND.md`).
 
 ---
 
@@ -330,10 +330,10 @@ React Query is configured globally with `staleTime: 30m` and `gcTime: 60m`, so n
 
 F1 example output: `"F1: Qualifying (Bahrain Grand Prix)"` — sponsor stripped from event name, abbreviation translated to full session type name.
 
-Transform functions:
-- `src/components/nba/utils/transformNbaEventsToIcs.ts`
-- `src/components/nfl/utils/transformNflEventsToIcs.ts`
-- `src/components/f1/utils/transformF1EventsToIcs.ts`
+Transform functions (client export copies; the backend uses the equivalents in `shared/src/<league>/transform.ts`):
+- `client/components/nba/utils/transformNbaEventsToIcs.ts`
+- `client/components/nfl/utils/transformNflEventsToIcs.ts`
+- `client/components/f1/utils/transformF1EventsToIcs.ts`
 
 ---
 
@@ -380,7 +380,7 @@ The Site API returns **inline data** — no `$ref` stub-following is needed. Tea
 |---|---|
 | League ID | `8048` |
 | 2026 season start | 2026-03-28 |
-| 2026 season end | 2026-05-24 |
+| 2026 season end | 2026-06-01 |
 | Season ID concept | Not used — events are fetched by **date** not season type |
 
 ### Event shape (Site API)
