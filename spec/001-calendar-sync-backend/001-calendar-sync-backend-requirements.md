@@ -11,7 +11,7 @@ Build a lightweight HTTP service (Supabase Edge Function) that generates and ser
 ## User Stories
 
 - As a fan, I want to subscribe to an NBA calendar filtered to my team so it appears in my calendar app and stays updated automatically.
-- As a fan, I want to filter with `showPastEvents=false` so completed games don't clutter my calendar.
+- As a fan, I want my subscribed calendar to retain the full season (past and future games), since native calendar apps let me scroll back through history.
 - As an F1 fan, I want to subscribe to only Race and Qualifying sessions, not practice.
 - As a developer, I want filter params to mirror the frontend exactly so I can copy the URL from the web app.
 
@@ -22,9 +22,9 @@ Build a lightweight HTTP service (Supabase Edge Function) that generates and ser
   - `GET /calendar/nfl.ics`
   - `GET /calendar/f1.ics`
   - `GET /calendar/ipl.ics`
-- **FR-2:** Accept the same filter query params the frontend uses per league:
-  - NBA / NFL / IPL: `teamIds` (comma-separated IDs), `showPastEvents` (`true` / `false`)
-  - F1: `types` (comma-separated session type IDs: 1, 2, 3, 4, 6), `showPastEvents` (`true` / `false`)
+- **FR-2:** Accept the same filter query params the frontend uses per league. Feeds always include past events (subscribed calendars keep full-season history), so the `showPastEvents` param is not supported by the backend:
+  - NBA / NFL / IPL: `teamIds` (comma-separated IDs)
+  - F1: `types` (comma-separated session type IDs: 1, 2, 3, 4, 6)
 - **FR-3:** Return a valid `.ics` (RFC 5545) response with `Content-Type: text/calendar; charset=utf-8`.
 - **FR-4:** Set `Cache-Control: public, max-age=3600` so calendar clients cache the feed locally for 1 hour.
 - **FR-5:** Each calendar event must include: title, start/end datetime, location (venue, if available), description (teams, league, status), and a stable `UID` (e.g. `{eventId}@sports-calendar`).
@@ -192,7 +192,7 @@ The `deno.json` maps the shared package name for Deno (npm workspaces handle thi
 
 ## Success Criteria
 
-1. Pasting `/calendar/nba.ics?teamIds=10&showPastEvents=false` into Apple Calendar's "New Calendar Subscription" shows only future games for that team.
+1. Pasting `/calendar/nba.ics?teamIds=10` into Apple Calendar's "New Calendar Subscription" shows that team's games (past and future).
 2. Google Calendar can subscribe to the same URL and displays the same events.
 3. Different filter params produce a different, valid `.ics` response.
 4. The feed updates automatically in calendar clients without user action (driven by `REFRESH-INTERVAL: PT1H`).
