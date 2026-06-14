@@ -18,7 +18,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { analytics } from "@/lib/analytics";
-import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
+import { buildIplFeedUrl } from "./utils/buildIplFeedUrl";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 
 type IplDownloadIcalButtonProps = {
@@ -32,7 +32,7 @@ function IplDownloadIcalButton({
 }: IplDownloadIcalButtonProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const feedUrl = buildCalendarFeedUrl("ipl", filters);
+  const feedUrl = buildIplFeedUrl(filters);
 
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const dates = getIplSeasonDates();

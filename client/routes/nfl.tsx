@@ -8,6 +8,7 @@ import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
 import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
 import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
+import { buildNflFeedUrl } from "@/components/nfl/utils/buildNflFeedUrl";
 import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
 
 export const Route = createFileRoute("/nfl")({
@@ -45,6 +46,7 @@ function NflPage() {
             fetchEventRefsFn={fetchNflEventRefs}
             transformEventsToIcsFn={transformNflEventsToIcs}
             filterEvents={filterNflEvents}
+            buildFeedUrlFn={buildNflFeedUrl}
             eventFilters={filters}
           />
           <NflFilterSelector filters={filters} setFilters={setFilters} />

@@ -18,7 +18,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { analytics } from "@/lib/analytics";
-import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 
 type DownloadIcalButtonProps<T extends BaseEvent, F> = {
@@ -30,6 +29,7 @@ type DownloadIcalButtonProps<T extends BaseEvent, F> = {
   ) => Promise<FetchEventRefsResponse>;
   transformEventsToIcsFn: (events: T[]) => EventAttributes[];
   filterEvents: (events: T[], filters: F) => T[];
+  buildFeedUrlFn: (filters: F) => string;
   eventFilters: F;
   filename?: string;
 };
@@ -40,16 +40,14 @@ function DownloadIcalButton<T extends BaseEvent, F>({
   fetchEventRefsFn,
   transformEventsToIcsFn,
   filterEvents,
+  buildFeedUrlFn,
   eventFilters,
   filename = "calendar.ics",
 }: DownloadIcalButtonProps<T, F>) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const feedUrl = buildCalendarFeedUrl(
-    league,
-    eventFilters as { teamIds?: string[]; types?: string[] }
-  );
+  const feedUrl = buildFeedUrlFn(eventFilters);
 
   const buildIcsBlob = async (): Promise<Blob | null> => {
     const allEvents = await fetchAllEvents<T>(

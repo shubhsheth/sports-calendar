@@ -6,7 +6,7 @@ import { analytics } from "@/lib/analytics";
 
 type AddToCalendarFeedLinksProps = {
   league: string;
-  feedUrl: string | null;
+  feedUrl: string;
 };
 
 function AddToCalendarFeedLinks({
@@ -15,7 +15,7 @@ function AddToCalendarFeedLinks({
 }: AddToCalendarFeedLinksProps) {
   const [copied, setCopied] = useState(false);
 
-  if (!feedUrl) return null;
+  if (!import.meta.env.VITE_CALENDAR_FEED_BASE_URL) return null;
 
   const webcalUrl = feedUrl.replace(/^https:/, "webcal:");
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl)}`;
