@@ -5,6 +5,9 @@ import { buildCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
  * Builds the live, auto-updating IPL `.ics` subscription feed URL for the given
  * filters. `showPastEvents` is intentionally omitted — the live feed always
  * includes past events.
+ *
+ * @param filters - The current IPL event filters (only `teamIds` is used).
+ * @returns The subscription feed URL.
  */
 export function buildIplFeedUrl(filters: IplEventFilters): string {
   const params = new URLSearchParams();
