@@ -38,6 +38,7 @@ Leagues currently supported by this project:
 - `client/components/nba/utils/fetchNbaEventRefs.ts`
 - `client/components/nfl/utils/fetchNflEventRefs.ts`
 - `client/components/f1/utils/fetchF1EventRefs.ts`
+- `client/components/fifa/utils/fetchFifaEventRefs.ts`
 
 ---
 
@@ -100,7 +101,7 @@ Per-sport wrappers (in `client/components/<league>/utils/`) set `pageSize: 30` a
 
 ### Season type IDs (`types/{seasonTypeId}`)
 
-The `types/` segment filters which **phase** of the season is returned. All three leagues hardcode `types/2`:
+The `types/` segment filters which **phase** of the season is returned. NBA, NFL, and F1 hardcode `types/2`; FIFA fetches both `types/1` (Group Stage) and `types/2` (Knockout Stage) and merges the results:
 
 | ID | Meaning | Used |
 |----|---------|------|

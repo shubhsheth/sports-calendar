@@ -48,6 +48,7 @@ The only per-league differences are the four functions wired in, all from
 | `GET /calendar/nba.ics` | `teamIds` (comma-separated team IDs) |
 | `GET /calendar/nfl.ics` | `teamIds` |
 | `GET /calendar/ipl.ics` | `teamIds` |
+| `GET /calendar/fifa.ics` | `teamIds` |
 | `GET /calendar/f1.ics`  | `types` (comma-separated session type IDs: `1,2,3,5,6`) |
 
 Notes:

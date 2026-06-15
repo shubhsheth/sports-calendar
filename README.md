@@ -1,6 +1,6 @@
 # Sports Calendar
 
-A live calendar for **NBA, NFL, Formula 1, and IPL** schedules. Browse fixtures
+A live calendar for your favorite sports leagues. Browse fixtures
 with infinite scroll and filtering, export them as an `.ics` file, or **subscribe
 to an auto-updating feed** in Apple Calendar or Google Calendar.
 

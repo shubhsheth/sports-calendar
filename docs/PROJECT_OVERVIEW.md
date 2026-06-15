@@ -2,7 +2,7 @@
 
 ## Main Goal
 
-A React SPA that fetches **NBA, NFL, F1, and IPL** schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend.
+A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend.
 
 This is an npm-workspaces monorepo: a `client/` SPA (deployed to GitHub Pages), a `shared/` package of ESPN/league logic reused by both surfaces, and a `supabase/` Edge Function that serves the subscription feeds.
 
@@ -55,7 +55,7 @@ shared/                          # @sports-calendar/shared — logic reused by c
     │   ├── fetchEventDetails.ts # Full event details by ref URL (defines BaseEvent)
     │   └── mapWithConcurrency.ts# Concurrency-capped async map (max N in flight)
     ├── eventStatus.ts           # isEventLive() / isEventPast() helpers
-    ├── nba/  nfl/  f1/  ipl/    # Per-league modules, each with:
+    ├── nba/ nfl/ f1/ ipl/ fifa/ # Per-league modules, each with:
     │   ├── types.ts             #   league event/team/filter types
     │   ├── filters.ts           #   filter<League>Events
     │   ├── fetch.ts             #   fetchAll<League>Events (full-season fetch)
@@ -76,7 +76,7 @@ client/                          # @sports-calendar/client — the React SPA
 │   │   ├── download-ical-button.tsx       # Generic ICS export with concurrency control
 │   │   ├── add-to-calendar-feed-links.tsx # Copy/Apple/Google subscription links
 │   │   └── filter-pill.tsx
-│   ├── nba/  nfl/  f1/  ipl/    # Per-league UI + utils/, e.g. nba/:
+│   ├── nba/ nfl/ f1/ ipl/ fifa/ # Per-league UI + utils/, e.g. nba/:
 │   │   ├── nba-event-card.tsx
 │   │   ├── nba-filter-selector.tsx
 │   │   ├── nba-filter-pills.tsx
@@ -88,7 +88,7 @@ client/                          # @sports-calendar/client — the React SPA
 ├── routes/
 │   ├── __root.tsx               # Layout: Header + Outlet + Footer
 │   ├── index.tsx                # Home: sport selection grid
-│   ├── nba.tsx  nfl.tsx  f1.tsx  ipl.tsx
+│   ├── nba.tsx  nfl.tsx  f1.tsx  ipl.tsx  fifa.tsx
 └── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init
 
 supabase/                        # Calendar feed backend (see docs/BACKEND.md)
@@ -123,7 +123,7 @@ ESPN's API returns paginated arrays of `{ $ref: URL }` objects. The app fetches 
 - 30-min stale time + 60-min GC = aggressive caching (no repeat network calls on revisit)
 
 ### 5. Per-Sport Self-Contained Modules
-Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`) owns its logic in two places:
+Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`) owns its logic in two places:
 - `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Supabase backend.
 - `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder with the client's own fetch/filter/transform/translate plus UI-only helpers (event durations, feed-URL builders, team lookups).
 
@@ -135,7 +135,7 @@ Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to
 - Initialises PostHog from `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` env vars; silently no-ops if the key is absent (safe for dev/test)
 - Exports a typed `analytics` object with one function per tracked interaction
 - Page views are captured via a `router.subscribe('onResolved', ...)` hook in `main.tsx`, so every TanStack Router navigation fires `$pageview` automatically
-- All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`) for easy segmentation in PostHog
+- All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`, `"fifa"`) for easy segmentation in PostHog
 
 **Key events:** `$pageview`, `league_selected`, `filter_panel_opened`, `filter_show_past_events_toggled`, `filter_team_toggled`, `filter_event_type_toggled` (F1), `filter_select_all_clicked`, `filter_clear_clicked`, `filter_pill_removed`, `calendar_download_opened`, `calendar_downloaded`, `calendar_feed_url_copied`, `calendar_feed_apple_clicked`, `calendar_feed_google_clicked`, `schedule_next_page_loaded`
 
@@ -150,7 +150,7 @@ Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to
 ## Data Flow
 
 ```
-User navigates to /nba (NBA/NFL/F1 — ESPN Core API, $ref pagination)
+User navigates to /nba (NBA/NFL/F1/FIFA — ESPN Core API, $ref pagination)
   → Route initializes filter state (useState)
   → InfiniteScrollEvents: useInfiniteQuery fetches paginated EventRef[]
   → IntersectionObserver fires fetchNextPage() as user scrolls
