@@ -22,7 +22,7 @@ tasks.md after the human approves the increment.
 
 ## Progress
 - [x] T1 — Export `cleanUpF1SponsorNames`
-- [ ] T2 — Slim filters to toggles + repoint filter consumers
+- [x] T2 — Slim filters to toggles + repoint filter consumers
 - [ ] T3 — Adopt shared transforms
 - [ ] T4 — Use shared `eventStatus`
 - [ ] T5 — Use shared F1 helpers
@@ -36,5 +36,9 @@ tasks.md after the human approves the increment.
   private, duplicated consts in filters.ts + transform.ts. T6 reworked: export the constant
   once from `shared/src/{sport}/types.ts`, refactor shared filters/transform to import it,
   delete client copies, repoint event cards. F1 already uses shared `F1_SESSION_DURATIONS`.
-- **Spec drift (pre-T2):** `ipl-download-ical-button.tsx` defines a local `mapWithConcurrency`
-  duplicating shared's export → fold replacement into T3.
+- **CI gate (verified):** CI runs `npm run lint && npm run format:check`, `npm run test:run`,
+  `npm run build` (Vite/esbuild). It does NOT run `tsc -b`. Baseline `tsc -b` already has 6
+  pre-existing `duration`-on-`EventAttributes` errors in the client `transform*.test.ts` files
+  (relocated/fixed in T7). Use the CI gate as the per-task verification, not `tsc -b`.
+- **T7 caution:** when relocating transform tests to shared, avoid re-introducing the
+  `EventAttributes.duration` access error (the `ics` union doesn't expose `duration` directly).

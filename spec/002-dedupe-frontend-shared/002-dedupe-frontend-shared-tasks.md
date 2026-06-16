@@ -7,7 +7,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `cleanUpF1SponsorNames` from a private function to an `export`. No other shared API changes.
   Verify: `npm run test:run` still green.
 
-- [ ] **T2 — Slim filters to UI-only + repoint filter consumers.** In each
+- [x] **T2 — Slim filters to UI-only + repoint filter consumers.** In each
   `client/components/{sport}/utils/filter{Sport}Events.ts`, remove the duplicated
   `filter{Sport}Events`, `filter{Sport}Event`, `getTeamIdFromRef`, and now-unused
   `isEventPast`/duration imports; keep only the React `toggle*` helpers. Update every consumer
