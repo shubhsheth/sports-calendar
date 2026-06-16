@@ -21,7 +21,7 @@ tasks.md after the human approves the increment.
   `fetchIplEvents`, `build{Sport}FeedUrl`.
 
 ## Progress
-- [ ] T1 — Export `cleanUpF1SponsorNames`
+- [x] T1 — Export `cleanUpF1SponsorNames`
 - [ ] T2 — Slim filters to toggles + repoint filter consumers
 - [ ] T3 — Adopt shared transforms
 - [ ] T4 — Use shared `eventStatus`
@@ -31,4 +31,10 @@ tasks.md after the human approves the increment.
 - [ ] T8 — Full verification
 
 ## Notes
-(Record per-task decisions, surprises, and any spec drift here as work proceeds.)
+- **Spec drift (pre-T2):** Duration constants are NOT orphaned — `{sport}-event-card.tsx`
+  (nba/nfl/fifa/ipl) use `{SPORT}_DURATION_MINUTES` for the live badge. Shared keeps them as
+  private, duplicated consts in filters.ts + transform.ts. T6 reworked: export the constant
+  once from `shared/src/{sport}/types.ts`, refactor shared filters/transform to import it,
+  delete client copies, repoint event cards. F1 already uses shared `F1_SESSION_DURATIONS`.
+- **Spec drift (pre-T2):** `ipl-download-ical-button.tsx` defines a local `mapWithConcurrency`
+  duplicating shared's export → fold replacement into T3.

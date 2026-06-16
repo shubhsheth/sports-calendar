@@ -3,7 +3,7 @@
 Pattern repeats across five sports: `nba`, `nfl`, `fifa`, `f1`, `ipl`. F1 has extra helpers.
 Each task ends in a compiling, testable state. Verify after each with `npx tsc -b` + `npm run test:run`.
 
-- [ ] **T1 — Export the missing shared symbol.** In `shared/src/f1/transform.ts`, change
+- [x] **T1 — Export the missing shared symbol.** In `shared/src/f1/transform.ts`, change
   `cleanUpF1SponsorNames` from a private function to an `export`. No other shared API changes.
   Verify: `npm run test:run` still green.
 
@@ -19,7 +19,8 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
 - [ ] **T3 — Adopt shared transforms.** Delete each
   `client/components/{sport}/utils/transform{Sport}EventsToIcs.ts` and repoint consumers
   (`client/routes/{sport}.tsx`, `client/components/ipl/ipl-download-ical-button.tsx`) to import
-  `transform{Sport}EventsToIcs` from `@sports-calendar/shared`.
+  `transform{Sport}EventsToIcs` from `@sports-calendar/shared`. Also replace the local
+  `mapWithConcurrency` defined in `ipl-download-ical-button.tsx` with the shared export.
   Verify: typecheck passes; IPL download still builds.
 
 - [ ] **T4 — Use shared `eventStatus`.** Delete `client/lib/eventStatus.ts`; update the five
@@ -34,9 +35,13 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   call with `cleanUpF1SponsorNames(...)` from `@sports-calendar/shared`.
   Verify: typecheck passes.
 
-- [ ] **T6 — Remove orphaned duration constants.** Delete each
-  `client/components/{sport}/utils/{sport}EventDuration.ts` (now unused after T2/T3).
-  Verify: `git grep` finds no remaining importers; typecheck passes.
+- [ ] **T6 — Consolidate duration constants in shared.** For `nba`, `nfl`, `fifa`, `ipl`:
+  add `export const {SPORT}_DURATION_MINUTES = <n>;` to `shared/src/{sport}/types.ts` and
+  import it in that sport's `filters.ts` and `transform.ts` (removing their private duplicate
+  consts — same values, so shared tests stay green). Delete each client
+  `{sport}EventDuration.ts` and repoint the `{sport}-event-card.tsx` live-badge logic to import
+  `{SPORT}_DURATION_MINUTES` from `@sports-calendar/shared`.
+  Verify: `git grep` finds no remaining client duration imports; typecheck + tests pass.
 
 - [ ] **T7 — Relocate and trim tests.**
   - Move `transform{Sport}EventsToIcs.test.ts` → `shared/src/{sport}/transform.test.ts`,

@@ -23,10 +23,15 @@ Detailed design lives in `/root/.claude/plans/system-reminder-message-sent-at-su
   `f1SessionDurations.ts`, `cleanUpSponsorName.ts`) are deleted; each `filter{Sport}Events.ts`
   retains only the React `toggle*` helpers.
 - `cleanUpF1SponsorNames` is exported from `shared/src/f1/transform.ts` and used by the F1 frontend.
+- Each `{SPORT}_DURATION_MINUTES` becomes a single exported constant in `shared/src/{sport}/types.ts`
+  (consumed by shared's filters/transform and by the client event cards' live-badge logic); the
+  client `{sport}EventDuration.ts` copies are deleted.
+- The local `mapWithConcurrency` in `ipl-download-ical-button.tsx` is replaced by shared's exported one.
 - The frontend's generated `.ics` (IPL download button, and any other client ICS) uses
   shared's transform output (includes `uid` + `description`, constant-derived duration).
 - `git grep` finds no imports from the deleted paths (`@/lib/eventStatus`,
-  `*/utils/transform*`, `*/utils/*EventDuration`, F1 helper files).
+  `*/utils/transform*`, `*/utils/*EventDuration`, F1 helper files) and no duplicate
+  `mapWithConcurrency` definition in the client.
 - `npm run test:run`, `npx tsc -b` (or `npm run build`), and `npm run lint` all pass.
 - Transform coverage and F1-helper coverage now live in `shared/` (relocated from `client/`),
   with expectations updated to shared's output; client filter tests cover only `toggle*` helpers.
