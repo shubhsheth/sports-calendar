@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterNbaEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@/lib/eventStatus";
+import { isEventLive } from "@sports-calendar/shared";
 import { NBA_DURATION_MINUTES } from "./utils/nbaEventDuration";
 
 type NbaEventCardProps = {

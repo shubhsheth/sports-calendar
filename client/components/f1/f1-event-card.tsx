@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterF1Event } from "@sports-calendar/shared";
 import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@/lib/eventStatus";
+import { isEventLive } from "@sports-calendar/shared";
 
 type F1EventCardProps = {
   league: string;
