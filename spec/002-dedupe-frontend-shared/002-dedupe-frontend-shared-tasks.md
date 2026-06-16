@@ -32,12 +32,16 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `isEventLive`/`isEventPast` from `@sports-calendar/shared`.
   Verify: typecheck passes.
 
-- [ ] **T5 — Use shared F1 helpers.** Delete `client/components/f1/utils/translateF1EventType.ts`,
-  `f1SessionDurations.ts`, `cleanUpSponsorName.ts`. Repoint `f1-event-card.tsx`,
-  `f1-filter-selector.tsx`, `f1-filter-pills.tsx`: `translateF1EventTypeAbbr/Id` and
-  `F1_SESSION_DURATIONS` from `@sports-calendar/shared`; replace `cleanUpSponsorName(...)`
-  call with `cleanUpF1SponsorNames(...)` from `@sports-calendar/shared`.
-  Verify: typecheck passes.
+- [ ] **T5 — Use shared F1 helpers (absorbs T7).** Delete
+  `client/components/f1/utils/translateF1EventType.ts`, `f1SessionDurations.ts`,
+  `cleanUpSponsorName.ts`. Repoint `f1-event-card.tsx`, `f1-filter-selector.tsx`,
+  `f1-filter-pills.tsx`: `translateF1EventTypeAbbr/Id` and `F1_SESSION_DURATIONS` from
+  `@sports-calendar/shared`; replace `cleanUpSponsorName(...)` call with
+  `cleanUpF1SponsorNames(...)` from `@sports-calendar/shared`. Relocate the two helper tests
+  (atomic, to keep tests green): `translateF1EventType.test.ts` → `shared/src/f1/types.test.ts`
+  (import translators from `./types.ts`); fold `cleanUpSponsorName.test.ts` into
+  `shared/src/f1/transform.test.ts` (import `cleanUpF1SponsorNames` from `./transform.ts`).
+  Verify: CI gate green.
 
 - [ ] **T6 — Consolidate duration constants in shared.** For `nba`, `nfl`, `fifa`, `ipl`:
   add `export const {SPORT}_DURATION_MINUTES = <n>;` to `shared/src/{sport}/types.ts` and
@@ -47,11 +51,9 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `{SPORT}_DURATION_MINUTES` from `@sports-calendar/shared`.
   Verify: `git grep` finds no remaining client duration imports; typecheck + tests pass.
 
-- [ ] **T7 — Relocate F1 helper tests.** Move `translateF1EventType.test.ts` and
-  `cleanUpSponsorName.test.ts` → `shared/src/f1/`, importing the shared exports
-  (`translateF1EventTypeAbbr/Id` from `./types.ts`, `cleanUpF1SponsorNames` from `./transform.ts`).
-  (Transform-test relocation handled in T3; client filter tests trimmed in T2.)
-  Verify: CI gate green; no test references deleted client modules.
+- [x] **T7 — Relocate F1 helper tests.** Absorbed into T5 (must be atomic with deleting the
+  helper sources to keep tests green). Transform-test relocation handled in T3; client filter
+  tests trimmed in T2.
 
 - [ ] **T8 — Full verification.** Run `npm run test:run`, `npm run build` (or `npx tsc -b`),
   `npm run lint`. `git grep` confirms no imports from deleted paths. `npm run dev` smoke-test
