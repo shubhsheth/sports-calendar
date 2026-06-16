@@ -16,7 +16,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `ipl-download-ical-button.tsx`). `toggle*` imports stay local.
   Verify: typecheck + tests green.
 
-- [ ] **T3 — Adopt shared transforms.** Delete each
+- [x] **T3 — Adopt shared transforms.** Delete each
   `client/components/{sport}/utils/transform{Sport}EventsToIcs.ts` and repoint consumers
   (`client/routes/{sport}.tsx`, `client/components/ipl/ipl-download-ical-button.tsx`) to import
   `transform{Sport}EventsToIcs` from `@sports-calendar/shared`. Also replace the local

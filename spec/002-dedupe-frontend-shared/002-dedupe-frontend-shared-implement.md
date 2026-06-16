@@ -23,7 +23,7 @@ tasks.md after the human approves the increment.
 ## Progress
 - [x] T1 — Export `cleanUpF1SponsorNames`
 - [x] T2 — Slim filters to toggles + repoint filter consumers
-- [ ] T3 — Adopt shared transforms
+- [x] T3 — Adopt shared transforms
 - [ ] T4 — Use shared `eventStatus`
 - [ ] T5 — Use shared F1 helpers
 - [ ] T6 — Remove orphaned duration constants
