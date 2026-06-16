@@ -1,5 +1,6 @@
-import type { FifaEvent } from "@sports-calendar/shared";
-import { transformFifaEventsToIcs } from "./transformFifaEventsToIcs";
+import { describe, it, expect } from "vitest";
+import { transformFifaEventsToIcs } from "./transform.ts";
+import type { FifaEvent } from "./types.ts";
 
 function makeEvent(overrides: Partial<FifaEvent> = {}): FifaEvent {
   return {
@@ -51,9 +52,18 @@ describe("transformFifaEventsToIcs", () => {
     expect(entry.title).toBe("FIFA: BRA @ ARG");
   });
 
+  it("sets a stable uid and a descriptive description", () => {
+    const [entry] = transformFifaEventsToIcs([makeEvent()]);
+    expect(entry.uid).toBe("1@sports-calendar");
+    expect(entry.description).toBe("FIFA: Brazil at Argentina — full");
+  });
+
   it("sets duration to 2 hours", () => {
     const [entry] = transformFifaEventsToIcs([makeEvent()]);
-    expect(entry.duration).toEqual({ hours: 2, minutes: 0 });
+    expect((entry as { duration?: unknown }).duration).toEqual({
+      hours: 2,
+      minutes: 0,
+    });
   });
 
   it("produces a start array with 5 numeric elements", () => {

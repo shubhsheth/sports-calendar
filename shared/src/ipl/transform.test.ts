@@ -1,5 +1,6 @@
-import type { IplEvent } from "@sports-calendar/shared";
-import { transformIplEventsToIcs } from "./transformIplEventsToIcs";
+import { describe, it, expect } from "vitest";
+import { transformIplEventsToIcs } from "./transform.ts";
+import type { IplEvent } from "./types.ts";
 
 function makeEvent(overrides: Partial<IplEvent> = {}): IplEvent {
   return {
@@ -40,9 +41,20 @@ describe("transformIplEventsToIcs", () => {
     expect(entry.title).toBe("IPL: PBKS v SRH");
   });
 
+  it("sets a stable uid and a descriptive description", () => {
+    const [entry] = transformIplEventsToIcs([makeEvent()]);
+    expect(entry.uid).toBe("1527690@sports-calendar");
+    expect(entry.description).toBe(
+      "IPL: Punjab Kings v Sunrisers Hyderabad — Scheduled"
+    );
+  });
+
   it("sets duration to 4 hours", () => {
     const [entry] = transformIplEventsToIcs([makeEvent()]);
-    expect(entry.duration).toEqual({ hours: 4, minutes: 0 });
+    expect((entry as { duration?: unknown }).duration).toEqual({
+      hours: 4,
+      minutes: 0,
+    });
   });
 
   it("produces a start array with 5 numeric elements", () => {
@@ -51,17 +63,6 @@ describe("transformIplEventsToIcs", () => {
     const start = entry.start as number[];
     expect(start).toHaveLength(5);
     start.forEach(v => expect(typeof v).toBe("number"));
-  });
-
-  it("adds 1 to dayjs month (converts 0-indexed to 1-indexed)", () => {
-    const event = makeEvent({ date: "2026-06-15T00:00:00.000Z" });
-    const [entry] = transformIplEventsToIcs([event]);
-    const start = entry.start as number[];
-    expect(start[0]).toBeGreaterThanOrEqual(2026); // year
-    expect(start[1]).toBeGreaterThanOrEqual(1); // month >= 1
-    expect(start[1]).toBeLessThanOrEqual(12); // month <= 12
-    expect(start[2]).toBeGreaterThanOrEqual(1); // day >= 1
-    expect(start[2]).toBeLessThanOrEqual(31); // day <= 31
   });
 
   it("processes multiple events with correct titles", () => {

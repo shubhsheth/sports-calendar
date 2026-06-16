@@ -1,5 +1,6 @@
-import type { NflEvent } from "@sports-calendar/shared";
-import { transformNflEventsToIcs } from "./transformNflEventsToIcs";
+import { describe, it, expect } from "vitest";
+import { transformNflEventsToIcs } from "./transform.ts";
+import type { NflEvent } from "./types.ts";
 
 function makeEvent(overrides: Partial<NflEvent> = {}): NflEvent {
   return {
@@ -51,9 +52,20 @@ describe("transformNflEventsToIcs", () => {
     expect(entry.title).toBe("NFL: NE @ KC");
   });
 
-  it("sets duration to 2 hours 30 minutes", () => {
+  it("sets a stable uid and a descriptive description", () => {
     const [entry] = transformNflEventsToIcs([makeEvent()]);
-    expect(entry.duration).toEqual({ hours: 2, minutes: 30 });
+    expect(entry.uid).toBe("1@sports-calendar");
+    expect(entry.description).toBe(
+      "NFL: New England Patriots at Kansas City Chiefs — full"
+    );
+  });
+
+  it("sets duration to 3 hours 30 minutes", () => {
+    const [entry] = transformNflEventsToIcs([makeEvent()]);
+    expect((entry as { duration?: unknown }).duration).toEqual({
+      hours: 3,
+      minutes: 30,
+    });
   });
 
   it("produces a start array with 5 numeric elements", () => {

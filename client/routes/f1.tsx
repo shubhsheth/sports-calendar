@@ -6,7 +6,7 @@ import F1FilterSelector from "@/components/f1/f1-filter-selector";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { F1Event, F1EventFilters } from "@sports-calendar/shared";
 import DownloadIcalButton from "@/components/base/download-ical-button";
-import { transformF1EventsToIcs } from "@/components/f1/utils/transformF1EventsToIcs";
+import { transformF1EventsToIcs } from "@sports-calendar/shared";
 import { filterF1Events } from "@sports-calendar/shared";
 import { buildF1FeedUrl } from "@/components/f1/utils/buildF1FeedUrl";
 import { F1FilterPills } from "@/components/f1/f1-filter-pills";

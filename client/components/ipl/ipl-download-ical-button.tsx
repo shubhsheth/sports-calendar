@@ -5,11 +5,14 @@ import { CalendarPlus, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
 import {
+  filterIplEvents,
+  transformIplEventsToIcs,
+  mapWithConcurrency,
+} from "@sports-calendar/shared";
+import {
   fetchIplEventsByDate,
   getIplSeasonDates,
 } from "./utils/fetchIplEvents";
-import { filterIplEvents } from "@sports-calendar/shared";
-import { transformIplEventsToIcs } from "./utils/transformIplEventsToIcs";
 import {
   Dialog,
   DialogContent,
@@ -111,25 +114,3 @@ function IplDownloadIcalButton({
 }
 
 export default IplDownloadIcalButton;
-
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  mapper: (item: T) => Promise<R>
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let index = 0;
-
-  async function runNext(): Promise<void> {
-    if (index >= items.length) return;
-    const current = index++;
-    results[current] = await mapper(items[current]);
-    await runNext();
-  }
-
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () =>
-    runNext()
-  );
-  await Promise.all(workers);
-  return results;
-}

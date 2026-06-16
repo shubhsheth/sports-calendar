@@ -1,5 +1,6 @@
-import type { F1Event } from "@sports-calendar/shared";
-import { transformF1EventsToIcs } from "./transformF1EventsToIcs";
+import { describe, it, expect } from "vitest";
+import { transformF1EventsToIcs } from "./transform.ts";
+import type { F1Event } from "./types.ts";
 
 function makeEvent(overrides: Partial<F1Event> = {}): F1Event {
   return {
@@ -86,9 +87,18 @@ describe("transformF1EventsToIcs", () => {
     expect(entry.title).toBe("F1: Race (Dutch GP)");
   });
 
+  it("sets a stable uid and a translated description", () => {
+    const [entry] = transformF1EventsToIcs([makeEvent()]);
+    expect(entry.uid).toBe("1@sports-calendar");
+    expect(entry.description).toBe("F1: Australian Grand Prix — Race");
+  });
+
   it("sets duration based on session type (race = 2h, qualifying = 1h)", () => {
     const [race] = transformF1EventsToIcs([makeEvent()]);
-    expect(race.duration).toEqual({ hours: 2, minutes: 0 });
+    expect((race as { duration?: unknown }).duration).toEqual({
+      hours: 2,
+      minutes: 0,
+    });
 
     const qualEvent = makeEvent({
       competitions: [
@@ -99,7 +109,10 @@ describe("transformF1EventsToIcs", () => {
       ],
     });
     const [qual] = transformF1EventsToIcs([qualEvent]);
-    expect(qual.duration).toEqual({ hours: 1, minutes: 0 });
+    expect((qual as { duration?: unknown }).duration).toEqual({
+      hours: 1,
+      minutes: 0,
+    });
   });
 
   it("produces a start array with 5 numeric elements", () => {
