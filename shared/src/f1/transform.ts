@@ -24,7 +24,7 @@ const SPONSORS = [
   "Moët & Chandon",
 ];
 
-function cleanUpF1SponsorNames(name: string): string {
+export function cleanUpF1SponsorNames(name: string): string {
   let cleanedName = name;
 
   for (const sponsor of SPONSORS) {
