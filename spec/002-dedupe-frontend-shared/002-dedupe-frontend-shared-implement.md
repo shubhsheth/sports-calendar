@@ -31,6 +31,10 @@ tasks.md after the human approves the increment.
 - [ ] T8 — Full verification
 
 ## Notes
+- **Out of scope (flagged, not touched):** `client/components/nba/utils/translateNbaEventType.ts`
+  (+ its test) is pre-existing dead code — only its own test imports it, no component uses it, and
+  shared has no NBA translator counterpart. Not a shared-package duplicate, so left alone per the
+  surgical-change rule. Worth a separate cleanup.
 - **Spec drift (pre-T2):** Duration constants are NOT orphaned — `{sport}-event-card.tsx`
   (nba/nfl/fifa/ipl) use `{SPORT}_DURATION_MINUTES` for the live badge. Shared keeps them as
   private, duplicated consts in filters.ts + transform.ts. T6 reworked: export the constant
