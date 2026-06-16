@@ -27,7 +27,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   transform coverage intact through the increment.
   Verify: CI gate (lint/format/test/build) green; IPL download still builds.
 
-- [ ] **T4 — Use shared `eventStatus`.** Delete `client/lib/eventStatus.ts`; update the five
+- [x] **T4 — Use shared `eventStatus`.** Delete `client/lib/eventStatus.ts`; update the five
   `{sport}-event-card.tsx` files (and any other importers of `@/lib/eventStatus`) to import
   `isEventLive`/`isEventPast` from `@sports-calendar/shared`.
   Verify: typecheck passes.
