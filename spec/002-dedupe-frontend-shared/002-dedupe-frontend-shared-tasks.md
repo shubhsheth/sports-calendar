@@ -21,7 +21,11 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   (`client/routes/{sport}.tsx`, `client/components/ipl/ipl-download-ical-button.tsx`) to import
   `transform{Sport}EventsToIcs` from `@sports-calendar/shared`. Also replace the local
   `mapWithConcurrency` defined in `ipl-download-ical-button.tsx` with the shared export.
-  Verify: typecheck passes; IPL download still builds.
+  Relocate the 5 client `transform{Sport}EventsToIcs.test.ts` → `shared/src/{sport}/transform.test.ts`
+  (import the shared transform; update expected ICS to shared's output — `uid`, `description`,
+  constant-derived `duration`; avoid the `EventAttributes.duration` access type error). This keeps
+  transform coverage intact through the increment.
+  Verify: CI gate (lint/format/test/build) green; IPL download still builds.
 
 - [ ] **T4 — Use shared `eventStatus`.** Delete `client/lib/eventStatus.ts`; update the five
   `{sport}-event-card.tsx` files (and any other importers of `@/lib/eventStatus`) to import
@@ -43,15 +47,11 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `{SPORT}_DURATION_MINUTES` from `@sports-calendar/shared`.
   Verify: `git grep` finds no remaining client duration imports; typecheck + tests pass.
 
-- [ ] **T7 — Relocate and trim tests.**
-  - Move `transform{Sport}EventsToIcs.test.ts` → `shared/src/{sport}/transform.test.ts`,
-    importing the shared transform and updating expected ICS to shared's output
-    (`uid`, `description`, constant-derived `duration`).
-  - Move `translateF1EventType.test.ts` and `cleanUpSponsorName.test.ts` → `shared/src/f1/`,
-    importing the shared exports.
-  - Trim each client `filter{Sport}Events.test.ts` to cover only the `toggle*` helpers
-    (pure-filter coverage already exists in `shared/src/{sport}/filters.test.ts`).
-  Verify: `npm run test:run` green; no test references deleted client modules.
+- [ ] **T7 — Relocate F1 helper tests.** Move `translateF1EventType.test.ts` and
+  `cleanUpSponsorName.test.ts` → `shared/src/f1/`, importing the shared exports
+  (`translateF1EventTypeAbbr/Id` from `./types.ts`, `cleanUpF1SponsorNames` from `./transform.ts`).
+  (Transform-test relocation handled in T3; client filter tests trimmed in T2.)
+  Verify: CI gate green; no test references deleted client modules.
 
 - [ ] **T8 — Full verification.** Run `npm run test:run`, `npm run build` (or `npx tsc -b`),
   `npm run lint`. `git grep` confirms no imports from deleted paths. `npm run dev` smoke-test
