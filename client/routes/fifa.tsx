@@ -7,7 +7,7 @@ import FifaEventCard from "@/components/fifa/fifa-event-card";
 import FifaFilterSelector from "@/components/fifa/fifa-filter-selector";
 import { fetchFifaEventRefs } from "@/components/fifa/utils/fetchFifaEventRefs";
 import { transformFifaEventsToIcs } from "@/components/fifa/utils/transformFifaEventsToIcs";
-import { filterFifaEvents } from "@/components/fifa/utils/filterFifaEvents";
+import { filterFifaEvents } from "@sports-calendar/shared";
 import { buildFifaFeedUrl } from "@/components/fifa/utils/buildFifaFeedUrl";
 import { FifaFilterPills } from "@/components/fifa/fifa-filter-pills";
 

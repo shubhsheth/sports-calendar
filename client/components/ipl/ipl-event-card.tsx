@@ -1,7 +1,7 @@
 import type { IplEvent, IplEventFilters } from "@sports-calendar/shared";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
-import { filterIplEvent } from "./utils/filterIplEvents";
+import { filterIplEvent } from "@sports-calendar/shared";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { isEventLive } from "@/lib/eventStatus";
 import { IPL_DURATION_MINUTES } from "./utils/iplEventDuration";

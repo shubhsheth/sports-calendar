@@ -8,7 +8,7 @@ import {
   fetchIplEventsByDate,
   getIplSeasonDates,
 } from "./utils/fetchIplEvents";
-import { filterIplEvents } from "./utils/filterIplEvents";
+import { filterIplEvents } from "@sports-calendar/shared";
 import { transformIplEventsToIcs } from "./utils/transformIplEventsToIcs";
 import {
   Dialog,

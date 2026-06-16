@@ -7,7 +7,7 @@ import NbaEventCard from "@/components/nba/nba-event-card";
 import NbaFilterSelector from "@/components/nba/nba-filter-selector";
 import { fetchNbaEventRefs } from "@/components/nba/utils/fetchNbaEventRefs";
 import { transformNbaEventsToIcs } from "@/components/nba/utils/transformNbaEventsToIcs";
-import { filterNbaEvents } from "@/components/nba/utils/filterNbaEvents";
+import { filterNbaEvents } from "@sports-calendar/shared";
 import { buildNbaFeedUrl } from "@/components/nba/utils/buildNbaFeedUrl";
 import { NbaFilterPills } from "@/components/nba/nba-filter-pills";
 
