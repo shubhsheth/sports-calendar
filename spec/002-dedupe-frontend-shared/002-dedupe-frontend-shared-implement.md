@@ -25,7 +25,7 @@ tasks.md after the human approves the increment.
 - [x] T2 — Slim filters to toggles + repoint filter consumers
 - [x] T3 — Adopt shared transforms
 - [x] T4 — Use shared `eventStatus`
-- [ ] T5 — Use shared F1 helpers
+- [x] T5 — Use shared F1 helpers
 - [ ] T6 — Remove orphaned duration constants
 - [x] T7 — Relocate F1 helper tests (absorbed into T5)
 - [ ] T8 — Full verification

@@ -32,7 +32,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `isEventLive`/`isEventPast` from `@sports-calendar/shared`.
   Verify: typecheck passes.
 
-- [ ] **T5 — Use shared F1 helpers (absorbs T7).** Delete
+- [x] **T5 — Use shared F1 helpers (absorbs T7).** Delete
   `client/components/f1/utils/translateF1EventType.ts`, `f1SessionDurations.ts`,
   `cleanUpSponsorName.ts`. Repoint `f1-event-card.tsx`, `f1-filter-selector.tsx`,
   `f1-filter-pills.tsx`: `translateF1EventTypeAbbr/Id` and `F1_SESSION_DURATIONS` from
