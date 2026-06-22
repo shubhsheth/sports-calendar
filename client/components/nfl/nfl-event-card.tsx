@@ -9,11 +9,10 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 
 import { useQuery } from "@tanstack/react-query";
-import { filterNflEvent } from "./utils/filterNflEvents";
+import { filterNflEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@/lib/eventStatus";
-import { NFL_DURATION_MINUTES } from "./utils/nflEventDuration";
+import { isEventLive, NFL_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type NflEventCardProps = {
   league: string;

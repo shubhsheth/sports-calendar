@@ -9,11 +9,10 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 
 import { useQuery } from "@tanstack/react-query";
-import { filterNbaEvent } from "./utils/filterNbaEvents";
+import { filterNbaEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@/lib/eventStatus";
-import { NBA_DURATION_MINUTES } from "./utils/nbaEventDuration";
+import { isEventLive, NBA_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type NbaEventCardProps = {
   league: string;

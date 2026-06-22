@@ -1,6 +1,6 @@
 import type { F1EventFilters } from "@sports-calendar/shared";
 import { FilterPill } from "@/components/base/filter-pill";
-import { translateF1EventTypeId } from "./utils/translateF1EventType";
+import { translateF1EventTypeId } from "@sports-calendar/shared";
 import { toggleEventType, toggleShowPastEvents } from "./utils/filterF1Events";
 import { analytics } from "@/lib/analytics";
 

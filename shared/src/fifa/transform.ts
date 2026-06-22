@@ -1,9 +1,7 @@
 import type { FifaEvent } from "./types.ts";
+import { FIFA_DURATION_MINUTES } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
-
-/** Typical duration of a soccer match in minutes (incl. halftime) */
-const FIFA_DURATION_MINUTES = 120;
 
 export function transformFifaEventsToIcs(
   events: FifaEvent[]

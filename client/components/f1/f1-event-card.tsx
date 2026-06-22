@@ -3,17 +3,17 @@ import {
   type F1EventFilters,
   type EventRef,
   fetchEventDetails,
+  filterF1Event,
+  isEventLive,
+  translateF1EventTypeAbbr,
+  cleanUpF1SponsorNames,
+  F1_SESSION_DURATIONS,
 } from "@sports-calendar/shared";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import dayjs from "dayjs";
-import { translateF1EventTypeAbbr } from "./utils/translateF1EventType";
-import { cleanUpSponsorName } from "./utils/cleanUpSponsorName";
 import { useQuery } from "@tanstack/react-query";
 
-import { filterF1Event } from "./utils/filterF1Events";
-import { F1_SESSION_DURATIONS } from "./utils/f1SessionDurations";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@/lib/eventStatus";
 
 type F1EventCardProps = {
   league: string;
@@ -43,7 +43,7 @@ function F1EventCard({ league, eventRef, filters }: F1EventCardProps) {
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-1">
           <h3 className="text-2xl font-black uppercase italic tracking-tighter text-foreground">
-            {cleanUpSponsorName(filteredF1Event.name)}
+            {cleanUpF1SponsorNames(filteredF1Event.name)}
           </h3>
         </div>
       </CardHeader>

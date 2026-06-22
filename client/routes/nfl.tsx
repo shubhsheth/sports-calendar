@@ -5,9 +5,9 @@ import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
 import DownloadIcalButton from "@/components/base/download-ical-button";
 import NflEventCard from "@/components/nfl/nfl-event-card";
 import NflFilterSelector from "@/components/nfl/nfl-filter-selector";
-import { filterNflEvents } from "@/components/nfl/utils/filterNflEvents";
+import { filterNflEvents } from "@sports-calendar/shared";
 import { fetchNflEventRefs } from "@/components/nfl/utils/fetchNflEventRefs";
-import { transformNflEventsToIcs } from "@/components/nfl/utils/transformNflEventsToIcs";
+import { transformNflEventsToIcs } from "@sports-calendar/shared";
 import { buildNflFeedUrl } from "@/components/nfl/utils/buildNflFeedUrl";
 import { NflFilterPills } from "@/components/nfl/nfl-filter-pills";
 

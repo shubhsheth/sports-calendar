@@ -6,6 +6,7 @@ import {
   type EventRef,
   type FetchEventRefsResponse,
   fetchEventDetails,
+  mapWithConcurrency,
 } from "@sports-calendar/shared";
 import { Button } from "@/components/ui/button";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
@@ -213,7 +214,7 @@ async function fetchAllEventDetails<T>(
 ): Promise<T[]> {
   const FETCH_CONCURRENCY = 8;
 
-  const allEvents = await mapWithConcurrency<T>(
+  const allEvents = await mapWithConcurrency(
     allEventRefs,
     FETCH_CONCURRENCY,
     ref => {
@@ -225,26 +226,4 @@ async function fetchAllEventDetails<T>(
   );
 
   return allEvents;
-}
-
-async function mapWithConcurrency<T>(
-  items: EventRef[],
-  limit: number,
-  mapper: (item: EventRef) => Promise<T>
-): Promise<T[]> {
-  const results: T[] = new Array(items.length);
-  let index = 0;
-
-  async function runNext(): Promise<void> {
-    if (index >= items.length) return;
-    const current = index++;
-    results[current] = await mapper(items[current]);
-    await runNext();
-  }
-
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () =>
-    runNext()
-  );
-  await Promise.all(workers);
-  return results;
 }

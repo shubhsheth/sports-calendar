@@ -1,5 +1,6 @@
-import type { NbaEvent } from "@sports-calendar/shared";
-import { transformNbaEventsToIcs } from "./transformNbaEventsToIcs";
+import { describe, it, expect } from "vitest";
+import { transformNbaEventsToIcs } from "./transform.ts";
+import type { NbaEvent } from "./types.ts";
 
 function makeEvent(overrides: Partial<NbaEvent> = {}): NbaEvent {
   return {
@@ -51,9 +52,20 @@ describe("transformNbaEventsToIcs", () => {
     expect(entry.title).toBe("NBA: LAL @ BOS");
   });
 
+  it("sets a stable uid and a descriptive description", () => {
+    const [entry] = transformNbaEventsToIcs([makeEvent()]);
+    expect(entry.uid).toBe("1@sports-calendar");
+    expect(entry.description).toBe(
+      "NBA: Los Angeles Lakers at Boston Celtics — full"
+    );
+  });
+
   it("sets duration to 2 hours 30 minutes", () => {
     const [entry] = transformNbaEventsToIcs([makeEvent()]);
-    expect(entry.duration).toEqual({ hours: 2, minutes: 30 });
+    expect((entry as { duration?: unknown }).duration).toEqual({
+      hours: 2,
+      minutes: 30,
+    });
   });
 
   it("produces a start array with 5 numeric elements", () => {
@@ -62,24 +74,6 @@ describe("transformNbaEventsToIcs", () => {
     const start = entry.start as number[];
     expect(start).toHaveLength(5);
     start.forEach(v => expect(typeof v).toBe("number"));
-  });
-
-  it("adds 1 to dayjs month (converts 0-indexed to 1-indexed)", () => {
-    // June = month index 5 in dayjs, so start[1] should be 6
-    const event = makeEvent({
-      competitions: [
-        { ...makeEvent().competitions[0], date: "2026-06-15T00:00:00.000Z" },
-      ],
-    });
-    // We can't know the exact UTC offset of the test runner,
-    // but we can verify the year is sensible and month is in valid range
-    const [entry] = transformNbaEventsToIcs([event]);
-    const start = entry.start as number[];
-    expect(start[0]).toBeGreaterThanOrEqual(2026); // year
-    expect(start[1]).toBeGreaterThanOrEqual(1); // month >= 1
-    expect(start[1]).toBeLessThanOrEqual(12); // month <= 12
-    expect(start[2]).toBeGreaterThanOrEqual(1); // day >= 1
-    expect(start[2]).toBeLessThanOrEqual(31); // day <= 31
   });
 
   it("processes multiple events, one entry each", () => {

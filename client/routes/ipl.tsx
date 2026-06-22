@@ -13,7 +13,7 @@ import {
   fetchIplEventsByDate,
   getIplSeasonDates,
 } from "@/components/ipl/utils/fetchIplEvents";
-import { filterIplEvents } from "@/components/ipl/utils/filterIplEvents";
+import { filterIplEvents } from "@sports-calendar/shared";
 
 export const Route = createFileRoute("/ipl")({
   component: IplPage,

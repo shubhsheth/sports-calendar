@@ -1,8 +1,6 @@
 import type { FifaEvent, FifaEventFilters } from "./types.ts";
+import { FIFA_DURATION_MINUTES } from "./types.ts";
 import { isEventPast } from "../eventStatus.ts";
-
-/** Typical duration of a soccer match in minutes (incl. halftime) */
-const FIFA_DURATION_MINUTES = 120;
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];

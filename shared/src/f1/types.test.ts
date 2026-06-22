@@ -1,7 +1,5 @@
-import {
-  translateF1EventTypeAbbr,
-  translateF1EventTypeId,
-} from "./translateF1EventType";
+import { describe, it, expect } from "vitest";
+import { translateF1EventTypeAbbr, translateF1EventTypeId } from "./types.ts";
 
 describe("translateF1EventTypeAbbr", () => {
   it.each([
