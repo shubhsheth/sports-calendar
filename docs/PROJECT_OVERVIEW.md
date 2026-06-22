@@ -68,7 +68,6 @@ client/                          # @sports-calendar/client — the React SPA
 ├── lib/
 │   ├── analytics.ts             # PostHog init + typed event tracking helpers
 │   ├── buildCalendarFeedUrl.ts  # Builds subscription feed URLs from VITE_CALENDAR_FEED_BASE_URL
-│   ├── eventStatus.ts           # client copy of live/past helpers
 │   └── utils.ts                 # cn() class merging utility
 ├── components/
 │   ├── base/
@@ -80,8 +79,8 @@ client/                          # @sports-calendar/client — the React SPA
 │   │   ├── nba-event-card.tsx
 │   │   ├── nba-filter-selector.tsx
 │   │   ├── nba-filter-pills.tsx
-│   │   └── utils/               # fetchNbaEventRefs, filterNbaEvents, transformNbaEventsToIcs,
-│   │                            #   translateNbaEventType, nbaEventDuration, fetchNbaTeams, buildNbaFeedUrl
+│   │   └── utils/               # client-side glue: fetchNbaEventRefs, fetchNbaTeams,
+│   │                            #   buildNbaFeedUrl, filter-state toggles, translateNbaEventType
 │   ├── header/header.tsx
 │   ├── footer/footer.tsx
 │   └── ui/                      # shadcn components (Card, Button, Badge, Sheet, Checkbox, Select, etc.)
@@ -125,7 +124,7 @@ ESPN's API returns paginated arrays of `{ $ref: URL }` objects. The app fetches 
 ### 5. Per-Sport Self-Contained Modules
 Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`) owns its logic in two places:
 - `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Supabase backend.
-- `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder with the client's own fetch/filter/transform/translate plus UI-only helpers (event durations, feed-URL builders, team lookups).
+- `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder of client-side glue only: infinite-scroll fetch wrappers, team fetchers, feed-URL builders, and filter-state toggle helpers. The filtering predicates, transforms, durations, and event-status helpers are imported from `@sports-calendar/shared` rather than duplicated here. The one remaining local helper is NBA's `translateNbaEventType`.
 
 ### 5a. Calendar Feed Subscriptions
 Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to-calendar-feed-links.tsx` surfaces Copy / Apple / Google links whose URLs are built by `client/lib/buildCalendarFeedUrl.ts` from `VITE_CALENDAR_FEED_BASE_URL`. Those URLs point at the Supabase Edge Function (`supabase/functions/calendar/`), which re-fetches from ESPN on each request so subscribed calendars stay current. See `docs/BACKEND.md`.

@@ -239,7 +239,7 @@ type F1EventCompetition = {
 
 For F1, `competition.type.id` identifies the **session within the race weekend**, not the season phase. This is a fundamental semantic difference from how NBA/NFL use the same `type` field.
 
-**Known values** (from `client/components/f1/utils/translateF1EventType.ts`):
+**Known values** (from `translateF1EventTypeAbbr` / `translateF1EventTypeId` in `shared/src/f1/types.ts`):
 
 | `id` | `abbreviation` | Human-readable | Default filter |
 |------|---------------|----------------|----------------|
@@ -257,7 +257,7 @@ Notes:
 
 ### F1 event names and sponsor cleanup
 
-F1 event names contain title sponsor prefixes (e.g. `"Qatar Airways Bahrain Grand Prix"`). `cleanUpSponsorName()` in `client/components/f1/utils/cleanUpSponsorName.ts` strips known sponsors for display and ICS titles.
+F1 event names contain title sponsor prefixes (e.g. `"Qatar Airways Bahrain Grand Prix"`). `cleanUpF1SponsorNames()` in `shared/src/f1/transform.ts` strips known sponsors for display and ICS titles.
 
 Current sponsor list: Qatar Airways, Heineken, Aramco, Gulf Air, STC, Crypto.com, Lenovo, MSC Cruises, Pirelli, AWS, Tag Heuer, Singapore Airlines, Etihad Airways.
 
@@ -335,10 +335,10 @@ React Query is configured globally with `staleTime: 30m` and `gcTime: 60m`, so n
 
 F1 example output: `"F1: Qualifying (Bahrain Grand Prix)"` — sponsor stripped from event name, abbreviation translated to full session type name.
 
-Transform functions (client export copies; the backend uses the equivalents in `shared/src/<league>/transform.ts`):
-- `client/components/nba/utils/transformNbaEventsToIcs.ts`
-- `client/components/nfl/utils/transformNflEventsToIcs.ts`
-- `client/components/f1/utils/transformF1EventsToIcs.ts`
+Transform functions live in `shared/src/<league>/transform.ts` and are used by both the client's download button and the backend feed:
+- `shared/src/nba/transform.ts`
+- `shared/src/nfl/transform.ts`
+- `shared/src/f1/transform.ts`
 
 ---
 
