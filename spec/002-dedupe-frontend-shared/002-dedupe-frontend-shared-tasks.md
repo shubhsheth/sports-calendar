@@ -43,7 +43,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   `shared/src/f1/transform.test.ts` (import `cleanUpF1SponsorNames` from `./transform.ts`).
   Verify: CI gate green.
 
-- [ ] **T6 — Consolidate duration constants in shared.** For `nba`, `nfl`, `fifa`, `ipl`:
+- [x] **T6 — Consolidate duration constants in shared.** For `nba`, `nfl`, `fifa`, `ipl`:
   add `export const {SPORT}_DURATION_MINUTES = <n>;` to `shared/src/{sport}/types.ts` and
   import it in that sport's `filters.ts` and `transform.ts` (removing their private duplicate
   consts — same values, so shared tests stay green). Delete each client
