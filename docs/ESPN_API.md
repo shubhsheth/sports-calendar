@@ -101,7 +101,7 @@ Per-sport wrappers (in `client/components/<league>/utils/`) set `pageSize: 30` a
 
 ### Season type IDs (`types/{seasonTypeId}`)
 
-The `types/` segment filters which **phase** of the season is returned. NBA, NFL, and F1 hardcode `types/2`; FIFA fetches both `types/1` (Group Stage) and `types/2` (Knockout Stage) and merges the results:
+The `types/` segment selects which **phase(s)** of the season to fetch. Each league's full-season fetch declares a `SEASON_TYPE_IDS` list in `shared/src/<league>/fetch.ts` and fetches/merges all of them — F1 `[2]`, FIFA `[1, 2]` (Group Stage, Knockout Stage), NBA `[2, 3]`, NFL `[1, 2, 3]`. The client's infinite-scroll wrappers take the season type as a parameter, defaulting to `2`:
 
 | ID | Meaning | Used |
 |----|---------|------|
@@ -111,7 +111,7 @@ The `types/` segment filters which **phase** of the season is returned. NBA, NFL
 | `4` | All-Star / Special Events | No |
 | `5` | Play-In Tournament (NBA only) | **Yes** |
 
-These IDs are hardcoded because their full range of valid values is not well-understood and differs by league. For example, F1 likely does not have a meaningful distinction between season types the way team sports do — a single `types/2` call returns the full race calendar. The NBA has a distinct In-Season Tournament and Play-In Tournament that may map to their own type IDs. NFL Conference Championship games may or may not be separated from other Playoff games.
+Each league's `SEASON_TYPE_IDS` list is curated by hand because the full range of valid values is not well-understood and differs by league. F1 has no meaningful season-type distinction — a single `types/2` call returns the full race calendar — so its list is just `[2]`. NBA adds postseason (`3`), NFL adds preseason and postseason (`1`, `3`), and FIFA uses Group/Knockout (`1`, `2`). Unlisted phases (e.g. the NBA Play-In Tournament) may map to their own type IDs that are not currently fetched.
 
 ---
 
