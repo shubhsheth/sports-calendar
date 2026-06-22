@@ -55,7 +55,7 @@ Each task ends in a compiling, testable state. Verify after each with `npx tsc -
   helper sources to keep tests green). Transform-test relocation handled in T3; client filter
   tests trimmed in T2.
 
-- [ ] **T8 — Full verification.** Run `npm run test:run`, `npm run build` (or `npx tsc -b`),
+- [x] **T8 — Full verification.** Run `npm run test:run`, `npm run build` (or `npx tsc -b`),
   `npm run lint`. `git grep` confirms no imports from deleted paths. `npm run dev` smoke-test
   each route (`/nba /nfl /fifa /f1 /ipl`): filtering (past toggle, team/type pills), live
   badges, and IPL `.ics` download (events now carry `uid`/`description`).
