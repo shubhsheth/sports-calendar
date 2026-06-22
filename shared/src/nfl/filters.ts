@@ -1,8 +1,6 @@
 import type { NflEvent, NflEventFilters } from "./types.ts";
+import { NFL_DURATION_MINUTES } from "./types.ts";
 import { isEventPast } from "../eventStatus.ts";
-
-/** Typical duration of an NFL game in minutes */
-const NFL_DURATION_MINUTES = 210;
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];

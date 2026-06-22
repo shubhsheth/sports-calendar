@@ -12,8 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterFifaEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@sports-calendar/shared";
-import { FIFA_DURATION_MINUTES } from "./utils/fifaEventDuration";
+import { isEventLive, FIFA_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type FifaEventCardProps = {
   league: string;

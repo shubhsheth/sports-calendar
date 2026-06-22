@@ -1,8 +1,6 @@
 import type { NbaEvent, NbaEventFilters } from "./types.ts";
+import { NBA_DURATION_MINUTES } from "./types.ts";
 import { isEventPast } from "../eventStatus.ts";
-
-/** Typical duration of an NBA game in minutes */
-const NBA_DURATION_MINUTES = 150;
 
 function getTeamIdFromRef(ref: string): string | undefined {
   return ref.match(/\/teams\/(\d+)/)?.[1];

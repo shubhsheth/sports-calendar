@@ -3,8 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { filterIplEvent } from "@sports-calendar/shared";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive } from "@sports-calendar/shared";
-import { IPL_DURATION_MINUTES } from "./utils/iplEventDuration";
+import { isEventLive, IPL_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type IplEventCardProps = {
   event: IplEvent;
