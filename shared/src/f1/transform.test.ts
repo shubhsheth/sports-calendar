@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { transformF1EventsToIcs } from "./transform.ts";
+import { transformF1EventsToIcs, cleanUpF1SponsorNames } from "./transform.ts";
 import type { F1Event } from "./types.ts";
 
 function makeEvent(overrides: Partial<F1Event> = {}): F1Event {
@@ -129,5 +129,57 @@ describe("transformF1EventsToIcs", () => {
     ];
     const result = transformF1EventsToIcs(events);
     expect(result).toHaveLength(2);
+  });
+});
+
+describe("cleanUpF1SponsorNames", () => {
+  it("strips a known sponsor prefix", () => {
+    expect(cleanUpF1SponsorNames("Qatar Airways Bahrain Grand Prix")).toBe(
+      "Bahrain Grand Prix"
+    );
+  });
+
+  it("strips another known sponsor prefix", () => {
+    expect(cleanUpF1SponsorNames("Heineken Dutch Grand Prix")).toBe(
+      "Dutch Grand Prix"
+    );
+  });
+
+  it("strips Aramco sponsor", () => {
+    expect(cleanUpF1SponsorNames("Aramco Saudi Arabian Grand Prix")).toBe(
+      "Saudi Arabian Grand Prix"
+    );
+  });
+
+  it("leaves names with no known sponsor unchanged", () => {
+    expect(cleanUpF1SponsorNames("Australian Grand Prix")).toBe(
+      "Australian Grand Prix"
+    );
+  });
+
+  it("returns empty string for empty input", () => {
+    expect(cleanUpF1SponsorNames("")).toBe("");
+  });
+
+  it("removes all occurrences of a repeated sponsor", () => {
+    expect(cleanUpF1SponsorNames("AWS AWS Monaco Grand Prix")).toBe(
+      "Monaco Grand Prix"
+    );
+  });
+
+  it("trims leading and trailing whitespace after removal", () => {
+    const result = cleanUpF1SponsorNames("STC Saudi Arabian Grand Prix");
+    expect(result).not.toMatch(/^\s|\s$/);
+  });
+
+  it("collapses multiple internal spaces after removal", () => {
+    const result = cleanUpF1SponsorNames("Qatar Airways  Bahrain Grand Prix");
+    expect(result).not.toMatch(/\s{2,}/);
+  });
+
+  it("is case-insensitive when stripping sponsors", () => {
+    expect(cleanUpF1SponsorNames("qatar airways Bahrain Grand Prix")).toBe(
+      "Bahrain Grand Prix"
+    );
   });
 });

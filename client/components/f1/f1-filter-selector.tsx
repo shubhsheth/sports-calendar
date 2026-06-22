@@ -21,7 +21,7 @@ import {
 } from "../ui/field";
 import { Separator } from "../ui/separator";
 import { toggleEventType, toggleShowPastEvents } from "./utils/filterF1Events";
-import { translateF1EventTypeId } from "./utils/translateF1EventType";
+import { translateF1EventTypeId } from "@sports-calendar/shared";
 import { analytics } from "@/lib/analytics";
 
 type F1FilterSelectorProps = {
