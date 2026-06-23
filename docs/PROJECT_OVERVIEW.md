@@ -55,7 +55,7 @@ src/
 │   ├── nba/
 │   │   ├── nba-event-card.tsx
 │   │   ├── nba-filter-selector.tsx
-│   │   └── utils/               # fetchNbaEventRefs, filterNbaEvents, transformNbaEventsToIcs, translateNbaEventType
+│   │   └── utils/               # fetchNbaEventRefs, filterNbaEvents, transformNbaEventsToIcs
 │   ├── nfl/
 │   │   └── utils/               # fetchNflEventRefs, transformNflEventsToIcs
 │   ├── f1/

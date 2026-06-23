@@ -182,7 +182,7 @@ Notes:
 
 `competition.type` reflects the **nature of the game**, not always the season phase. Even when fetching via `types/2` (Regular Season), the competition's own `type.id` is returned and can be used for display or filtering.
 
-**Known values** (from `src/components/nba/utils/translateNbaEventType.ts`; NFL is identical):
+**Known values** (NFL is identical):
 
 | `id` | `abbreviation` | Human-readable |
 |------|---------------|----------------|
