@@ -3,6 +3,10 @@ import { NBA_DURATION_MINUTES } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
+/**
+ * Builds one ICS event per NBA game. Title: `NBA: {shortName}`; duration is
+ * `NBA_DURATION_MINUTES` (see `shared/src/nba/types.ts`).
+ */
 export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
 

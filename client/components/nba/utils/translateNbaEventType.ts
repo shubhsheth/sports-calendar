@@ -1,3 +1,9 @@
+/**
+ * NBA/NFL `competition.type.id` reflects the game's nature (season phase). Known
+ * IDs: 1 PS Preseason · 2 RS Regular Season · 3 PO Playoffs · 4 AS All-Star ·
+ * 5 FIN Finals. Unknown values fall through. The same scheme applies to NFL.
+ * `…Abbr` maps the API `abbreviation`; `…Id` maps the numeric `id`.
+ */
 export function translateNbaEventTypeAbbr(type: string): string {
   switch (type) {
     case "PS":

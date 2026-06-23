@@ -8,6 +8,18 @@ export type FetchEventRefsResponse = {
   pageIndex: number;
 };
 
+/**
+ * Lists event `$ref` stubs for one season "type" (phase), a page at a time:
+ *
+ *   GET …/sports/{sportId}/leagues/{leagueId}/seasons/{seasonId}
+ *       /types/{seasonTypeId}/events/?limit={pageSize}&page={pageNumber}
+ *
+ * Returns `{ items, pageCount, pageIndex }`; callers page until
+ * `pageIndex >= pageCount`. `seasonTypeId` defaults to `2` (regular season) and
+ * `pageSize` to `30`. Which phase(s) a league actually fetches is decided by its
+ * `SEASON_TYPE_IDS` in `shared/src/<league>/fetch.ts`; the client's infinite
+ * scroll passes a single `seasonTypeId` per query.
+ */
 export async function fetchEventRefsBySeason(
   sportId: string,
   leagueId: string,

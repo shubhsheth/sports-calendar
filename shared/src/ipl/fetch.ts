@@ -1,6 +1,10 @@
 import type { IplEvent } from "./types.ts";
 import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
 
+// IPL is not available on the Core API (`$ref` style); cricket is only on the
+// Site API (`site.api.espn.com`), which returns fully inline events — teams,
+// logos, and status are embedded, so there is no `$ref` following. There is also
+// no page-number pagination, so the season is walked one calendar date at a time.
 const LEAGUE_ID = "8048";
 const FETCH_CONCURRENCY = 8;
 
@@ -89,6 +93,13 @@ function normalizeEvent(event: ScoreboardEvent): IplEvent {
   };
 }
 
+/**
+ * Fetches all IPL matches on one day from the Site API scoreboard endpoint
+ * (`…/cricket/{leagueId}/scoreboard?dates=YYYYMMDD`). Events come back inline;
+ * each is normalized into an `IplEvent`. Team logos are absolute CDN URLs
+ * (`https://a.espncdn.com/i/teamlogos/cricket/500/{teamId}.png`). Days with no
+ * matches return an empty array.
+ */
 export async function fetchIplEventsByDate(
   dateStr: string
 ): Promise<IplEvent[]> {
@@ -112,6 +123,11 @@ export function getIplSeasonDates(): string[] {
   return dates;
 }
 
+/**
+ * Fetches the whole IPL season by requesting every date in the window
+ * (`getIplSeasonDates`) concurrently and flattening the results. The client's
+ * infinite scroll uses the same per-date approach, treating each date as a page.
+ */
 export async function fetchAllIplEvents(): Promise<IplEvent[]> {
   const dates = getIplSeasonDates();
   const eventsByDate = await mapWithConcurrency(

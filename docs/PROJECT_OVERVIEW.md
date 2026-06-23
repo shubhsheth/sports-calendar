@@ -114,7 +114,7 @@ supabase/                        # Calendar feed backend (see docs/BACKEND.md)
 ESPN's API returns paginated arrays of `{ $ref: URL }` objects. The app fetches refs first (cheap, paginated), then lazily follows each URL for full event/team details.
 
 ### 3. Concurrency-Limited Fetching
-`shared/src/espn/mapWithConcurrency.ts` implements `mapWithConcurrency()` using `Promise.race()` to cap parallel ESPN API calls (default 8), preventing the device from being overwhelmed when fetching full-season data. Used both by `download-ical-button.tsx` (client export) and the per-league `fetch.ts` orchestrators (`shared/`, also used by the backend).
+Following many `$ref`s at once (full-season export and feeds) is capped via `mapWithConcurrency()` (`shared/src/espn/mapWithConcurrency.ts`) so the device isn't flooded with parallel requests. Used by the client download button and the per-league `fetch.ts` orchestrators (also the backend); see its docstring for the cap rationale.
 
 ### 4. React Query for All Server State
 - `useInfiniteQuery` powers infinite scroll pagination
@@ -136,7 +136,7 @@ Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to
 - Page views are captured via a `router.subscribe('onResolved', ...)` hook in `main.tsx`, so every TanStack Router navigation fires `$pageview` automatically
 - All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`, `"fifa"`) for easy segmentation in PostHog
 
-**Key events:** `$pageview`, `league_selected`, `filter_panel_opened`, `filter_show_past_events_toggled`, `filter_team_toggled`, `filter_event_type_toggled` (F1), `filter_select_all_clicked`, `filter_clear_clicked`, `filter_pill_removed`, `calendar_download_opened`, `calendar_downloaded`, `calendar_feed_url_copied`, `calendar_feed_apple_clicked`, `calendar_feed_google_clicked`, `schedule_next_page_loaded`
+The full catalogue of tracked events lives in `client/lib/analytics.ts` — one typed function per interaction (page views, filter toggles, downloads, feed-link clicks, pagination).
 
 ### 7. File-Based Routing
 `@tanstack/react-router` auto-generates `client/routeTree.gen.ts` from the `client/routes/` file structure.
