@@ -80,7 +80,7 @@ client/                          # @sports-calendar/client — the React SPA
 │   │   ├── nba-filter-selector.tsx
 │   │   ├── nba-filter-pills.tsx
 │   │   └── utils/               # client-side glue: fetchNbaEventRefs, fetchNbaTeams,
-│   │                            #   buildNbaFeedUrl, filter-state toggles, translateNbaEventType
+│   │                            #   buildNbaFeedUrl, filter-state toggles
 │   ├── header/header.tsx
 │   ├── footer/footer.tsx
 │   └── ui/                      # shadcn components (Card, Button, Badge, Sheet, Checkbox, Select, etc.)
@@ -124,7 +124,7 @@ Following many `$ref`s at once (full-season export and feeds) is capped via `map
 ### 5. Per-Sport Self-Contained Modules
 Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`) owns its logic in two places:
 - `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Supabase backend.
-- `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder of client-side glue only: infinite-scroll fetch wrappers, team fetchers, feed-URL builders, and filter-state toggle helpers. The filtering predicates, transforms, durations, and event-status helpers are imported from `@sports-calendar/shared` rather than duplicated here. The one remaining local helper is NBA's `translateNbaEventType`.
+- `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder of client-side glue only: infinite-scroll fetch wrappers, team fetchers, feed-URL builders, and filter-state toggle helpers. The filtering predicates, transforms, durations, and event-status helpers are imported from `@sports-calendar/shared` rather than duplicated here.
 
 ### 5a. Calendar Feed Subscriptions
 Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to-calendar-feed-links.tsx` surfaces Copy / Apple / Google links whose URLs are built by `client/lib/buildCalendarFeedUrl.ts` from `VITE_CALENDAR_FEED_BASE_URL`. Those URLs point at the Supabase Edge Function (`supabase/functions/calendar/`), which re-fetches from ESPN on each request so subscribed calendars stay current. See `docs/BACKEND.md`.

@@ -87,9 +87,10 @@ differences that matter:
 - **IPL** (Site API) — each event *is* the match, with competitors and logos
   inline.
 
-Competition type-ID meanings and their quirks are documented on the translator
-functions: NBA/NFL in `client/components/nba/utils/translateNbaEventType.ts`,
-F1 in `shared/src/f1/types.ts`.
+For NBA/NFL, `competition.type.id` season phases are `1` PS Preseason · `2` RS
+Regular Season · `3` PO Playoffs · `4` AS All-Star · `5` FIN Finals; unknown IDs
+are ignored. F1's session-type IDs and their quirks are documented on
+`shared/src/f1/types.ts`.
 
 ## ICS export
 
