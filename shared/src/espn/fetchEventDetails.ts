@@ -21,6 +21,9 @@ export type BaseEvent = {
  *
  * The `http://` → `https://` rewrite is **required, not defensive**: ESPN
  * frequently returns `http://` in `$ref` URLs, which fails from an HTTPS page.
+ *
+ * @param refUrl - The `$ref` stub URL to follow.
+ * @returns The full resource the stub points at, typed as `T`.
  */
 export async function fetchEventDetails<T = BaseEvent>(
   refUrl: string

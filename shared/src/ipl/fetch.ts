@@ -99,6 +99,9 @@ function normalizeEvent(event: ScoreboardEvent): IplEvent {
  * each is normalized into an `IplEvent`. Team logos are absolute CDN URLs
  * (`https://a.espncdn.com/i/teamlogos/cricket/500/{teamId}.png`). Days with no
  * matches return an empty array.
+ *
+ * @param dateStr - The day to fetch, as `YYYYMMDD`.
+ * @returns The day's matches as `IplEvent`s; empty if there are none.
  */
 export async function fetchIplEventsByDate(
   dateStr: string
@@ -127,6 +130,8 @@ export function getIplSeasonDates(): string[] {
  * Fetches the whole IPL season by requesting every date in the window
  * (`getIplSeasonDates`) concurrently and flattening the results. The client's
  * infinite scroll uses the same per-date approach, treating each date as a page.
+ *
+ * @returns All IPL matches across the season window.
  */
 export async function fetchAllIplEvents(): Promise<IplEvent[]> {
   const dates = getIplSeasonDates();

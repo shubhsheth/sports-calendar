@@ -28,6 +28,9 @@ const SPONSORS = [
  * Strips title-sponsor prefixes from an F1 event name for display and ICS titles
  * (e.g. "Qatar Airways Bahrain Grand Prix" → "Bahrain Grand Prix"). Known
  * sponsors are listed in `SPONSORS` above; extend it as title sponsors change.
+ *
+ * @param name - The raw F1 event name, possibly with a title-sponsor prefix.
+ * @returns The name with known sponsor prefixes stripped.
  */
 export function cleanUpF1SponsorNames(name: string): string {
   let cleanedName = name;
@@ -50,6 +53,9 @@ export function cleanUpF1SponsorNames(name: string): string {
  * Builds one ICS event per F1 session. Title: `F1: {session} ({event name})`
  * with the sponsor prefix stripped; per-session duration comes from
  * `F1_SESSION_DURATIONS` (default 60m).
+ *
+ * @param events - The F1 events (race weekends) to convert.
+ * @returns One ICS event attribute object per session.
  */
 export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];

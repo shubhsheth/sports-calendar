@@ -58,6 +58,9 @@ export const F1_SESSION_DURATIONS: Record<string, number> = {
  *
  * `translateF1EventTypeAbbr` maps the API's `abbreviation`; `…Id` maps the
  * numeric `id`.
+ *
+ * @param type - The API `competition.type.abbreviation` (e.g. `FP1`, `Qual`, `SR`).
+ * @returns The human-readable session name, or the input unchanged if unrecognized.
  */
 export function translateF1EventTypeAbbr(type: string): string {
   switch (type) {
@@ -78,6 +81,12 @@ export function translateF1EventTypeAbbr(type: string): string {
   }
 }
 
+/**
+ * Maps an F1 `competition.type.id` to a human-readable session name.
+ *
+ * @param type - The numeric `competition.type.id` as a string (e.g. `"3"`).
+ * @returns The human-readable session name, or `"Other"` if unrecognized.
+ */
 export function translateF1EventTypeId(type: string): string {
   switch (type) {
     case "1":

@@ -16,6 +16,9 @@ type BaseTeam = {
  *
  * The `http://` → `https://` rewrite is required for the same reason as
  * `fetchEventDetails` — ESPN returns `http://` in `$ref` URLs.
+ *
+ * @param refUrl - The `competitor.team.$ref` stub URL to follow.
+ * @returns The full team resource (including the `logos[]` array), typed as `T`.
  */
 export async function fetchTeamDetails<T = BaseTeam>(
   refUrl: string
