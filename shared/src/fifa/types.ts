@@ -21,7 +21,12 @@ export type FifaEventCompetition = {
   timeValid: boolean;
   recent: boolean;
   bracketAvailable: boolean;
-  gameSource: {
+  gameSource?: {
+    id: string;
+    description: string;
+    state: string;
+  };
+  boxscoreSource?: {
     id: string;
     description: string;
     state: string;

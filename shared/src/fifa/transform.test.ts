@@ -19,7 +19,7 @@ function makeEvent(overrides: Partial<FifaEvent> = {}): FifaEvent {
         timeValid: true,
         recent: false,
         bracketAvailable: false,
-        gameSource: { id: "0", description: "Unknown", state: "full" },
+        boxscoreSource: { id: "38", description: "S&A feed", state: "full" },
         venue: {
           $ref: "https://venue",
           fullName: "SoFi Stadium",

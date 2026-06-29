@@ -12,11 +12,14 @@ export function transformFifaEventsToIcs(
     for (const competition of mainEvent.competitions) {
       const start = dayjs(competition.date);
       const title = `FIFA: ${mainEvent.shortName}`;
+      const state = (competition.boxscoreSource ?? competition.gameSource)?.state;
 
       icsEvents.push({
         uid: `${competition.id}@sports-calendar`,
         title,
-        description: `FIFA: ${mainEvent.name} — ${competition.gameSource.state}`,
+        description: state
+          ? `FIFA: ${mainEvent.name} — ${state}`
+          : `FIFA: ${mainEvent.name}`,
         start: [
           start.year(),
           start.month() + 1,
