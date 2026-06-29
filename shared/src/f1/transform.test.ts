@@ -19,7 +19,6 @@ function makeEvent(overrides: Partial<F1Event> = {}): F1Event {
         timeValid: true,
         recent: false,
         bracketAvailable: false,
-        gameSource: { id: "0", description: "Unknown", state: "full" },
         status: { $ref: "https://status" },
         session: 5,
       },

@@ -19,7 +19,6 @@ function makeEvent(overrides: Partial<FifaEvent> = {}): FifaEvent {
         timeValid: true,
         recent: false,
         bracketAvailable: false,
-        gameSource: { id: "0", description: "Unknown", state: "full" },
         venue: {
           $ref: "https://venue",
           fullName: "SoFi Stadium",
@@ -55,7 +54,7 @@ describe("transformFifaEventsToIcs", () => {
   it("sets a stable uid and a descriptive description", () => {
     const [entry] = transformFifaEventsToIcs([makeEvent()]);
     expect(entry.uid).toBe("1@sports-calendar");
-    expect(entry.description).toBe("FIFA: Brazil at Argentina — full");
+    expect(entry.description).toBe("FIFA: Brazil at Argentina");
   });
 
   it("sets duration to 2 hours", () => {

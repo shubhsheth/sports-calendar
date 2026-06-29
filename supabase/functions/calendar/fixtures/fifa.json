@@ -14,7 +14,6 @@
       "timeValid": true,
       "recent": false,
       "bracketAvailable": false,
-      "gameSource": { "id": "1", "description": "ESPN", "state": "full" },
       "venue": {
         "$ref": "https://example.test/venue",
         "fullName": "SoFi Stadium",

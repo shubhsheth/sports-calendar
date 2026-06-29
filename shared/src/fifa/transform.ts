@@ -16,7 +16,7 @@ export function transformFifaEventsToIcs(
       icsEvents.push({
         uid: `${competition.id}@sports-calendar`,
         title,
-        description: `FIFA: ${mainEvent.name} — ${competition.gameSource.state}`,
+        description: `FIFA: ${mainEvent.name}`,
         start: [
           start.year(),
           start.month() + 1,

@@ -19,7 +19,6 @@ function makeCompetition(
     timeValid: true,
     recent: false,
     bracketAvailable: false,
-    gameSource: { id: "1", description: "ESPN", state: "full" },
     competitors: [
       { $ref: "https://ref", homeAway: "home", team: { $ref: teamRef("1") } },
       { $ref: "https://ref", homeAway: "away", team: { $ref: teamRef("2") } },

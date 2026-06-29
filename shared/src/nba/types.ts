@@ -21,11 +21,6 @@ export type NbaEventCompetition = {
   timeValid: boolean;
   recent: boolean;
   bracketAvailable: boolean;
-  gameSource: {
-    id: string;
-    description: string;
-    state: string;
-  };
   status?: { $ref: string }; // absent on games far in the future
   venue?: {
     $ref: string;

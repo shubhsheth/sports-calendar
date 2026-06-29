@@ -19,7 +19,6 @@ function makeEvent(overrides: Partial<NflEvent> = {}): NflEvent {
         timeValid: true,
         recent: false,
         bracketAvailable: false,
-        gameSource: { id: "0", description: "Unknown", state: "full" },
         venue: {
           $ref: "https://venue",
           fullName: "Arrowhead Stadium",
@@ -56,7 +55,7 @@ describe("transformNflEventsToIcs", () => {
     const [entry] = transformNflEventsToIcs([makeEvent()]);
     expect(entry.uid).toBe("1@sports-calendar");
     expect(entry.description).toBe(
-      "NFL: New England Patriots at Kansas City Chiefs — full"
+      "NFL: New England Patriots at Kansas City Chiefs"
     );
   });
 
