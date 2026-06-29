@@ -21,11 +21,6 @@ export type NflEventCompetition = {
   timeValid: boolean;
   recent: boolean;
   bracketAvailable: boolean;
-  gameSource: {
-    id: string;
-    description: string;
-    state: string;
-  };
   status?: { $ref: string };
   venue?: {
     $ref: string;

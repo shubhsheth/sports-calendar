@@ -16,7 +16,6 @@ function makeCompetition(
     timeValid: true,
     recent: false,
     bracketAvailable: false,
-    gameSource: { id: "1", description: "ESPN", state: "full" },
     competitors: [
       {
         $ref: "https://comp-home",

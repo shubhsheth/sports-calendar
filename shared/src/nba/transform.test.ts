@@ -19,7 +19,6 @@ function makeEvent(overrides: Partial<NbaEvent> = {}): NbaEvent {
         timeValid: true,
         recent: false,
         bracketAvailable: false,
-        gameSource: { id: "0", description: "Unknown", state: "full" },
         venue: {
           $ref: "https://venue",
           fullName: "TD Garden",
@@ -56,7 +55,7 @@ describe("transformNbaEventsToIcs", () => {
     const [entry] = transformNbaEventsToIcs([makeEvent()]);
     expect(entry.uid).toBe("1@sports-calendar");
     expect(entry.description).toBe(
-      "NBA: Los Angeles Lakers at Boston Celtics — full"
+      "NBA: Los Angeles Lakers at Boston Celtics"
     );
   });
 

@@ -21,7 +21,7 @@ export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
       icsEvents.push({
         uid: `${competition.id}@sports-calendar`,
         title,
-        description: `NBA: ${mainEvent.name} — ${competition.gameSource.state}`,
+        description: `NBA: ${mainEvent.name}`,
         start: [
           start.year(),
           start.month() + 1,

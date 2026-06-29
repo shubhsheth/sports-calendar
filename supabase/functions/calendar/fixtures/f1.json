@@ -14,7 +14,6 @@
       "timeValid": true,
       "recent": false,
       "bracketAvailable": false,
-      "gameSource": { "id": "1", "description": "ESPN", "state": "full" },
       "status": { "$ref": "https://example.test/status" },
       "session": 1
     }
