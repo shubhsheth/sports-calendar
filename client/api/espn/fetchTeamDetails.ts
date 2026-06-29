@@ -7,6 +7,19 @@ type BaseTeam = {
   displayName: string;
 };
 
+/**
+ * Follows a `competitor.team.$ref` stub and returns the full team resource
+ * (including the `logos[]` array). Used only by NBA/NFL cards — F1 has no
+ * competitor/team data, and IPL embeds team info inline. Team logos carry `rel`
+ * tags (`"default"` for light backgrounds, `"dark"` for dark); cards pick
+ * `"default"`.
+ *
+ * The `http://` → `https://` rewrite is required for the same reason as
+ * `fetchEventDetails` — ESPN returns `http://` in `$ref` URLs.
+ *
+ * @param refUrl - The `competitor.team.$ref` stub URL to follow.
+ * @returns The full team resource (including the `logos[]` array), typed as `T`.
+ */
 export async function fetchTeamDetails<T = BaseTeam>(
   refUrl: string
 ): Promise<T> {

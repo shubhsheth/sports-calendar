@@ -8,8 +8,9 @@ import type { FifaEvent } from "./types.ts";
 
 const SPORT = "soccer";
 const LEAGUE = "fifa.world";
-const SEASON = "2026";
+const SEASON = "2026"; // ESPN season id = calendar year the season starts
 const PAGE_SIZE = 30;
+// Phases fetched and merged: 1 = group stage, 2 = knockout stage.
 const SEASON_TYPE_IDS = [1, 2];
 const FETCH_CONCURRENCY = 8;
 

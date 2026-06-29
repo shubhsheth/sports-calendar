@@ -8,8 +8,10 @@ import type { F1Event } from "./types.ts";
 
 const SPORT = "racing";
 const LEAGUE = "f1";
-const SEASON = "2026";
+const SEASON = "2026"; // ESPN season id = calendar year the season starts
 const PAGE_SIZE = 30;
+// F1 has no meaningful season-phase split — a single type 2 call returns the
+// full race calendar.
 const SEASON_TYPE_IDS = [2];
 const FETCH_CONCURRENCY = 8;
 

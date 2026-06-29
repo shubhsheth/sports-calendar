@@ -4,6 +4,12 @@ export type F1Event = BaseEvent & {
   competitions: F1EventCompetition[];
 };
 
+/**
+ * One F1 session (practice / qualifying / race). An F1 event is a whole race
+ * weekend containing 4–6 of these. Unlike NBA/NFL competitions there are no
+ * `competitors` or `venue`, and `type.id` denotes the session type rather than a
+ * season phase (see `translateF1EventType*`).
+ */
 export type F1EventCompetition = {
   $ref: string;
   id: string;
@@ -39,6 +45,23 @@ export const F1_SESSION_DURATIONS: Record<string, number> = {
   "6": 30, // Sprint Race
 };
 
+/**
+ * F1 `competition.type.id` identifies the session within a race weekend. Known
+ * IDs and their API abbreviations:
+ *   1 → Free Practice (FP1/FP2/FP3 — the abbreviation distinguishes them)
+ *   2 → Qualifying (Qual)
+ *   3 → Race
+ *   5 → Sprint Qualifying (SS, "Sprint Shootout")
+ *   6 → Sprint Race (SR)
+ * Type 4 ("Sprint") is the legacy pre-2023 sprint format and is intentionally
+ * unmapped. The F1 route hides practice by default (shows types 2, 3, 5, 6).
+ *
+ * `translateF1EventTypeAbbr` maps the API's `abbreviation`; `…Id` maps the
+ * numeric `id`.
+ *
+ * @param type - The API `competition.type.abbreviation` (e.g. `FP1`, `Qual`, `SR`).
+ * @returns The human-readable session name, or the input unchanged if unrecognized.
+ */
 export function translateF1EventTypeAbbr(type: string): string {
   switch (type) {
     case "FP1":
@@ -58,6 +81,12 @@ export function translateF1EventTypeAbbr(type: string): string {
   }
 }
 
+/**
+ * Maps an F1 `competition.type.id` to a human-readable session name.
+ *
+ * @param type - The numeric `competition.type.id` as a string (e.g. `"3"`).
+ * @returns The human-readable session name, or `"Other"` if unrecognized.
+ */
 export function translateF1EventTypeId(type: string): string {
   switch (type) {
     case "1":

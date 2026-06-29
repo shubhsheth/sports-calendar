@@ -26,7 +26,7 @@ export type NbaEventCompetition = {
     description: string;
     state: string;
   };
-  status?: { $ref: string };
+  status?: { $ref: string }; // absent on games far in the future
   venue?: {
     $ref: string;
     fullName: string;
@@ -41,9 +41,9 @@ export type NbaEventCompetition = {
 export type NbaCompetitor = {
   $ref: string;
   homeAway: "home" | "away";
-  winner?: boolean;
-  team: { $ref: string };
-  score?: { $ref: string };
+  winner?: boolean; // only present on completed games
+  team: { $ref: string }; // follow via fetchTeamDetails for logos
+  score?: { $ref: string }; // present but never followed — schedule-focused
 };
 
 export type NbaTeam = {
@@ -53,7 +53,7 @@ export type NbaTeam = {
   displayName: string;
   logos: {
     href: string;
-    rel: string[];
+    rel: string[]; // variant tags, e.g. ["default"] / ["dark"]; cards use "default"
   }[];
 };
 

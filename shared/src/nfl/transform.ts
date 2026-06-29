@@ -3,6 +3,13 @@ import { NFL_DURATION_MINUTES } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
+/**
+ * Builds one ICS event per NFL game. Title: `NFL: {shortName}`; duration is
+ * `NFL_DURATION_MINUTES` (see `shared/src/nfl/types.ts`).
+ *
+ * @param events - The NFL events to convert.
+ * @returns One ICS event attribute object per game.
+ */
 export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
 
