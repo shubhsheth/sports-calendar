@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import { fetchF1EventRefs } from "@/components/f1/utils/fetchF1EventRefs";
 import F1EventCard from "@/components/f1/f1-event-card";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
@@ -48,6 +49,10 @@ function F1Page() {
             filterEvents={filterF1Events}
             buildFeedUrlFn={buildF1FeedUrl}
             eventFilters={filters}
+          />
+          <SaveLeagueButton
+            league="f1"
+            subscriptionFilters={{ types: filters.types }}
           />
           <F1FilterSelector filters={filters} setFilters={setFilters} />
         </div>

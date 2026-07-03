@@ -43,7 +43,7 @@ Backend tasks additionally verify against the locally served function
   dedupe, invalid/unknown token, empty calendar). Verify: deno tests + local serve
   round-trip with a seeded row.
 
-- [ ] **T5 — League page integration.** Signed-in users get: an "Add to My Calendar"
+- [x] **T5 — League page integration.** Signed-in users get: an "Add to My Calendar"
   action beside the existing feed links that saves the league with the currently
   selected filters (upsert; button reflects already-subscribed state), and a pin/unpin
   toggle on each event card (NBA/NFL/F1/IPL/FIFA). Signed-out clicks prompt sign-in.

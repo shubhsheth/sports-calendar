@@ -1,3 +1,4 @@
+import PinEventButton from "@/components/base/pin-event-button";
 import {
   type F1Event,
   type F1EventFilters,
@@ -41,10 +42,11 @@ function F1EventCard({ league, eventRef, filters }: F1EventCardProps) {
   return (
     <Card className="w-full overflow-hidden border-l-4 border-l-red-600 transition-all hover:shadow-md">
       <CardHeader className="pb-2">
-        <div className="flex flex-col gap-1">
+        <div className="flex items-start justify-between gap-2">
           <h3 className="text-2xl font-black uppercase italic tracking-tighter text-foreground">
             {cleanUpF1SponsorNames(filteredF1Event.name)}
           </h3>
+          <PinEventButton league="f1" espnEventId={filteredF1Event.id} />
         </div>
       </CardHeader>
 

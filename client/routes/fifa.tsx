@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { FifaEvent, FifaEventFilters } from "@sports-calendar/shared";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
@@ -50,6 +51,10 @@ function FifaPage() {
             filterEvents={filterFifaEvents}
             buildFeedUrlFn={buildFifaFeedUrl}
             eventFilters={filters}
+          />
+          <SaveLeagueButton
+            league="fifa"
+            subscriptionFilters={{ teamIds: filters.teamIds }}
           />
           <FifaFilterSelector filters={filters} setFilters={setFilters} />
         </div>

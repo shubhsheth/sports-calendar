@@ -38,7 +38,7 @@ here and in tasks.md after the human approves the increment.
 - [x] T2 — Client auth foundation
 - [x] T3 — Calendar data layer (client)
 - [x] T4 — Personal feed endpoint (backend)
-- [ ] T5 — League page integration
+- [x] T5 — League page integration
 - [ ] T6 — My Calendar page
 - [ ] T7 — Analytics + docs
 - [ ] T8 — Full verification
