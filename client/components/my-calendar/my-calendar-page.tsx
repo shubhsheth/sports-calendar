@@ -23,6 +23,7 @@ import {
   useRegenerateFeedToken,
   useRemoveSubscription,
 } from "@/hooks/useMyCalendar";
+import { analytics } from "@/lib/analytics";
 import { buildMyCalendarFeedUrl } from "@/lib/buildCalendarFeedUrl";
 
 export function MyCalendarPage() {
@@ -174,7 +175,13 @@ function SubscriptionItem({
         aria-label={`Remove ${LEAGUE_LABELS[subscription.league]} subscription`}
         disabled={removeSubscription.isPending}
         onClick={() =>
-          removeSubscription.mutate({ league: subscription.league })
+          removeSubscription.mutate(
+            { league: subscription.league },
+            {
+              onSuccess: () =>
+                analytics.leagueRemovedFromMyCalendar(subscription.league),
+            }
+          )
         }
       >
         <Trash2 className="size-4" aria-hidden />
@@ -221,7 +228,10 @@ function FeedCard({ feedToken }: { feedToken: string }) {
                 disabled={regenerate.isPending}
                 onClick={() =>
                   regenerate.mutate(undefined, {
-                    onSuccess: () => setConfirmOpen(false),
+                    onSuccess: () => {
+                      analytics.feedTokenRegenerated();
+                      setConfirmOpen(false);
+                    },
                   })
                 }
               >

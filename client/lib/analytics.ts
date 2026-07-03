@@ -55,4 +55,16 @@ export const analytics = {
     capture("calendar_feed_google_clicked", { league }),
   scheduleNextPageLoaded: (league: string, pageNumber: number) =>
     capture("schedule_next_page_loaded", { league, page_number: pageNumber }),
+  signInStarted: (method: "google" | "magic_link") =>
+    capture("sign_in_started", { method }),
+  signedOut: () => capture("signed_out"),
+  leagueSavedToMyCalendar: (league: string) =>
+    capture("league_saved_to_my_calendar", { league }),
+  leagueRemovedFromMyCalendar: (league: string) =>
+    capture("league_removed_from_my_calendar", { league }),
+  eventPinned: (league: string, eventId: string) =>
+    capture("event_pinned", { league, event_id: eventId }),
+  eventUnpinned: (league: string, eventId: string) =>
+    capture("event_unpinned", { league, event_id: eventId }),
+  feedTokenRegenerated: () => capture("feed_token_regenerated"),
 };

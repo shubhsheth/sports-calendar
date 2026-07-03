@@ -88,10 +88,10 @@ describe("PinEventButton", () => {
     });
     expect(button).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(button);
-    expect(pinMutate).toHaveBeenCalledWith({
-      league: "ipl",
-      espnEventId: "701",
-    });
+    expect(pinMutate).toHaveBeenCalledWith(
+      { league: "ipl", espnEventId: "701" },
+      expect.anything()
+    );
     expect(unpinMutate).not.toHaveBeenCalled();
   });
 
@@ -106,10 +106,10 @@ describe("PinEventButton", () => {
     });
     expect(button).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(button);
-    expect(unpinMutate).toHaveBeenCalledWith({
-      league: "ipl",
-      espnEventId: "701",
-    });
+    expect(unpinMutate).toHaveBeenCalledWith(
+      { league: "ipl", espnEventId: "701" },
+      expect.anything()
+    );
     expect(pinMutate).not.toHaveBeenCalled();
   });
 });

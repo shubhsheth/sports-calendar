@@ -40,7 +40,7 @@ here and in tasks.md after the human approves the increment.
 - [x] T4 — Personal feed endpoint (backend)
 - [x] T5 — League page integration
 - [x] T6 — My Calendar page
-- [ ] T7 — Analytics + docs
+- [x] T7 — Analytics + docs
 - [ ] T8 — Full verification
 
 ## Notes
@@ -56,3 +56,14 @@ here and in tasks.md after the human approves the increment.
   `supabase db reset` locally once before deploying (T8 checklist).
 - **RLS policy style:** `(select auth.uid())` per Supabase perf guidance (initPlan
   caching); policies target only `authenticated` — no anon policies by design.
+- **T4 verification (env constraint):** same as T1 — no local `supabase functions
+  serve` here. Verified with the function's Deno test harness (fixture-stubbed ESPN +
+  PostgREST fetch): combine/dedupe, invalid/unknown token 404s, invalid stored filters
+  skipped, empty calendar. Live round trip deferred to the T8 deploy checklist.
+- **T6 simplifications (minor drift from tasks.md wording):** subscriptions display
+  filter *summaries* ("2 teams selected" / F1 session names via
+  `translateF1EventTypeId`) rather than full team-name pills — team names would need
+  per-league team fetches for marginal value. Pinned events resolve name/date via the
+  core API's per-event endpoint (`…/leagues/<league>/events/<id>`); IPL has no such
+  endpoint (verified: `summary?event=` errors), so IPL pins search the cached season
+  fetch (`fetchAllIplEvents` via `ensureQueryData`, shared across pins).

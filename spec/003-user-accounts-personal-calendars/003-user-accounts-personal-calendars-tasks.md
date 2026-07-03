@@ -58,7 +58,7 @@ Backend tasks additionally verify against the locally served function
   "Regenerate URL" action (confirm dialog). Empty and signed-out states. Verify: CI
   gate green; component tests for empty/populated/signed-out.
 
-- [ ] **T7 — Analytics + docs.** Typed analytics events for sign-in/out, subscribe/
+- [x] **T7 — Analytics + docs.** Typed analytics events for sign-in/out, subscribe/
   unsubscribe league, pin/unpin, feed-URL copy, token regen (per `client/lib/analytics.ts`
   conventions). Update `docs/PROJECT_OVERVIEW.md`, `docs/BACKEND.md` (new endpoint,
   schema, RLS), `.env.example`. Verify: CI gate green.

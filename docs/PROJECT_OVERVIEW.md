@@ -2,7 +2,7 @@
 
 ## Main Goal
 
-A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend.
+A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend. Signed-in users (Supabase Auth) get a **personal calendar**: filtered league subscriptions plus individually pinned games, combined into one secret-token feed URL.
 
 This is an npm-workspaces monorepo: a `client/` SPA (deployed to GitHub Pages), a `shared/` package of ESPN/league logic reused by both surfaces, and a `supabase/` Edge Function that serves the subscription feeds.
 
@@ -26,6 +26,7 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 | Infinite Scroll | `react-intersection-observer` |
 | Analytics | PostHog (`posthog-js`) |
 | Backend | Supabase Edge Function — Hono on Deno |
+| Auth & User Data | Supabase Auth (Google + magic link) + Postgres with RLS, via `@supabase/supabase-js` |
 | Deployment | GitHub Pages (client) + Supabase (function), via GitHub Actions |
 
 ---
@@ -65,15 +66,27 @@ shared/                          # @sports-calendar/shared — logic reused by c
 client/                          # @sports-calendar/client — the React SPA
 ├── api/espn/
 │   └── fetchTeamDetails.ts      # Team info by ref URL (NBA/NFL)
+├── api/calendar/                # Personal calendar CRUD via supabase-js (RLS)
+│   ├── calendarApi.ts           # get-or-create, subscriptions, pins, token regen
+│   ├── fetchPinnedEventDetails.ts # Name/date for pinned events (core API / IPL season)
+│   └── types.ts                 # League, SubscriptionFilters, MyCalendar shapes
 ├── lib/
 │   ├── analytics.ts             # PostHog init + typed event tracking helpers
 │   ├── buildCalendarFeedUrl.ts  # Builds subscription feed URLs from VITE_CALENDAR_FEED_BASE_URL
+│   ├── supabase.ts              # supabase-js singleton (null without env vars)
 │   └── utils.ts                 # cn() class merging utility
+├── hooks/
+│   ├── useAuth.ts               # Auth context + hook (provider in components/auth)
+│   └── useMyCalendar.ts         # React Query hooks over api/calendar
 ├── components/
+│   ├── auth/                    # AuthProvider, header AuthMenu, SignInDialog
+│   ├── my-calendar/             # My Calendar page: lists, pinned items, feed card
 │   ├── base/
 │   │   ├── infinite-scroll-events.tsx     # Generic infinite scroll (accepts league prop)
 │   │   ├── download-ical-button.tsx       # Generic ICS export with concurrency control
 │   │   ├── add-to-calendar-feed-links.tsx # Copy/Apple/Google subscription links
+│   │   ├── save-league-button.tsx         # Save league + filters to My Calendar
+│   │   ├── pin-event-button.tsx           # Pin/unpin one fixture on My Calendar
 │   │   └── filter-pill.tsx
 │   ├── nba/ nfl/ f1/ ipl/ fifa/ # Per-league UI + utils/, e.g. nba/:
 │   │   ├── nba-event-card.tsx
@@ -87,15 +100,17 @@ client/                          # @sports-calendar/client — the React SPA
 ├── routes/
 │   ├── __root.tsx               # Layout: Header + Outlet + Footer
 │   ├── index.tsx                # Home: sport selection grid
+│   ├── my-calendar.tsx          # Personal calendar (signed-in)
 │   ├── nba.tsx  nfl.tsx  f1.tsx  ipl.tsx  fifa.tsx
-└── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init
+└── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init + AuthProvider
 
 supabase/                        # Calendar feed backend (see docs/BACKEND.md)
 ├── config.toml
+├── migrations/                  # Postgres schema: calendars, subscriptions, pinned events (RLS)
 └── functions/
     ├── deno.json
-    ├── _shared/                 # params.ts (query parsing), icsHeaders.ts
-    └── calendar/index.ts        # Hono app: GET /calendar/{nba,nfl,f1,ipl}.ics
+    ├── _shared/                 # params.ts (query parsing), icsHeaders.ts, personalCalendar.ts
+    └── calendar/                # Hono app: GET /calendar/{nba,nfl,f1,ipl,fifa}.ics + /calendar/my/<token>.ics
 ```
 
 ---
@@ -128,6 +143,19 @@ Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`) owns its logic in two places
 
 ### 5a. Calendar Feed Subscriptions
 Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to-calendar-feed-links.tsx` surfaces Copy / Apple / Google links whose URLs are built by `client/lib/buildCalendarFeedUrl.ts` from `VITE_CALENDAR_FEED_BASE_URL`. Those URLs point at the Supabase Edge Function (`supabase/functions/calendar/`), which re-fetches from ESPN on each request so subscribed calendars stay current. See `docs/BACKEND.md`.
+
+### 5b. Personal Calendars (accounts)
+Signing in (Supabase Auth: Google OAuth or magic link; `client/components/auth/`)
+unlocks a personal calendar stored in Supabase Postgres. From any league page,
+"Save to My Calendar" stores that league with the currently selected filters
+(`calendar_subscriptions`, one row per league, upsert semantics) and each event
+card gets a pin toggle (`calendar_pinned_events`). The `/my-calendar` route lists
+everything with remove actions and surfaces the combined feed URL
+(`<base>/my/<feed_token>.ics`, regenerable). All client access goes through
+supabase-js against RLS owner-only tables (`client/api/calendar/`); the Edge
+Function reads by token with the service role (see `docs/BACKEND.md`). Without
+`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` every account surface hides and the
+anonymous app is unchanged.
 
 ### 6. Analytics with PostHog
 `client/lib/analytics.ts` is the single point of contact for PostHog. It:
@@ -169,4 +197,10 @@ Subscribe (live feed):
   → buildCalendarFeedUrl(league, params) → <VITE_CALENDAR_FEED_BASE_URL>/<league>.ics?…
   → Calendar app polls the Supabase Edge Function (docs/BACKEND.md)
   → Function fetches fresh ESPN data → filters → returns .ics on every request
+
+Personal calendar (signed in):
+  → Save league / pin event → supabase-js writes RLS-protected rows
+  → My Calendar page lists subscriptions + pins (React Query: useMyCalendar)
+  → Calendar app polls <base>/my/<feed_token>.ics
+  → Function: token → calendar rows → per league fetch/filter/pin-union → deduped .ics
 ```

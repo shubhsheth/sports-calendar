@@ -8,6 +8,7 @@ import {
   usePinEvent,
   useUnpinEvent,
 } from "@/hooks/useMyCalendar";
+import { analytics } from "@/lib/analytics";
 
 type PinEventButtonProps = {
   league: League;
@@ -47,8 +48,15 @@ function PinEventButton({ league, espnEventId }: PinEventButtonProps) {
 
   const toggle = () => {
     const args = { league, espnEventId };
-    if (isPinned) unpinEvent.mutate(args);
-    else pinEvent.mutate(args);
+    if (isPinned) {
+      unpinEvent.mutate(args, {
+        onSuccess: () => analytics.eventUnpinned(league, espnEventId),
+      });
+    } else {
+      pinEvent.mutate(args, {
+        onSuccess: () => analytics.eventPinned(league, espnEventId),
+      });
+    }
   };
 
   return (

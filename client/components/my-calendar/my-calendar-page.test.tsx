@@ -140,17 +140,20 @@ describe("MyCalendarPage", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /remove nba subscription/i })
     );
-    expect(removeMutate).toHaveBeenCalledWith({ league: "nba" });
+    expect(removeMutate).toHaveBeenCalledWith(
+      { league: "nba" },
+      expect.anything()
+    );
 
     fireEvent.click(
       await screen.findByRole("button", {
         name: /remove pinned event punjab kings/i,
       })
     );
-    expect(unpinMutate).toHaveBeenCalledWith({
-      league: "ipl",
-      espnEventId: "701",
-    });
+    expect(unpinMutate).toHaveBeenCalledWith(
+      { league: "ipl", espnEventId: "701" },
+      expect.anything()
+    );
   });
 
   it("shows the feed links and regenerates the URL after confirmation", () => {

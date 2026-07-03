@@ -7,6 +7,7 @@ import { LEAGUE_LABELS } from "@/components/my-calendar/league-labels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useUnpinEvent } from "@/hooks/useMyCalendar";
+import { analytics } from "@/lib/analytics";
 
 /** One pinned fixture: league badge, name/date from ESPN, and unpin. */
 export function PinnedEventItem({ pin }: { pin: PinnedEvent }) {
@@ -46,10 +47,13 @@ export function PinnedEventItem({ pin }: { pin: PinnedEvent }) {
         aria-label={`Remove pinned event ${details?.name ?? pin.espnEventId}`}
         disabled={unpinEvent.isPending}
         onClick={() =>
-          unpinEvent.mutate({
-            league: pin.league,
-            espnEventId: pin.espnEventId,
-          })
+          unpinEvent.mutate(
+            { league: pin.league, espnEventId: pin.espnEventId },
+            {
+              onSuccess: () =>
+                analytics.eventUnpinned(pin.league, pin.espnEventId),
+            }
+          )
         }
       >
         <Trash2 className="size-4" aria-hidden />

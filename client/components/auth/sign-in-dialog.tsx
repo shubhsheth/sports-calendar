@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { analytics } from "@/lib/analytics";
 
 type SignInDialogProps = {
   /** Element that opens the dialog (rendered via Radix `asChild`). */
@@ -36,6 +37,7 @@ export function SignInDialog({
   async function handleMagicLink(event: React.FormEvent) {
     event.preventDefault();
     setStatus({ state: "sending" });
+    analytics.signInStarted("magic_link");
     const { error } = await signInWithMagicLink(email);
     setStatus(error ? { state: "error", message: error } : { state: "sent" });
   }
@@ -54,7 +56,12 @@ export function SignInDialog({
           <DialogTitle>Sign in</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Button onClick={() => void signInWithGoogle()}>
+        <Button
+          onClick={() => {
+            analytics.signInStarted("google");
+            void signInWithGoogle();
+          }}
+        >
           Continue with Google
         </Button>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

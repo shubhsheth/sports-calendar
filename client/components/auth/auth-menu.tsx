@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SignInDialog } from "@/components/auth/sign-in-dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { analytics } from "@/lib/analytics";
 
 /**
  * Header auth control: a Sign in button (opening the sign-in dialog) when
@@ -29,7 +30,10 @@ export function AuthMenu() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => void signOut()}
+          onClick={() => {
+            analytics.signedOut();
+            void signOut();
+          }}
           aria-label="Sign out"
         >
           <LogOut />

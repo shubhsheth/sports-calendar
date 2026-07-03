@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SignInDialog } from "@/components/auth/sign-in-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyCalendar, useUpsertSubscription } from "@/hooks/useMyCalendar";
+import { analytics } from "@/lib/analytics";
 
 type SaveLeagueButtonProps = {
   league: League;
@@ -50,6 +51,7 @@ function SaveLeagueButton({
       { league, filters: subscriptionFilters },
       {
         onSuccess: () => {
+          analytics.leagueSavedToMyCalendar(league);
           setJustSaved(true);
           setTimeout(() => setJustSaved(false), 2000);
         },
