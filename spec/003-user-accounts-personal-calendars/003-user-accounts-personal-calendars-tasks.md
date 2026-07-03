@@ -32,7 +32,7 @@ Backend tasks additionally verify against the locally served function
   All via supabase-js against RLS tables; React Query hooks wrapping each. Unit tests
   with a mocked supabase client. Verify: CI gate green.
 
-- [ ] **T4 — Personal feed endpoint (backend).** In the `calendar` function: a
+- [x] **T4 — Personal feed endpoint (backend).** In the `calendar` function: a
   service-role supabase client helper in `functions/_shared/`; `GET
   /calendar/my/:token.ics` → look up calendar by feed_token (404 if none), load
   subscriptions + pinned events, then per involved league: `fetchAll<League>Events`
