@@ -41,7 +41,7 @@ here and in tasks.md after the human approves the increment.
 - [x] T5 — League page integration
 - [x] T6 — My Calendar page
 - [x] T7 — Analytics + docs
-- [ ] T8 — Full verification
+- [x] T8 — Full verification
 
 ## Notes
 - **T1 verification (env constraint):** this environment has no Supabase CLI and no
@@ -67,3 +67,29 @@ here and in tasks.md after the human approves the increment.
   core API's per-event endpoint (`…/leagues/<league>/events/<id>`); IPL has no such
   endpoint (verified: `summary?event=` errors), so IPL pins search the cached season
   fetch (`fetchAllIplEvents` via `ensureQueryData`, shared across pins).
+- **T8 verification (what ran here):** CI gate green (205 vitest tests / 0 lint
+  errors / format clean / build ok), 8 Deno feed tests green, migration + RLS harness
+  green on local Postgres 16. Headless-Chromium smoke against `npm run dev` in both
+  modes: (a) no Supabase env — auth UI and account affordances absent everywhere,
+  all five league routes + Add to Calendar + live FIFA event cards render, My
+  Calendar explains accounts aren't configured, zero console errors; (b) dummy
+  Supabase env, signed out — Sign in button, Save to My Calendar on all five routes,
+  pin buttons on cards, pin click opens the sign-in dialog, My Calendar prompts
+  sign-in, zero console errors. Signed-in round trip (real Google/magic-link login →
+  save/pin → fetch `/calendar/my/<token>.ics`) requires a real Supabase project and
+  is covered by the deploy checklist below.
+
+## Deploy checklist (requires the real Supabase project — not possible in this sandbox)
+1. `supabase db push` (applies `20260703000000_user_calendars.sql`); confirm RLS is
+   shown enabled on all three tables in the dashboard.
+2. Supabase Auth: enable the Google provider (OAuth client id/secret) and email OTP;
+   add redirect URLs for both `http://localhost:5173/` and
+   `https://shubhsheth.github.io/sports-calendar/` (site URL = the Pages URL).
+3. Client env (GitHub Pages build + local `.env`): `VITE_SUPABASE_URL`,
+   `VITE_SUPABASE_ANON_KEY` (anon key only — never the service key).
+4. `supabase functions deploy calendar` (CI does this on merge); the runtime injects
+   `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` automatically — no new secrets.
+5. Manual round trip: sign in with Google AND a magic link → save two leagues with
+   filters + pin one event → My Calendar lists all three → feed URL returns the
+   combined deduped ICS in a calendar app → remove one item → feed reflects it →
+   regenerate token → old URL 404s, new URL works.

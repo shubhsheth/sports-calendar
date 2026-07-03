@@ -63,7 +63,7 @@ Backend tasks additionally verify against the locally served function
   conventions). Update `docs/PROJECT_OVERVIEW.md`, `docs/BACKEND.md` (new endpoint,
   schema, RLS), `.env.example`. Verify: CI gate green.
 
-- [ ] **T8 — Full verification.** CI gate green. Manual round trip on local stack:
+- [x] **T8 — Full verification.** CI gate green. Manual round trip on local stack:
   sign in (Google + magic link) → subscribe two leagues with filters + pin one event →
   My Calendar shows all → feed URL returns combined deduped ICS → remove one item →
   feed reflects it → regenerate token → old URL 404s, new one works. Anonymous smoke of
