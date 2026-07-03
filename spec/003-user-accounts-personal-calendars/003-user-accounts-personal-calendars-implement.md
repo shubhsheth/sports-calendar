@@ -34,7 +34,7 @@ here and in tasks.md after the human approves the increment.
   runs on that base — test the callback on both localhost and Pages.
 
 ## Progress
-- [ ] T1 — Database schema + RLS
+- [x] T1 — Database schema + RLS
 - [ ] T2 — Client auth foundation
 - [ ] T3 — Calendar data layer (client)
 - [ ] T4 — Personal feed endpoint (backend)
@@ -44,4 +44,15 @@ here and in tasks.md after the human approves the increment.
 - [ ] T8 — Full verification
 
 ## Notes
-(populated during implementation — spec drift, out-of-scope findings, deploy checklist)
+- **T1 verification (env constraint):** this environment has no Supabase CLI and no
+  Docker daemon, so `supabase db reset` couldn't run here. Verified instead against a
+  local PostgreSQL 16 cluster with a stubbed Supabase environment (`auth.users`,
+  `auth.uid()` reading `request.jwt.claims`, `anon`/`authenticated`/`service_role`
+  roles with default grants): migration applies cleanly; assertions covered RLS enabled
+  on all three tables, owner CRUD, cross-user read/write denial (including a leaked
+  calendar-UUID insert attempt), anon denial, service-role bypass (token lookup), the
+  one-calendar-per-user / one-subscription-per-league / league-whitelist /
+  pinned-uniqueness constraints, and `auth.users` delete cascade. Re-run
+  `supabase db reset` locally once before deploying (T8 checklist).
+- **RLS policy style:** `(select auth.uid())` per Supabase perf guidance (initPlan
+  caching); policies target only `authenticated` — no anon policies by design.

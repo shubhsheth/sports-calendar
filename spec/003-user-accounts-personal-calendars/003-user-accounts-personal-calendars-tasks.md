@@ -5,7 +5,7 @@ Each task ends in a compiling, testable state. Verify after each with the CI gat
 Backend tasks additionally verify against the locally served function
 (`supabase start && supabase functions serve`).
 
-- [ ] **T1 — Database schema + RLS.** Add `supabase/migrations/` with one migration
+- [x] **T1 — Database schema + RLS.** Add `supabase/migrations/` with one migration
   creating `calendars` (id, user_id unique → auth.users, feed_token uuid unique default
   `gen_random_uuid()`, created_at), `calendar_subscriptions` (id, calendar_id fk cascade,
   league text check in nba/nfl/f1/ipl/fifa, filters jsonb, created_at, unique
