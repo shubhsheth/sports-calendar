@@ -39,7 +39,7 @@ here and in tasks.md after the human approves the increment.
 - [x] T3 — Calendar data layer (client)
 - [x] T4 — Personal feed endpoint (backend)
 - [x] T5 — League page integration
-- [ ] T6 — My Calendar page
+- [x] T6 — My Calendar page
 - [ ] T7 — Analytics + docs
 - [ ] T8 — Full verification
 

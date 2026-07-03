@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as NflRouteImport } from './routes/nfl'
 import { Route as NbaRouteImport } from './routes/nba'
+import { Route as MyCalendarRouteImport } from './routes/my-calendar'
 import { Route as IplRouteImport } from './routes/ipl'
 import { Route as FifaRouteImport } from './routes/fifa'
 import { Route as F1RouteImport } from './routes/f1'
@@ -24,6 +25,11 @@ const NflRoute = NflRouteImport.update({
 const NbaRoute = NbaRouteImport.update({
   id: '/nba',
   path: '/nba',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyCalendarRoute = MyCalendarRouteImport.update({
+  id: '/my-calendar',
+  path: '/my-calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IplRoute = IplRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/f1': typeof F1Route
   '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
+  '/my-calendar': typeof MyCalendarRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/f1': typeof F1Route
   '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
+  '/my-calendar': typeof MyCalendarRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
 }
@@ -69,15 +77,24 @@ export interface FileRoutesById {
   '/f1': typeof F1Route
   '/fifa': typeof FifaRoute
   '/ipl': typeof IplRoute
+  '/my-calendar': typeof MyCalendarRoute
   '/nba': typeof NbaRoute
   '/nfl': typeof NflRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
+  fullPaths: '/' | '/f1' | '/fifa' | '/ipl' | '/my-calendar' | '/nba' | '/nfl'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
-  id: '__root__' | '/' | '/f1' | '/fifa' | '/ipl' | '/nba' | '/nfl'
+  to: '/' | '/f1' | '/fifa' | '/ipl' | '/my-calendar' | '/nba' | '/nfl'
+  id:
+    | '__root__'
+    | '/'
+    | '/f1'
+    | '/fifa'
+    | '/ipl'
+    | '/my-calendar'
+    | '/nba'
+    | '/nfl'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -85,6 +102,7 @@ export interface RootRouteChildren {
   F1Route: typeof F1Route
   FifaRoute: typeof FifaRoute
   IplRoute: typeof IplRoute
+  MyCalendarRoute: typeof MyCalendarRoute
   NbaRoute: typeof NbaRoute
   NflRoute: typeof NflRoute
 }
@@ -103,6 +121,13 @@ declare module '@tanstack/react-router' {
       path: '/nba'
       fullPath: '/nba'
       preLoaderRoute: typeof NbaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-calendar': {
+      id: '/my-calendar'
+      path: '/my-calendar'
+      fullPath: '/my-calendar'
+      preLoaderRoute: typeof MyCalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ipl': {
@@ -141,6 +166,7 @@ const rootRouteChildren: RootRouteChildren = {
   F1Route: F1Route,
   FifaRoute: FifaRoute,
   IplRoute: IplRoute,
+  MyCalendarRoute: MyCalendarRoute,
   NbaRoute: NbaRoute,
   NflRoute: NflRoute,
 }

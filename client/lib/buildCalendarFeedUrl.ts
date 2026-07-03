@@ -11,3 +11,8 @@ export function buildCalendarFeedUrl(
   const query = params.toString();
   return `${base}/${league}.ics${query ? `?${query}` : ""}`;
 }
+
+/** The personal combined feed URL for a calendar's secret token. */
+export function buildMyCalendarFeedUrl(feedToken: string): string {
+  return buildCalendarFeedUrl(`my/${feedToken}`, new URLSearchParams());
+}

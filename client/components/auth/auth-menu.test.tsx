@@ -4,6 +4,16 @@ import { AuthMenu } from "./auth-menu";
 import { useAuth } from "@/hooks/useAuth";
 
 vi.mock("@/hooks/useAuth", () => ({ useAuth: vi.fn() }));
+vi.mock("@tanstack/react-router", () => ({
+  Link: (props: React.ComponentProps<"a"> & { to?: string }) => {
+    const { to, children, ...rest } = props;
+    return (
+      <a href={to} {...rest}>
+        {children}
+      </a>
+    );
+  },
+}));
 
 const mockUseAuth = vi.mocked(useAuth);
 

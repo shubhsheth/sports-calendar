@@ -51,7 +51,7 @@ Backend tasks additionally verify against the locally served function
   implementation, league specifics passed in. Verify: CI gate green; component tests
   for signed-in/out states.
 
-- [ ] **T6 — My Calendar page.** `client/routes/my-calendar.tsx` (+ header nav link,
+- [x] **T6 — My Calendar page.** `client/routes/my-calendar.tsx` (+ header nav link,
   signed-in only): lists league subscriptions with their filter pills and pinned events
   (event name/date via existing detail fetchers); remove actions for both; personal
   feed URL block reusing `add-to-calendar-feed-links.tsx` (Copy/Apple/Google) with a

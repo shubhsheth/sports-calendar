@@ -1,4 +1,5 @@
-import { LogOut } from "lucide-react";
+import { CalendarDays, LogOut } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SignInDialog } from "@/components/auth/sign-in-dialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +17,12 @@ export function AuthMenu() {
   if (user) {
     return (
       <div className="flex items-center gap-2 justify-self-end">
+        <Button variant="secondary" size="sm" asChild>
+          <Link to="/my-calendar">
+            <CalendarDays />
+            <span className="hidden sm:inline">My Calendar</span>
+          </Link>
+        </Button>
         <span className="text-sm text-gray-300 hidden sm:inline truncate max-w-48">
           {user.email}
         </span>
