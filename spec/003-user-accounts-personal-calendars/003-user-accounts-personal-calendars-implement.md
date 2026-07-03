@@ -35,7 +35,7 @@ here and in tasks.md after the human approves the increment.
 
 ## Progress
 - [x] T1 — Database schema + RLS
-- [ ] T2 — Client auth foundation
+- [x] T2 — Client auth foundation
 - [ ] T3 — Calendar data layer (client)
 - [ ] T4 — Personal feed endpoint (backend)
 - [ ] T5 — League page integration

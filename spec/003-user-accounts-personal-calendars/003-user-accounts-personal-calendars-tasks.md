@@ -16,7 +16,7 @@ Backend tasks additionally verify against the locally served function
   Verify: `supabase db reset` applies cleanly; SQL statements assert RLS is enabled and
   a second user cannot read the first user's rows.
 
-- [ ] **T2 — Client auth foundation.** Add `@supabase/supabase-js` to the client
+- [x] **T2 — Client auth foundation.** Add `@supabase/supabase-js` to the client
   workspace; `client/lib/supabase.ts` singleton from `VITE_SUPABASE_URL` /
   `VITE_SUPABASE_ANON_KEY` (no-op guard when absent, like analytics.ts);
   `client/hooks/useAuth.tsx` exposing session/user + `signInWithGoogle`,
