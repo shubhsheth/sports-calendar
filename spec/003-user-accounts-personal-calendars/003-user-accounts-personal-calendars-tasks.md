@@ -25,7 +25,7 @@ Backend tasks additionally verify against the locally served function
   Update `.env.example`. Verify: CI gate green; signed-out render unchanged; manual
   smoke sign-in against local Supabase.
 
-- [ ] **T3 — Calendar data layer (client).** `client/api/calendar/` module:
+- [x] **T3 — Calendar data layer (client).** `client/api/calendar/` module:
   `getOrCreateCalendar()`, `upsertSubscription(league, filters)`,
   `removeSubscription(league)`, `pinEvent(league, espnEventId)` / `unpinEvent(...)`,
   `listCalendar()` (calendar + subscriptions + pinned events), `regenerateFeedToken()`.
