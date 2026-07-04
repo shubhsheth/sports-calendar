@@ -10,8 +10,10 @@ const SPORT = "soccer";
 const LEAGUE = "fifa.world";
 const SEASON = "2026"; // ESPN season id = calendar year the season starts
 const PAGE_SIZE = 30;
-// Phases fetched and merged: 1 = group stage, 2 = knockout stage.
-const SEASON_TYPE_IDS = [1, 2];
+// Phases fetched and merged. ESPN splits the World Cup into one season "type"
+// per round: 1 = group stage, 2 = round of 32, 3 = round of 16,
+// 4 = quarterfinals, 5 = semifinals, 6 = third place, 7 = final.
+const SEASON_TYPE_IDS = [1, 2, 3, 4, 5, 6, 7];
 const FETCH_CONCURRENCY = 8;
 
 export async function fetchAllFifaEvents(): Promise<FifaEvent[]> {

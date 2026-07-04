@@ -27,7 +27,7 @@ export const Route = createFileRoute("/fifa")({
 });
 
 const FIFA_LEAGUE = "fifa";
-const FIFA_SEASON_TYPE_IDS = [1, 2];
+const FIFA_SEASON_TYPE_IDS = [1, 2, 3, 4, 5, 6, 7];
 
 function FifaPage() {
   const [filters, setFilters] = useLocalStorageState<FifaEventFilters>(
