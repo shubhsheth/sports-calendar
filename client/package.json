@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@sports-calendar/shared": "*"
+    "@sports-calendar/shared": "*",
+    "@supabase/supabase-js": "^2.110.0"
   }
 }

@@ -28,6 +28,8 @@ import {
   type ParseResult,
 } from "../_shared/params.ts";
 import { icsHeaders } from "../_shared/icsHeaders.ts";
+import { fetchCalendarByToken } from "../_shared/personalCalendar.ts";
+import { buildCombinedIcsEvents } from "./personalFeed.ts";
 
 export const app = new Hono();
 
@@ -98,6 +100,32 @@ registerLeagueRoute(
   filterFifaEvents,
   transformFifaEventsToIcs
 );
+
+/** `<feed_token>.ics` — tokens are UUIDs, anything else 404s without a lookup. */
+const FEED_FILE_PATTERN =
+  /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.ics$/i;
+
+/**
+ * Personal combined feed: the union of every league subscription (with its
+ * stored filters) and every pinned event on the calendar identified by the
+ * secret token, deduped by UID. Same pipeline functions as the league routes.
+ */
+app.get("/calendar/my/:file", async (c: Context) => {
+  const match = FEED_FILE_PATTERN.exec(c.req.param("file") ?? "");
+  if (!match) return c.text("Not Found", 404);
+
+  const calendar = await fetchCalendarByToken(match[1]);
+  if (!calendar) return c.text("Not Found", 404);
+
+  const icsEvents = await buildCombinedIcsEvents(calendar);
+  const result = createEvents(icsEvents);
+  if (!result.value) {
+    console.error("Failed to create iCal:", result.error);
+    return c.text("Failed to generate calendar", 500);
+  }
+
+  return new Response(result.value, { headers: icsHeaders() });
+});
 
 app.notFound(c => c.text("Not Found", 404));
 

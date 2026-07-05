@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { analytics } from "@/lib/analytics";
@@ -45,6 +46,10 @@ function IplPage() {
         <h1 className="text-4xl font-extrabold tracking-tight">IPL Schedule</h1>
         <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
           <IplDownloadIcalButton filters={filters} />
+          <SaveLeagueButton
+            league="ipl"
+            subscriptionFilters={{ teamIds: filters.teamIds }}
+          />
           <IplFilterSelector filters={filters} setFilters={setFilters} />
         </div>
       </div>

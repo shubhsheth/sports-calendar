@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import type { NbaEvent, NbaEventFilters } from "@sports-calendar/shared";
 import InfiniteScrollEvents from "@/components/base/infinite-scroll-events";
@@ -48,6 +49,10 @@ function NbaPage() {
             filterEvents={filterNbaEvents}
             buildFeedUrlFn={buildNbaFeedUrl}
             eventFilters={filters}
+          />
+          <SaveLeagueButton
+            league="nba"
+            subscriptionFilters={{ teamIds: filters.teamIds }}
           />
           <NbaFilterSelector filters={filters} setFilters={setFilters} />
         </div>

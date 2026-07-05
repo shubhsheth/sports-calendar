@@ -1,3 +1,4 @@
+import PinEventButton from "@/components/base/pin-event-button";
 import {
   type FifaEvent,
   type FifaEventFilters,
@@ -68,7 +69,7 @@ function FifaEventCard({ eventRef, filters }: FifaEventCardProps) {
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col items-start border-t bg-muted/30 py-3">
+      <CardFooter className="flex items-center justify-between gap-2 border-t bg-muted/30 py-3">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{eventDate}</span>
           {mainCompetition.venue && (
@@ -78,6 +79,7 @@ function FifaEventCard({ eventRef, filters }: FifaEventCardProps) {
             </>
           )}
         </p>
+        <PinEventButton league="fifa" espnEventId={filteredFifaEvent.id} />
       </CardFooter>
     </Card>
   );
