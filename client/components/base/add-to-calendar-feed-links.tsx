@@ -3,15 +3,19 @@ import { Apple, Check, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { analytics } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 type AddToCalendarFeedLinksProps = {
   league: string;
   feedUrl: string;
+  /** Overrides the default dialog-body padding (e.g. when inside a Card). */
+  className?: string;
 };
 
 function AddToCalendarFeedLinks({
   league,
   feedUrl,
+  className,
 }: AddToCalendarFeedLinksProps) {
   const [copied, setCopied] = useState(false);
 
@@ -30,7 +34,7 @@ function AddToCalendarFeedLinks({
   return (
     <>
       <Separator />
-      <div className="px-5 pb-5 pt-2 flex flex-col gap-2">
+      <div className={cn("px-5 pb-5 pt-2 flex flex-col gap-2", className)}>
         <p className="text-sm text-muted-foreground">
           Subscribe to a live feed that updates automatically.
         </p>

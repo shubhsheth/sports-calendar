@@ -56,48 +56,50 @@ export function SignInDialog({
           <DialogTitle>Sign in</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Button
-          onClick={() => {
-            analytics.signInStarted("google");
-            void signInWithGoogle();
-          }}
-        >
-          Continue with Google
-        </Button>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          or
-          <span className="h-px flex-1 bg-border" />
+        <div className="px-5 pb-5 pt-2 flex flex-col gap-3">
+          <Button
+            onClick={() => {
+              analytics.signInStarted("google");
+              void signInWithGoogle();
+            }}
+          >
+            Continue with Google
+          </Button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          {status.state === "sent" ? (
+            <p className="text-sm" role="status">
+              Check your email for a sign-in link.
+            </p>
+          ) : (
+            <form onSubmit={handleMagicLink} className="grid gap-2">
+              <Label htmlFor="magic-link-email">Email</Label>
+              <Input
+                id="magic-link-email"
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+              />
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={status.state === "sending"}
+              >
+                {status.state === "sending" ? "Sending…" : "Email me a link"}
+              </Button>
+              {status.state === "error" && (
+                <p className="text-sm text-destructive" role="alert">
+                  {status.message}
+                </p>
+              )}
+            </form>
+          )}
         </div>
-        {status.state === "sent" ? (
-          <p className="text-sm" role="status">
-            Check your email for a sign-in link.
-          </p>
-        ) : (
-          <form onSubmit={handleMagicLink} className="grid gap-2">
-            <Label htmlFor="magic-link-email">Email</Label>
-            <Input
-              id="magic-link-email"
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={event => setEmail(event.target.value)}
-            />
-            <Button
-              type="submit"
-              variant="secondary"
-              disabled={status.state === "sending"}
-            >
-              {status.state === "sending" ? "Sending…" : "Email me a link"}
-            </Button>
-            {status.state === "error" && (
-              <p className="text-sm text-destructive" role="alert">
-                {status.message}
-              </p>
-            )}
-          </form>
-        )}
       </DialogContent>
     </Dialog>
   );
