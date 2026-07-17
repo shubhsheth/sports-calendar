@@ -200,8 +200,12 @@ function FeedCard({ feedToken }: { feedToken: string }) {
       <CardHeader>
         <CardTitle>Your calendar feed</CardTitle>
       </CardHeader>
-      <AddToCalendarFeedLinks league="my-calendar" feedUrl={feedUrl} />
-      <CardContent className="pt-0">
+      <AddToCalendarFeedLinks
+        league="my-calendar"
+        feedUrl={feedUrl}
+        className="px-4 py-0"
+      />
+      <CardContent>
         <Button
           variant="outline"
           size="sm"
@@ -219,7 +223,7 @@ function FeedCard({ feedToken }: { feedToken: string }) {
                 subscribed to it will need the new link.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex gap-2 justify-end">
+            <div className="px-5 pb-5 pt-2 flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setConfirmOpen(false)}>
                 Cancel
               </Button>
