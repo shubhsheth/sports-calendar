@@ -14,7 +14,7 @@ Key risk (checked early, in T2): the discovery scan's coverage depends on the he
 endpoint returning every series active on a sampled date — T2's fixtures must include a
 multi-series day to lock that behavior in.
 
-- [ ] **T1 — Shared types, curated teams, fixtures.** `shared/src/cricketTeam/types.ts`:
+- [x] **T1 — Shared types, curated teams, fixtures.** `shared/src/cricketTeam/types.ts`:
   `CricketTeamEvent` (extends the IPL Site-API event shape with `seriesId`, `seriesName`,
   `format`, `endDate`), `CricketMatchFormat` (`test | odi | t20i | other`),
   `CricketTeamFilters` (`formats: CricketMatchFormat[]`), `CRICKET_NATIONAL_TEAMS` (the 12

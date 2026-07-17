@@ -124,7 +124,8 @@ Team logos follow the existing CDN pattern
   - Pinned cricket matches store `espn_event_id` as `"{seriesId}:{eventId}"` so the feed
     can resolve them via the series scoreboard without a discovery scan.
 - The shared cricket-team event type extends the IPL Site-API shape (competitors/logos
-  inline) with `seriesId`, `seriesName`, `format`, and `endDate`.
+  inline) with `seriesId`, `seriesName`, `format`, `formatDetail` (the competition
+  description, e.g. "2nd T20I"), and `endDate`.
 - The team page fetches the whole window in one query (a team plays ~30–60 matches in
   7 months) — no infinite scroll; parity is in features, not mechanics.
 - ESPN endpoints are unofficial and may change; same standing caveat as `docs/ESPN_API.md`.

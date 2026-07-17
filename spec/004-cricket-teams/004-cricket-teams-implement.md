@@ -49,7 +49,7 @@ after the human approves the increment.
   `uefa.champions`).
 
 ## Progress
-- [ ] T1 — Shared types, curated teams, fixtures
+- [x] T1 — Shared types, curated teams, fixtures
 - [ ] T2 — Series discovery
 - [ ] T3 — Team event fetch + normalization
 - [ ] T4 — Filters + ICS transform
@@ -65,4 +65,21 @@ after the human approves the increment.
 - [ ] T14 — Full verification
 
 ## Notes
-(append per-task execution notes here)
+- **T1 (2026-07-17):** Types in `shared/src/cricketTeam/types.ts`
+  (`CricketTeamEvent = IplEvent & {seriesId, seriesName, format, formatDetail,
+  endDate?}` — `formatDetail` added beyond the spec sketch to carry the
+  competition description, e.g. "2nd T20I", for card badges and ICS titles).
+  Fixtures recorded from live ESPN responses, trimmed to consumed fields per
+  repo convention: `cricket-header.json` (2026-07-25 header, 4 series incl.
+  India tour of Zimbabwe and a women's competition as a negative case),
+  `cricket-series-scoreboard.json` (India tour of Sri Lanka 24567, undated —
+  calendar + the multi-day 1st Test with `class`/`endDate`),
+  `cricket-odi-scoreboard.json` (WI tour of India 24289 dated 2026-09-27 —
+  1st ODI) — the planned single "match-date incl. Test" fixture became the
+  ODI one because the undated series fixture already contains the Test.
+  **Quirk for T3:** a Test appears in `leagues[0].calendar` once per match
+  *day* (24567: Aug 15–19 all map to the same event 1544001) and dated
+  fetches on each of those days return that same event — dedupe by event id
+  is mandatory, and `winner` can be the string `"false"` (IPL normalizer
+  already handles this). Logo CDN pattern verified live (HTTP 200,
+  `image/png`, id 6).
