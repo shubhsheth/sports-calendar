@@ -16,11 +16,21 @@ after the human approves the increment.
 
 ## Reference (verified during research, 2026-07-17 — live ESPN fetches)
 - **Discovery endpoint:**
-  `https://site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=YYYYMMDD`
-  → `sports[0].leagues[]` = every series with a match that date; each league has
+  `https://site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=…`
+  → `sports[0].leagues[]` = every series with a match in the span; each league has
   `id`, `name`, `isTournament`, `events[]` with `competitors[] {id, displayName}`.
-  Date ranges (`dates=A-B`) return empty — per-date only. Responses are gzipped
-  (irrelevant to `fetch`, but curl needs `--compressed`).
+  `dates=` takes `YYYYMMDD` or `YYYYMM`; ranges (`A-B`) and comma lists return empty.
+  Month-mode quirks (all verified live 2026-07-18): fully past months permanently
+  return empty; a month's first-ever request can return empty while ESPN warms its
+  cache (retry succeeds); the current month truncates events a few days past "today";
+  busy leagues' event lists get chronologically truncated (The Hundred cut at 20
+  events mid-August while another league listed 48 — no fixed cap). Coarse sampling
+  is UNSAFE: alternate-day bilateral series phase-lock between samples (a 3-day
+  cadence missed India's Zimbabwe + West Indies series). Hence the hybrid in
+  `discovery.ts`: daily for lookback + current month, monthly forward, retry →
+  daily-fallback for empty months, daily top-up after a truncation-suspect league's
+  last listed day (threshold ≥15 events). ~45–50 requests, ~8 s at concurrency 8.
+  Responses are gzipped (irrelevant to `fetch`, but curl needs `--compressed`).
 - **Series calendar:** `https://site.api.espn.com/apis/site/v2/sports/cricket/{seriesId}/scoreboard`
   (dated or not) always carries `leagues[0].calendar` = ISO list of the series' match
   dates. Undated returns only the nearest day's events — always walk the calendar.
@@ -50,7 +60,7 @@ after the human approves the increment.
 
 ## Progress
 - [x] T1 — Shared types, curated teams, fixtures
-- [ ] T2 — Series discovery
+- [x] T2 — Series discovery
 - [ ] T3 — Team event fetch + normalization
 - [ ] T4 — Filters + ICS transform
 - [ ] T5 — Home selection state + filters
@@ -74,6 +84,17 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T2 (2026-07-18):** first implementation used the spec's 3-day sampling and the
+  live smoke immediately disproved the "vanishingly rare miss" assumption — it found
+  only 3 of India's series, phase-locking past the Zimbabwe tour (Jul 23/25/26) and
+  the whole West Indies series (8 match days, zero sample hits). Probing for
+  alternatives surfaced `dates=YYYYMM` month support and its quirks (see Reference),
+  leading to the hybrid scan now implemented; specify.md's NFR-1/assumption/research
+  sections updated accordingly. Redesigned live smoke finds 10 India series
+  (Afghanistan, Ireland, England, Zimbabwe, Sri Lanka tours + WI/SL/ZIM/AUS home
+  series + NZ tour) in ~8 s. Also: fixture is imported as JSON (not `readFileSync`)
+  because the root vitest config runs jsdom where `import.meta.url` isn't `file:`;
+  `resolveJsonModule` added to shared/tsconfig.json.
 - **T1 (2026-07-17):** Types in `shared/src/cricketTeam/types.ts`
   (`CricketTeamEvent = IplEvent & {seriesId, seriesName, format, formatDetail,
   endDate?}` — `formatDetail` added beyond the spec sketch to carry the

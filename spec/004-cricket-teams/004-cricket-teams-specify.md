@@ -28,10 +28,18 @@ There is **no team-schedule endpoint for cricket** — `…/cricket/{league}/tea
 (`sports.core.api.espn.com/v2/sports/cricket/leagues` → empty) all fail; ESPNcricinfo's
 `hs-consumer-api` is bot-blocked. The workable pipeline is:
 
-1. **Series discovery** — `site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=YYYYMMDD`
-   returns every series with a match on that date, with events and competitor team IDs
-   inline. Sampling dates across a window and filtering by team ID finds all the team's
-   series. Date *ranges* are not supported (verified: `dates=A-B` returns empty).
+1. **Series discovery** — `site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=…`
+   returns every series with a match in the requested span, with events and competitor
+   team IDs inline. `dates=` accepts a single day (`YYYYMMDD`) or a month (`YYYYMM`);
+   ranges and comma lists are not supported (verified: both return empty). Month
+   queries only work for the current + future months (fully past months return empty),
+   can transiently return empty on a cold ESPN cache, and chronologically truncate a
+   busy league's event list — and the current month truncates a few days past "today".
+   Coarser-than-daily *sampling* is unsafe: bilateral series often play alternate days
+   and can phase-lock entirely between samples (verified live: a 3-day cadence missed
+   2 of India's 4 series). Discovery therefore goes daily for lookback + current
+   month, monthly for future months, with retry/daily-fallback and truncation top-up
+   repairs.
 2. **Series calendar** — `site.api.espn.com/apis/site/v2/sports/cricket/{seriesId}/scoreboard`
    (any date, or none) always includes `leagues[0].calendar`: the exact list of match
    dates in that series. No blind day-walking needed.
@@ -104,8 +112,8 @@ Team logos follow the existing CDN pattern
 
 - NFR-1: Discovery window is bounded (see Assumptions) and the full team fetch
   (discovery + series calendars + match dates) stays within the same order of magnitude
-  of ESPN calls as an existing full-season league fetch (~60 discovery calls + ~1 call
-  per series + ~1 call per match day), fanned out via `mapWithConcurrency`.
+  of ESPN calls as an existing full-season league fetch (~45–50 discovery calls + ~1
+  call per series + ~1 call per match day), fanned out via `mapWithConcurrency`.
 - NFR-2: Client caches with the existing React Query policy (30 m stale / 60 m gc); the
   feed endpoint sends the same 1-hour cache headers as existing league feeds.
 - NFR-2a: Home fetches only what is selected (nothing selected = zero schedule
@@ -126,10 +134,12 @@ Team logos follow the existing CDN pattern
 
 ## Assumptions
 
-- Discovery window: 1 month back to 6 months ahead, sampled every 3 days (~61 header
-  calls). A series is captured if *any* of its match days lands on a sample date; a
-  hypothetical series spanning fewer than 3 total days could be missed — accepted risk,
-  vanishingly rare for full-member sides.
+- Discovery window: 1 month back to 6 months ahead, covered gaplessly by a hybrid
+  scan (~45–50 header calls): daily requests from the lookback through the end of the
+  current month, one month-granularity request per following month, an
+  empty-month retry falling back to daily, and a daily top-up of days a
+  truncation-suspect busy league leaves uncovered (see the API research section for
+  the endpoint quirks that force this shape).
 - Format classification uses `competitions[0].class`
   (`internationalClassId` 1/2/3 → Test/ODI/T20I; anything else → Other).
 - My Calendar storage reuses the existing tables with league value `"cricket-team"`:

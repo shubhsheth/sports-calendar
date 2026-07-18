@@ -19,6 +19,7 @@ export * from "./ipl/filters.ts";
 export * from "./ipl/fetch.ts";
 export * from "./ipl/transform.ts";
 export * from "./cricketTeam/types.ts";
+export * from "./cricketTeam/discovery.ts";
 export * from "./fifa/types.ts";
 export * from "./fifa/filters.ts";
 export * from "./fifa/fetch.ts";

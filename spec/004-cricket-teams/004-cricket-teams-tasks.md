@@ -35,15 +35,20 @@ multi-series day to lock that behavior in.
   - Files: `shared/src/cricketTeam/types.ts`, `shared/src/index.ts`, 3 fixture JSONs.
   - Size: S
 
-- [ ] **T2 — Series discovery.** `shared/src/cricketTeam/discovery.ts`:
-  `getDiscoverySampleDates()` (3-day cadence across the window) and
-  `discoverTeamSeriesIds(teamId)` — fetch the header endpoint per sample date via
-  `mapWithConcurrency`, collect distinct series IDs (+ names) where the team appears as a
-  competitor, skipping (not failing on) individual fetch errors. Docstring documents the
-  endpoint, the no-date-range limitation, and the sub-3-day-series accepted risk.
+- [x] **T2 — Series discovery.** `shared/src/cricketTeam/discovery.ts`:
+  `getDiscoveryQueries()` (daily params for lookback + current month, `YYYYMM` params
+  for following months through the horizon) and `discoverTeamSeriesIds(teamId)` —
+  fetch the header endpoint per query via `mapWithConcurrency`, collect distinct
+  series IDs (+ names) where the team appears as an exact-id competitor, skipping (not
+  failing on) individual fetch errors, retrying an empty month once then falling back
+  to daily requests, and daily top-up-scanning days a truncation-suspect busy league
+  leaves uncovered. Docstrings document the endpoint quirks (month support limits,
+  cold-cache empties, truncation, why sampling is unsafe).
   - Acceptance: given fixture responses, returns the correct deduped series set for a
-    team; a throwing sample date is skipped.
-  - Verify: `npm run test:run` (new `discovery.test.ts`); CI gate green.
+    team; failed queries are skipped; empty-month retry, daily fallback, and
+    truncation top-up each covered by a test.
+  - Verify: `npm run test:run` (new `discovery.test.ts`); CI gate green; live smoke
+    finds all of India's published series.
   - Files: `discovery.ts`, `discovery.test.ts`.
   - Size: S
 
