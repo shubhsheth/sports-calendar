@@ -61,7 +61,7 @@ after the human approves the increment.
 ## Progress
 - [x] T1 — Shared types, curated teams, fixtures
 - [x] T2 — Series discovery
-- [ ] T3 — Team event fetch + normalization
+- [x] T3 — Team event fetch + normalization
 - [ ] T4 — Filters + ICS transform
 - [ ] T5 — Home selection state + filters
 - [ ] T6 — Combined schedule data layer
@@ -84,6 +84,16 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T3 (2026-07-18):** `fetch.ts` mirrors the IPL normalizer, extended with
+  `format`/`formatDetail`/`seriesId`/`seriesName`/`endDate`; `seriesName` prefers the
+  scoreboard response's league name over the discovery ref. Orchestration flattens
+  series×day pairs into one `mapWithConcurrency` pass (no nested fan-out).
+  Live smoke: 52 India matches (9 Tests / 20 ODIs / 23 T20Is) across all 10 series in
+  ~3.6 s. Note: discovered series contribute their full calendars, so series
+  straddling the lookahead horizon are included completely (Australia Tests run to
+  Feb 2027) — treated as intended behavior. A Test's `endDate` runs to day 4/5
+  23:59 as expected; an "Only Test" formatDetail exists (one-off Tests), so ICS
+  titles in T4 must not assume "Nth Format" shape.
 - **T2 (2026-07-18):** first implementation used the spec's 3-day sampling and the
   live smoke immediately disproved the "vanishingly rare miss" assumption — it found
   only 3 of India's series, phase-locking past the Zimbabwe tour (Jul 23/25/26) and

@@ -52,7 +52,7 @@ multi-series day to lock that behavior in.
   - Files: `discovery.ts`, `discovery.test.ts`.
   - Size: S
 
-- [ ] **T3 — Team event fetch + normalization.** `shared/src/cricketTeam/fetch.ts`:
+- [x] **T3 — Team event fetch + normalization.** `shared/src/cricketTeam/fetch.ts`:
   `fetchSeriesCalendar(seriesId)` (undated scoreboard → `leagues[0].calendar`),
   `fetchSeriesEventsByDate(seriesId, date)` (normalize like `ipl/fetch.ts`, plus
   `format` from `competitions[0].class.internationalClassId` (1/2/3 → test/odi/t20i,
