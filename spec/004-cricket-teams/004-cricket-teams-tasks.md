@@ -5,10 +5,16 @@ Each task ends in a compiling, testable state. Verify after each with the CI gat
 Backend tasks additionally run the calendar function's Deno tests.
 
 Plan summary: build bottom-up in `shared/` (types → discovery → fetch → filter/transform),
-then the client pages as a vertical slice, then the backend feed, then the My Calendar
-integration (migration → backend branch → client), then analytics, docs, and full
-verification. T1–T4 are strictly sequential; T5–T7 (client) and T8 (backend feed) can
-proceed in parallel after T4; T9–T11 are sequential after T8.
+then the home-page browse surface as a vertical slice (selection state/filters → merged
+schedule data → merged schedule UI → calendar links), then the backend feed, then the My
+Calendar integration (migration → backend branch → client), then analytics, docs, and
+full verification. T1–T4 are strictly sequential; T5–T7 (client) and T8 (backend feed)
+can proceed in parallel after T4; T9–T11 are sequential after T8.
+
+> **Revised 2026-07-17 (after T1):** the original T5–T7 (picker page, team page,
+> team-page links) were replaced when the UX pivoted to home-page Teams + Leagues
+> filters over one merged schedule. T1–T4 and T8–T14 are unaffected in substance;
+> T5–T7 below reflect the new surface.
 
 Key risk (checked early, in T2): the discovery scan's coverage depends on the header
 endpoint returning every series active on a sampled date — T2's fixtures must include a
@@ -67,36 +73,47 @@ multi-series day to lock that behavior in.
     `shared/src/index.ts`.
   - Size: M
 
-- [ ] **T5 — Team picker page.** `client/routes/cricket-teams.tsx` rendering
-  `client/components/cricket-teams/team-picker-grid.tsx` (12 teams from
-  `CRICKET_NATIONAL_TEAMS`, logos, links to `/cricket-teams/$teamId`); home page grid
-  gains a Cricket Teams tile.
-  - Acceptance: picker renders all 12 teams; navigation works under the app base path.
-  - Verify: CI gate green; component test for the grid.
-  - Files: route, `team-picker-grid.tsx` (+ test), `client/routes/index.tsx`.
-  - Size: S
-
-- [ ] **T6 — Team schedule page.** `client/routes/cricket-teams.$teamId.tsx`: one
-  `useQuery` on `fetchAllCricketTeamEvents` (React Query defaults), chronological list of
-  `cricket-team-event-card.tsx` (IPL-style card + series name + format badge + live/past
-  status), `cricket-team-filter-selector.tsx` format pills with toggle helpers in
-  `client/components/cricket-teams/utils/`. Unknown team IDs show a not-found state.
-  - Acceptance: filters narrow the list; loading/error/empty states present; card test
-    and toggle-helper test pass.
-  - Verify: CI gate green; manual smoke against live ESPN for team 6.
-  - Files: route, card (+ test), filter selector, `utils/filterState.ts` (+ test).
+- [ ] **T5 — Home selection state + filters.** `client/components/home/home-filters.tsx`:
+  Teams chip row (12 from `CRICKET_NATIONAL_TEAMS`, with logos) and Leagues chip row
+  (NBA/NFL/F1/IPL/FIFA), multi-select, persisted with `useLocalStorageState`; cricket
+  format pills appear when at least one team is selected. `client/routes/index.tsx`
+  renders the filters above the existing grid; with no selection the page is unchanged
+  (no schedule fetches).
+  - Acceptance: selections toggle and survive reload; empty selection renders today's
+    grid untouched.
+  - Verify: CI gate green; component test for toggle/persist/empty states.
+  - Files: `home-filters.tsx` (+ test), `client/routes/index.tsx`,
+    `client/components/home/utils/selectionState.ts` (+ test).
   - Size: M
 
-- [ ] **T7 — Download + feed links.** Team page gets the one-time `.ics` download (reuse
-  the shared transform; events already fetched, filtered client-side) and
-  `add-to-calendar-feed-links.tsx` wired to
-  `client/components/cricket-teams/utils/buildCricketTeamFeedUrl.ts`
-  (`/cricket-team/{teamId}.ics?formats=…`).
-  - Acceptance: download produces ICS matching current filters; feed links encode team +
-    formats.
-  - Verify: CI gate green; `buildCricketTeamFeedUrl` unit test; manual download check.
-  - Files: team route, `buildCricketTeamFeedUrl.ts` (+ test).
+- [ ] **T6 — Combined schedule data layer.** `client/components/home/utils/
+  useCombinedSchedule.ts`: one React Query entry per selected source
+  (`fetchAllCricketTeamEvents` per team, `fetchAll<League>Events` per league), merged
+  into a single chronologically sorted list of tagged entries
+  (`{source, league|teamId, event}`), cricket format filter applied, default upcoming
+  view with the existing show-past toggle pattern, per-source loading/error surfaced.
+  - Acceptance: unit tests (mocked fetchers) cover merge ordering across sources,
+    format filtering, partial-failure surfacing, and no fetch when nothing selected.
+  - Verify: `npm run test:run`; CI gate green.
+  - Files: `useCombinedSchedule.ts` (+ test).
   - Size: S
+
+- [ ] **T7 — Merged schedule UI + calendar links.** `combined-schedule.tsx` renders the
+  merged list: cricket entries via new `cricket-teams/cricket-team-event-card.tsx`
+  (IPL-style + series name + format badge), league entries via each league's existing
+  card (adapted to accept a pre-fetched event where they currently take a `$ref`).
+  `selection-calendar-links.tsx`: one `.ics` download of the whole filtered selection
+  (reuses per-league + cricket-team transforms) and per-source feed links
+  (existing league URLs; `cricket-teams/utils/buildCricketTeamFeedUrl.ts` →
+  `/cricket-team/{teamId}.ics?formats=…`). Navigation grid moves below the schedule
+  while a selection is active.
+  - Acceptance: mixed selection renders correct card styles in one chronological list;
+    download contains all selected sources filtered; feed links encode team + formats.
+  - Verify: CI gate green; card + feed-URL unit tests; manual smoke: India + NBA on
+    live ESPN, download inspected.
+  - Files: `combined-schedule.tsx`, `cricket-team-event-card.tsx` (+ test),
+    `selection-calendar-links.tsx`, `buildCricketTeamFeedUrl.ts` (+ test).
+  - Size: M
 
 - [ ] **T8 — Backend team feed.** `supabase/functions/_shared/params.ts`: parse/validate
   `teamId` (must be one of the curated 12) and `formats`. `functions/calendar/index.ts`:
@@ -132,22 +149,24 @@ multi-series day to lock that behavior in.
   - Files: `personalFeed.ts` (+ test), `_shared/personalCalendar.ts` if types need it.
   - Size: S
 
-- [ ] **T11 — Client My Calendar integration.** Team page: "Save to My Calendar" (upsert
-  `cricket-team` + teamId + formats; reflects saved state) and pin/unpin on match cards
-  storing `"{seriesId}:{eventId}"`; signed-out clicks prompt sign-in (existing pattern).
+- [ ] **T11 — Client My Calendar integration.** Home selection panel: "Save to My
+  Calendar" per selected cricket team (upsert `cricket-team` + teamId + formats;
+  reflects saved state) and pin/unpin on merged-schedule cricket cards storing
+  `"{seriesId}:{eventId}"`; signed-out clicks prompt sign-in (existing pattern).
   My Calendar page lists cricket-team subscriptions (team name + format pills) and
   resolves cricket pins (extend `fetchPinnedEventDetails` using the composite id).
   - Acceptance: two teams saveable simultaneously; rows removable; pins resolve to
     name/date; component tests for signed-in/out.
   - Verify: CI gate green.
-  - Files: team route, `save-league-button.tsx`/`pin-event-button.tsx` wiring,
-    `client/api/calendar/fetchPinnedEventDetails.ts`, my-calendar components.
+  - Files: `selection-calendar-links.tsx`, `pin-event-button.tsx` wiring in the cricket
+    card, `client/api/calendar/fetchPinnedEventDetails.ts`, my-calendar components.
   - Size: M
 
 - [ ] **T12 — Analytics.** Typed events per `client/lib/analytics.ts` conventions with
-  league `"cricket-team"`: team page view (team id), format filter toggles, download,
-  feed-link clicks, save/pin — matching what existing leagues track.
-  - Acceptance: every user action tracked on league pages has its team-page equivalent.
+  league `"cricket-team"`: home team/league selection toggles, format filter toggles,
+  selection download, feed-link clicks, save/pin — matching what existing leagues track.
+  - Acceptance: every user action tracked on league pages has its home-surface
+    equivalent.
   - Verify: CI gate green.
   - Files: `client/lib/analytics.ts`, call sites in cricket-teams components.
   - Size: S
@@ -163,17 +182,18 @@ multi-series day to lock that behavior in.
   - Files: `docs/ESPN_API.md`, `docs/PROJECT_OVERVIEW.md`, `docs/BACKEND.md`, `CLAUDE.md`.
   - Size: S
 
-- [ ] **T14 — Full verification.** CI gate green. Manual round trip: India team page
-  lists matches across the currently published series with correct formats → filter to
-  Tests → download ICS → subscribe feed URL → save team + a second team + pin one match
-  → My Calendar shows all → combined feed contains both teams' (filtered) matches + the
-  pin, deduped. Anonymous smoke of all five league routes and feeds unchanged.
+- [ ] **T14 — Full verification.** CI gate green. Manual round trip: select India +
+  NBA on home → merged list shows both with correct cards/formats → filter to Tests →
+  download ICS (both sources) → subscribe team feed URL → save two teams + pin one
+  match → My Calendar shows all → combined feed contains both teams' (filtered)
+  matches + the pin, deduped. Empty-selection home identical to today; anonymous smoke
+  of all five league routes and feeds unchanged.
   - Acceptance: every FR demonstrated; success criteria in the spec all hold.
   - Verify: manual checklist + full test suite.
   - Files: none (verification only).
   - Size: S
 
-FR coverage: FR-1→T5 · FR-2→T2/T3/T6 · FR-3→T4/T6/T8 · FR-4→T4/T7 · FR-5→T8 ·
+FR coverage: FR-1→T5 · FR-2→T2/T3/T6/T7 · FR-3→T4/T5/T6/T8 · FR-4→T4/T7 · FR-5→T8 ·
 FR-6→T9/T10/T11 · FR-7→T3/T4 · FR-8→T9 (constraint preservation)/T14. No gaps found.
 (Note: repo precedent from spec 003 keeps full verification as the final task, after the
 documentation task.)

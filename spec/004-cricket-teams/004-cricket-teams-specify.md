@@ -10,11 +10,16 @@ tour/tournament as its own transient "league" (a *series ID*), so a national sid
 fixtures are scattered across many short-lived series (verified 2026-07-17: India appears
 in series 24301, 24567, 24289, and 24469 within three months).
 
-A team page gets full league-page parity: browsable schedule, format filters, one-time
-`.ics` download, live subscription feed, and Save/Pin to My Calendar.
+The teams dimension surfaces on the **home page**: alongside the existing navigation
+grid, home gains a **Teams** filter (the 12 curated ICC full members) and a **Leagues**
+filter (the five existing leagues). Selecting entries in either or both populates one
+merged, chronological schedule of everything selected — India's matches interleaved
+with NBA games — with full parity affordances: format filters for cricket, one-time
+`.ics` download of the selection, per-source live feed links, and Save/Pin to My
+Calendar. Existing per-league pages are unchanged; the home surface is purely additive.
 
-First iteration is cricket national teams only (the 12 ICC full members, curated).
-Team dimensions for other sports reuse this groundwork later.
+First iteration puts only cricket national teams in the Teams filter (the 12 ICC full
+members, curated). Team dimensions for other sports reuse this groundwork later.
 
 ## ESPN API research (verified with live fetches, 2026-07-17)
 
@@ -53,34 +58,43 @@ Team logos follow the existing CDN pattern
 
 ## User Stories
 
-- As a Team India fan, I want one page showing every upcoming India match across all
-  tours and tournaments so that I don't have to know which series exist.
+- As a Team India fan, I want to select India on the home page and see every upcoming
+  India match across all tours and tournaments so that I don't have to know which
+  series exist.
+- As a multi-sport fan, I want to select a team and a league together (e.g. India +
+  NBA) and see one merged chronological schedule so that I can browse everything I
+  follow in one place.
 - As a fan, I want to subscribe to a live feed of my team's matches so that new series
   appear in my calendar automatically as ESPN publishes them.
 - As a Test purist, I want to filter to only the formats I care about (e.g. Tests) so
   that T20Is don't clutter my calendar.
-- As a signed-in user, I want to save my team (and pin individual marquee matches) to My
-  Calendar so that it combines with my existing league subscriptions in one feed.
+- As a signed-in user, I want to save my selection (and pin individual marquee matches)
+  to My Calendar so that it combines into one feed.
 
 ## Functional Requirements
 
-- FR-1: A cricket-teams picker page lists the 12 curated national teams with logos;
-  selecting one opens that team's page.
-- FR-2: A team page lists the team's matches — recent past and all discoverable upcoming
-  — across every series in the discovery window, chronologically, each card showing
-  opponent, series name, match format, venue, local time, and live/past status (same
-  status treatment as IPL cards).
-- FR-3: Matches can be filtered by format (Test / ODI / T20I / Other) with the same
-  pill-based filter UX as league pages; filters apply to the list, the download, and are
-  encoded in feed URLs.
-- FR-4: The team page offers a one-time `.ics` download of the (filtered) schedule.
+- FR-1: The home page offers a **Teams** filter (the 12 curated national teams, with
+  logos) and a **Leagues** filter (NBA, NFL, F1, IPL, FIFA), both multi-select and
+  persisted across visits; with nothing selected, home shows the existing navigation
+  grid unchanged.
+- FR-2: Selecting teams and/or leagues populates one merged chronological schedule:
+  each selected cricket team contributes its matches across every series in the
+  discovery window (card shows opponent, series name, match format, venue, local time,
+  live/past status — IPL-style); each selected league contributes its season's events
+  rendered with that league's existing card style.
+- FR-3: Cricket matches can be filtered by format (Test / ODI / T20I / Other) with the
+  same pill-based filter UX as league pages; format filters apply to the merged list,
+  the download, and are encoded in cricket-team feed URLs.
+- FR-4: Home offers a one-time `.ics` download of the current (filtered) selection —
+  all selected teams and leagues combined — plus per-selected-source live feed links
+  (existing league feeds; new cricket-team feeds).
 - FR-5: The backend serves a live feed `GET /calendar/cricket-team/{teamId}.ics`
   (optional `?formats=` param) that re-runs discovery on request so newly announced
   series appear without user action. Unknown team IDs return 400/404.
 - FR-6: A signed-in user can save one or more cricket teams to My Calendar (with the
-  selected format filters) and pin/unpin individual matches from the team page; both
-  appear on the My Calendar page with remove actions, and the personal combined feed
-  includes them (deduplicated, like existing leagues).
+  selected format filters) and pin/unpin individual matches from the merged schedule's
+  cards; both appear on the My Calendar page with remove actions, and the personal
+  combined feed includes them (deduplicated, like existing leagues).
 - FR-7: Multi-day matches (Tests) appear as multi-day calendar events using ESPN's
   `endDate`; single-day formats use format-appropriate durations.
 - FR-8: All existing league pages, downloads, feeds, and My Calendar behavior remain
@@ -94,6 +108,9 @@ Team logos follow the existing CDN pattern
   per series + ~1 call per match day), fanned out via `mapWithConcurrency`.
 - NFR-2: Client caches with the existing React Query policy (30 m stale / 60 m gc); the
   feed endpoint sends the same 1-hour cache headers as existing league feeds.
+- NFR-2a: Home fetches only what is selected (nothing selected = zero schedule
+  fetches, page as cheap as today); each selected source is one cached React Query
+  entry, so toggling a source off and on refetches nothing within the stale window.
 - NFR-3: The discovery scan degrades gracefully: a failed sample date is skipped (logged),
   not fatal to the whole schedule.
 
@@ -126,8 +143,20 @@ Team logos follow the existing CDN pattern
 - The shared cricket-team event type extends the IPL Site-API shape (competitors/logos
   inline) with `seriesId`, `seriesName`, `format`, `formatDetail` (the competition
   description, e.g. "2nd T20I"), and `endDate`.
-- The team page fetches the whole window in one query (a team plays ~30–60 matches in
-  7 months) — no infinite scroll; parity is in features, not mechanics.
+- Home layout: filter sections on top (Teams row with logos, Leagues row); with no
+  selection the existing five-tile navigation grid renders as today; with a selection
+  the merged schedule and its calendar-links panel (download + per-source feed links +
+  save) render in its place and the navigation grid moves below the schedule. League
+  tiles keep navigating to the unchanged per-league pages.
+- Selections persist in `localStorage` via the existing `useLocalStorageState` hook
+  (no URL params — home stays a single route).
+- Each selected source is fetched whole (`fetchAll<League>Events` /
+  `fetchAllCricketTeamEvents`) rather than ref-paginated — required to interleave
+  sources chronologically (a team plays ~30–60 matches in the window; league seasons
+  are already fetched whole by the download/feed paths today). Default view shows
+  upcoming events; past events behind the existing show-past toggle pattern.
+- League events in the merged list render with each league's existing card components,
+  adapted where needed to accept a pre-fetched event instead of a `$ref`.
 - ESPN endpoints are unofficial and may change; same standing caveat as `docs/ESPN_API.md`.
 
 ## Tech Stack
@@ -162,12 +191,15 @@ shared/src/cricketTeam/
 
 client/components/cricket-teams/
 ├── cricket-team-event-card.tsx      → card (series name + format badge; IPL-style)
-├── cricket-team-filter-selector.tsx → format pills
-├── team-picker-grid.tsx             → 12-team picker
-└── utils/                           → feed-URL builder, filter-state toggles
+└── utils/                           → feed-URL builder
 
-client/routes/cricket-teams.tsx           → picker page (linked from home grid)
-client/routes/cricket-teams.$teamId.tsx   → team schedule page
+client/components/home/
+├── home-filters.tsx                 → Teams + Leagues multi-select chip rows
+├── combined-schedule.tsx            → merged chronological list (per-league cards)
+├── selection-calendar-links.tsx     → download + per-source feed links + save
+└── utils/useCombinedSchedule.ts     → per-source queries → merge/sort/format-filter
+
+client/routes/index.tsx                   → home: filters + grid ⁄ merged schedule
 
 supabase/functions/calendar/index.ts      → + GET /calendar/cricket-team/:teamId.ics
 supabase/functions/_shared/params.ts      → + teamId/formats param parsing
@@ -228,11 +260,15 @@ export async function fetchAllCricketTeamEvents(
 
 ## Success Criteria
 
-- Opening the India page (team 6) lists its matches across at least the currently
+- With nothing selected, the home page renders the existing navigation grid and issues
+  no schedule fetches.
+- Selecting India (team 6) on home lists its matches across at least the currently
   published tours (as of authoring: Zimbabwe, Sri Lanka, West Indies, New Zealand
-  series) sorted chronologically with correct format badges and series names.
-- Filtering to "Test" hides limited-overs matches in the list, the download, and the
-  feed URL.
+  series) sorted chronologically with correct format badges and series names; adding
+  the NBA league interleaves NBA games into the same list with NBA cards, and the
+  download contains both sources.
+- Filtering to "Test" hides limited-overs cricket matches in the list, the download,
+  and the cricket-team feed URL (league events are unaffected).
 - `GET /calendar/cricket-team/6.ics` returns valid ICS spanning multiple series; a Test
   match spans multiple days; an unknown team ID is rejected.
 - A signed-in user can follow two different teams simultaneously; both rows appear on My
@@ -242,5 +278,7 @@ export async function fetchAllCricketTeamEvents(
 
 ## Open Questions
 
-None — direction confirmed 2026-07-17 (cricket national teams only; full league-page
-parity; curated 12-team picker).
+None — direction confirmed 2026-07-17 (cricket national teams only; full parity
+affordances; curated 12 teams). Revised same day after T1: the picker/team-page UX was
+replaced by Teams + Leagues filters on the home page populating one merged schedule;
+per-league pages unchanged.

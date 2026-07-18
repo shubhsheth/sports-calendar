@@ -53,9 +53,9 @@ after the human approves the increment.
 - [ ] T2 — Series discovery
 - [ ] T3 — Team event fetch + normalization
 - [ ] T4 — Filters + ICS transform
-- [ ] T5 — Team picker page
-- [ ] T6 — Team schedule page
-- [ ] T7 — Download + feed links
+- [ ] T5 — Home selection state + filters
+- [ ] T6 — Combined schedule data layer
+- [ ] T7 — Merged schedule UI + calendar links
 - [ ] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
@@ -65,6 +65,15 @@ after the human approves the increment.
 - [ ] T14 — Full verification
 
 ## Notes
+- **UX pivot (2026-07-17, after T1):** the picker page + dedicated team page were
+  replaced by Teams + Leagues multi-select filters on the home page populating one
+  merged chronological schedule (league pages unchanged; teams filter = the 12
+  cricket sides). Cascaded through specify.md (Objective, stories, FR-1..4/6,
+  NFR-2a, Assumptions, Project Structure, Success Criteria) and tasks.md (T5–T7
+  replaced; T11/T12/T14 retargeted). Shared layer T2–T4 unaffected. Home layout:
+  filters on top; no selection → today's grid, no fetches; selection → calendar-links
+  panel + merged schedule, grid moves below. Selection persists via
+  `useLocalStorageState`.
 - **T1 (2026-07-17):** Types in `shared/src/cricketTeam/types.ts`
   (`CricketTeamEvent = IplEvent & {seriesId, seriesName, format, formatDetail,
   endDate?}` — `formatDetail` added beyond the spec sketch to carry the
