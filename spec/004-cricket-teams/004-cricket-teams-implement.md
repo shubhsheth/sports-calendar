@@ -64,7 +64,7 @@ after the human approves the increment.
 - [x] T3 — Team event fetch + normalization
 - [x] T4 — Filters + ICS transform
 - [x] T5 — Home selection state + filters
-- [ ] T6 — Combined schedule data layer
+- [x] T6 — Combined schedule data layer
 - [ ] T7 — Merged schedule UI + calendar links
 - [ ] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
@@ -84,6 +84,15 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T6 (2026-07-19):** `useCombinedSchedule(selection, showPastEvents)` → two
+  `useQueries` batches (keys `["home","cricket-team",teamId]` /
+  `["home","league",league]`), cricket deduped by event id across teams (two
+  selected teams sharing a match), each league filtered through its own
+  `filter<League>Events` (past rule reused), `CombinedEntry` discriminated on
+  `source` for T7's card dispatch, failed sources surfaced by label. For T7:
+  league cards must handle events whose `competitions` survived league
+  filtering (NBA/NFL filters operate per-competition and require
+  `event.competitions` — a test fake without it throws in render).
 - **T5 (2026-07-19):** `HomeFilters` takes callbacks (`onToggleTeam/League/Format`)
   rather than a setState — index.tsx wires them to the pure `selectionState`
   helpers over `useLocalStorageState`, reading through `normalizeSelection` so

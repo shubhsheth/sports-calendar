@@ -91,7 +91,7 @@ multi-series day to lock that behavior in.
     `client/components/home/utils/selectionState.ts` (+ test).
   - Size: M
 
-- [ ] **T6 — Combined schedule data layer.** `client/components/home/utils/
+- [x] **T6 — Combined schedule data layer.** `client/components/home/utils/
   useCombinedSchedule.ts`: one React Query entry per selected source
   (`fetchAllCricketTeamEvents` per team, `fetchAll<League>Events` per league), merged
   into a single chronologically sorted list of tagged entries
