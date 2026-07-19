@@ -129,7 +129,7 @@ multi-series day to lock that behavior in.
   - Files: `params.ts` (+ test), `index.ts`, `index.test.ts`.
   - Size: M
 
-- [ ] **T9 — Subscription schema migration + client types.** New migration: extend both
+- [x] **T9 — Subscription schema migration + client types.** New migration: extend both
   `league` check constraints with `'cricket-team'`; replace
   `unique (calendar_id, league)` with a unique index on
   `(calendar_id, league, coalesce(filters->>'teamId',''))` (league rows keep single-row

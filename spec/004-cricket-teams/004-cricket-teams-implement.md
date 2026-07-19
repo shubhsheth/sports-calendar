@@ -67,7 +67,7 @@ after the human approves the increment.
 - [x] T6 — Team schedule page (rework)
 - [x] T7 — Team page download + feed links (rework)
 - [x] T8 — Backend team feed
-- [ ] T9 — Subscription schema migration + client types
+- [x] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
 - [ ] T11 — Client My Calendar integration
 - [ ] T12 — Analytics
@@ -94,6 +94,16 @@ after the human approves the increment.
   `home-filters`, `selectionState` multi-select, `useCombinedSchedule`,
   `combined-schedule`, `selection-calendar-links`, and the league cards' `event`
   prop adaptations (reverted to ref-only).
+- **T9 (2026-07-19):** migration also adds a check the spec didn't spell out:
+  `cricket-team` rows must carry `filters->>'teamId'` (a teamId-less row would
+  silently collide via `coalesce('')` with league semantics). Verified against
+  the container's PostgreSQL 16 with a stubbed Supabase env (auth.users,
+  auth.uid(), authenticated/anon roles; script piped via stdin because the
+  postgres system user can't traverse the scratchpad path): both migrations
+  apply cleanly; assertions — two teams coexist, duplicate teamId rejected,
+  one-row-per-league preserved, teamId required, cricket-team pin accepted,
+  unknown league rejected, RLS intact. Re-run `supabase db reset` before
+  deploying (T14 checklist).
 - **T8 (2026-07-19):** route is `/calendar/cricket-team/:file` with a numeric
   `(\d+)\.ics` gate (404) before curated-team validation (400) — mirrors the
   personal feed's file-pattern style rather than `registerLeagueRoute` (which
