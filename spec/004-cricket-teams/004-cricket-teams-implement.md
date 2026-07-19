@@ -63,7 +63,7 @@ after the human approves the increment.
 - [x] T2 — Series discovery
 - [x] T3 — Team event fetch + normalization
 - [x] T4 — Filters + ICS transform
-- [ ] T5 — Home selection state + filters
+- [x] T5 — Home selection state + filters
 - [ ] T6 — Combined schedule data layer
 - [ ] T7 — Merged schedule UI + calendar links
 - [ ] T8 — Backend team feed
@@ -84,6 +84,16 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T5 (2026-07-19):** `HomeFilters` takes callbacks (`onToggleTeam/League/Format`)
+  rather than a setState — index.tsx wires them to the pure `selectionState`
+  helpers over `useLocalStorageState`, reading through `normalizeSelection` so
+  stale/garbage localStorage can't crash the page. Chips are `aria-pressed`
+  Buttons; format pills render only when ≥1 team selected. Existing nav grid
+  extracted to `NavigationGrid` in index.tsx, unchanged (T7 repositions it).
+  Analytics wiring deferred to T12 per task plan. Note: `npx tsc -b
+  tsconfig.app.json` shows two PRE-EXISTING errors in
+  pin-event-button.test.tsx / save-league-button.test.tsx (UseQueryResult
+  casts) — not part of the CI gate, left untouched.
 - **T4 (2026-07-19):** durations added to types.ts
   (`CRICKET_FORMAT_DURATION_MINUTES`: test 5d fallback · odi 8h · t20i/other 4h);
   past-check uses `endDate` when present (`isCricketEventPast`) so an in-progress

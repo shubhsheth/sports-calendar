@@ -78,7 +78,7 @@ multi-series day to lock that behavior in.
     `shared/src/index.ts`.
   - Size: M
 
-- [ ] **T5 — Home selection state + filters.** `client/components/home/home-filters.tsx`:
+- [x] **T5 — Home selection state + filters.** `client/components/home/home-filters.tsx`:
   Teams chip row (12 from `CRICKET_NATIONAL_TEAMS`, with logos) and Leagues chip row
   (NBA/NFL/F1/IPL/FIFA), multi-select, persisted with `useLocalStorageState`; cricket
   format pills appear when at least one team is selected. `client/routes/index.tsx`

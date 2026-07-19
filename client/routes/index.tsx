@@ -1,5 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { analytics } from "@/lib/analytics";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
+import { HomeFilters } from "@/components/home/home-filters";
+import {
+  EMPTY_HOME_SELECTION,
+  HOME_SELECTION_STORAGE_KEY,
+  normalizeSelection,
+  toggleFormat,
+  toggleLeague,
+  toggleTeam,
+  type HomeSelection,
+} from "@/components/home/utils/selectionState";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -17,6 +28,33 @@ export const Route = createFileRoute("/")({
 });
 
 function IndexComponent() {
+  const [storedSelection, setStoredSelection] =
+    useLocalStorageState<HomeSelection>(
+      HOME_SELECTION_STORAGE_KEY,
+      EMPTY_HOME_SELECTION
+    );
+  const selection = normalizeSelection(storedSelection);
+
+  return (
+    <div className="grid gap-6">
+      <HomeFilters
+        selection={selection}
+        onToggleTeam={teamId =>
+          setStoredSelection(toggleTeam(selection, teamId))
+        }
+        onToggleLeague={league =>
+          setStoredSelection(toggleLeague(selection, league))
+        }
+        onToggleFormat={format =>
+          setStoredSelection(toggleFormat(selection, format))
+        }
+      />
+      <NavigationGrid />
+    </div>
+  );
+}
+
+function NavigationGrid() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-3xl mx-auto">
       <Link
