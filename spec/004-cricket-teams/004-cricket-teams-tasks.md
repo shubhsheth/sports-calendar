@@ -65,7 +65,7 @@ multi-series day to lock that behavior in.
   - Files: `fetch.ts`, `fetch.test.ts`.
   - Size: S
 
-- [ ] **T4 — Filters + ICS transform.** `shared/src/cricketTeam/filters.ts`
+- [x] **T4 — Filters + ICS transform.** `shared/src/cricketTeam/filters.ts`
   (`filterCricketTeamEvents` by formats; empty selection = all) and
   `shared/src/cricketTeam/transform.ts` (`transformCricketTeamEventsToIcs`: title
   "India vs Zimbabwe — 2nd T20I" style with series name in the description; Tests span

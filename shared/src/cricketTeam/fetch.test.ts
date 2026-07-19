@@ -27,7 +27,7 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-const serveScoreboard = (fixture: unknown) =>
+const serveScoreboard = (fixture: Record<string, unknown>) =>
   server.use(http.get(SCOREBOARD_URL, () => HttpResponse.json(fixture)));
 
 describe("fetchSeriesCalendar", () => {

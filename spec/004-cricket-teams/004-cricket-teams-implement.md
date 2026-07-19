@@ -62,7 +62,7 @@ after the human approves the increment.
 - [x] T1 — Shared types, curated teams, fixtures
 - [x] T2 — Series discovery
 - [x] T3 — Team event fetch + normalization
-- [ ] T4 — Filters + ICS transform
+- [x] T4 — Filters + ICS transform
 - [ ] T5 — Home selection state + filters
 - [ ] T6 — Combined schedule data layer
 - [ ] T7 — Merged schedule UI + calendar links
@@ -84,6 +84,17 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T4 (2026-07-19):** durations added to types.ts
+  (`CRICKET_FORMAT_DURATION_MINUTES`: test 5d fallback · odi 8h · t20i/other 4h);
+  past-check uses `endDate` when present (`isCricketEventPast`) so an in-progress
+  Test isn't "past" mid-match. ICS: Tests emit `end` (DTSTART→DTEND) instead of
+  `duration`; titles "Name — formatDetail" (suffix omitted when ESPN gives none);
+  description "SeriesName: Name — status". Test factory shared via
+  `testEvent.ts`. Live smoke: 52 events → valid ICS (createEvents ok, 52
+  VEVENTs, multi-day DTEND verified); format filter 52→9 Tests. Also fixed a
+  T3 test-helper `unknown` typing caught by `tsc -p shared` (note: the repo's
+  CI gate never typechecks shared — vite build only bundles; consider adding
+  tsc to CI later, out of scope here).
 - **T3 (2026-07-18):** `fetch.ts` mirrors the IPL normalizer, extended with
   `format`/`formatDetail`/`seriesId`/`seriesName`/`endDate`; `seriesName` prefers the
   scoreboard response's league name over the discovery ref. Orchestration flattens

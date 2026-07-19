@@ -22,6 +22,22 @@ export type CricketTeamEvent = IplEvent & {
   endDate?: string; // ISO 8601; Tests span multiple days (e.g. five)
 };
 
+/**
+ * Nominal duration per format, used for live/past checks and as the ICS
+ * duration of single-day formats. Tests are multi-day: the value here is a
+ * fallback for the rare Test missing `endDate` — when `endDate` is present it
+ * wins (both for "is past" checks and the ICS span).
+ */
+export const CRICKET_FORMAT_DURATION_MINUTES: Record<
+  CricketMatchFormat,
+  number
+> = {
+  test: 5 * 24 * 60,
+  odi: 480,
+  t20i: 240,
+  other: 240,
+};
+
 export type CricketTeamFilters = {
   showPastEvents: boolean;
   formats: CricketMatchFormat[]; // empty = no filter (all formats shown)
