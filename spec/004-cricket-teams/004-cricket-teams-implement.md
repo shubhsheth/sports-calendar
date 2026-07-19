@@ -63,9 +63,9 @@ after the human approves the increment.
 - [x] T2 — Series discovery
 - [x] T3 — Team event fetch + normalization
 - [x] T4 — Filters + ICS transform
-- [x] T5 — Home selection state + filters
-- [x] T6 — Combined schedule data layer
-- [x] T7 — Merged schedule UI + calendar links
+- [ ] T5 — Home segmented selector (rework)
+- [ ] T6 — Team schedule page (rework)
+- [ ] T7 — Team page download + feed links (rework)
 - [ ] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
@@ -84,7 +84,17 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
-- **T7 (2026-07-19):** ref-based league cards (nba/nfl/f1/fifa) gained an
+- **UX pivot #2 (2026-07-19, after first T5–T7 landed):** human rejected events on
+  the home page ("just a team or league selector"). Final shape per follow-up Q&A:
+  segmented Leagues | Teams chips on home switching tile grids; team tiles navigate
+  to dedicated `/cricket-teams/{teamId}` pages carrying the schedule + filters +
+  calendar links. Cascaded through specify.md and tasks.md (T5–T7 re-scoped,
+  T11/T12/T14 retargeted). Kept from the first build: shared layer,
+  `cricket-team-event-card`, `buildCricketTeamFeedUrl`, format-pill UX. Removed:
+  `home-filters`, `selectionState` multi-select, `useCombinedSchedule`,
+  `combined-schedule`, `selection-calendar-links`, and the league cards' `event`
+  prop adaptations (reverted to ref-only).
+- **T7 (first build, superseded — 2026-07-19):** ref-based league cards (nba/nfl/f1/fifa) gained an
   optional `event` prop (query `enabled: !event`) so the merged list passes
   pre-fetched events; cards' internal re-filter gets a keep-all filter from
   `combined-schedule.tsx`. Cricket card has no pin button yet (League union
