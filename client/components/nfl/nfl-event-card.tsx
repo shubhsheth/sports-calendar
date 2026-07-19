@@ -17,21 +17,28 @@ import { isEventLive, NFL_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type NflEventCardProps = {
   league: string;
-  eventRef: EventRef;
+  eventRef?: EventRef;
+  /** Pre-fetched event (home merged schedule); skips the ref fetch. */
+  event?: NflEvent;
   filters: NflEventFilters;
 };
 
-function NflEventCard({ eventRef, filters }: NflEventCardProps) {
+function NflEventCard({ eventRef, event, filters }: NflEventCardProps) {
   const {
-    data: nflEvent,
+    data: fetchedEvent,
     isPending,
     error,
   } = useQuery({
     queryKey: ["nfl-event", eventRef],
-    queryFn: () => fetchEventDetails<NflEvent>(eventRef.$ref),
+    queryFn: () => {
+      if (!eventRef) throw new Error("eventRef is required without event");
+      return fetchEventDetails<NflEvent>(eventRef.$ref);
+    },
+    enabled: !event,
   });
 
-  if (isPending) return null;
+  const nflEvent = event ?? fetchedEvent;
+  if (!event && isPending) return null;
   if (!nflEvent) return <div>Error looking for event</div>;
   if (error) return <div>Error: {error.message}</div>;
 

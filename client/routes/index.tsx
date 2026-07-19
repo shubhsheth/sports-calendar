@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { analytics } from "@/lib/analytics";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import { HomeFilters } from "@/components/home/home-filters";
+import { CombinedSchedule } from "@/components/home/combined-schedule";
+import { SelectionCalendarLinks } from "@/components/home/selection-calendar-links";
+import { useCombinedSchedule } from "@/components/home/utils/useCombinedSchedule";
 import {
   EMPTY_HOME_SELECTION,
   HOME_SELECTION_STORAGE_KEY,
+  hasSelection,
   normalizeSelection,
   toggleFormat,
   toggleLeague,
@@ -34,6 +39,13 @@ function IndexComponent() {
       EMPTY_HOME_SELECTION
     );
   const selection = normalizeSelection(storedSelection);
+  const [showPastEvents, setShowPastEvents] = useState(false);
+
+  const { entries, isLoading, failedSources } = useCombinedSchedule(
+    selection,
+    showPastEvents
+  );
+  const selectionActive = hasSelection(selection);
 
   return (
     <div className="grid gap-6">
@@ -49,6 +61,18 @@ function IndexComponent() {
           setStoredSelection(toggleFormat(selection, format))
         }
       />
+      {selectionActive && (
+        <>
+          <SelectionCalendarLinks selection={selection} entries={entries} />
+          <CombinedSchedule
+            entries={entries}
+            isLoading={isLoading}
+            failedSources={failedSources}
+            showPastEvents={showPastEvents}
+            onToggleShowPast={setShowPastEvents}
+          />
+        </>
+      )}
       <NavigationGrid />
     </div>
   );

@@ -17,21 +17,28 @@ import { isEventLive, NBA_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type NbaEventCardProps = {
   league: string;
-  eventRef: EventRef;
+  eventRef?: EventRef;
+  /** Pre-fetched event (home merged schedule); skips the ref fetch. */
+  event?: NbaEvent;
   filters: NbaEventFilters;
 };
 
-function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
+function NbaEventCard({ eventRef, event, filters }: NbaEventCardProps) {
   const {
-    data: nbaEvent,
+    data: fetchedEvent,
     isPending,
     error,
   } = useQuery({
     queryKey: ["nba-event", eventRef],
-    queryFn: () => fetchEventDetails<NbaEvent>(eventRef.$ref),
+    queryFn: () => {
+      if (!eventRef) throw new Error("eventRef is required without event");
+      return fetchEventDetails<NbaEvent>(eventRef.$ref);
+    },
+    enabled: !event,
   });
 
-  if (isPending) return null;
+  const nbaEvent = event ?? fetchedEvent;
+  if (!event && isPending) return null;
   if (!nbaEvent) return <div>Error looking for event</div>;
   if (error) return <div>Error: {error.message}</div>;
 

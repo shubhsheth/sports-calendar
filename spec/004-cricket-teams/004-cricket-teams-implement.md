@@ -65,7 +65,7 @@ after the human approves the increment.
 - [x] T4 — Filters + ICS transform
 - [x] T5 — Home selection state + filters
 - [x] T6 — Combined schedule data layer
-- [ ] T7 — Merged schedule UI + calendar links
+- [x] T7 — Merged schedule UI + calendar links
 - [ ] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
@@ -84,6 +84,24 @@ after the human approves the increment.
   filters on top; no selection → today's grid, no fetches; selection → calendar-links
   panel + merged schedule, grid moves below. Selection persists via
   `useLocalStorageState`.
+- **T7 (2026-07-19):** ref-based league cards (nba/nfl/f1/fifa) gained an
+  optional `event` prop (query `enabled: !event`) so the merged list passes
+  pre-fetched events; cards' internal re-filter gets a keep-all filter from
+  `combined-schedule.tsx`. Cricket card has no pin button yet (League union
+  lacks "cricket-team" until T9/T11). Download builds ICS client-side from the
+  already-filtered entries via each source's shared transform
+  (`sports-calendar.ics`); live-feed links per source in collapsibles —
+  cricket via `buildCricketTeamFeedUrl`, leagues via unfiltered
+  `buildCalendarFeedUrl` (league pages remain the place for filtered feeds).
+  **CORS verified live**: `site.web.api.espn.com` header endpoint sends
+  `access-control-allow-origin: *` (curl with Origin), so client-side
+  discovery works in prod. Visual smoke via Playwright + route interception
+  (sandbox browser can't reach the internet — external requests
+  connection-reset; NOT an app issue): empty state unchanged, India selection
+  renders series card ("3rd T20I" badge, venue), Test-only filter empties the
+  T20I list, show-past reveals earlier days. AddToCalendarFeedLinks hides
+  without `VITE_CALENDAR_FEED_BASE_URL` (existing guard) — feed links appear
+  only in configured envs.
 - **T6 (2026-07-19):** `useCombinedSchedule(selection, showPastEvents)` → two
   `useQueries` batches (keys `["home","cricket-team",teamId]` /
   `["home","league",league]`), cricket deduped by event id across teams (two

@@ -17,21 +17,28 @@ import { isEventLive, FIFA_DURATION_MINUTES } from "@sports-calendar/shared";
 
 type FifaEventCardProps = {
   league: string;
-  eventRef: EventRef;
+  eventRef?: EventRef;
+  /** Pre-fetched event (home merged schedule); skips the ref fetch. */
+  event?: FifaEvent;
   filters: FifaEventFilters;
 };
 
-function FifaEventCard({ eventRef, filters }: FifaEventCardProps) {
+function FifaEventCard({ eventRef, event, filters }: FifaEventCardProps) {
   const {
-    data: fifaEvent,
+    data: fetchedEvent,
     isPending,
     error,
   } = useQuery({
     queryKey: ["fifa-event", eventRef],
-    queryFn: () => fetchEventDetails<FifaEvent>(eventRef.$ref),
+    queryFn: () => {
+      if (!eventRef) throw new Error("eventRef is required without event");
+      return fetchEventDetails<FifaEvent>(eventRef.$ref);
+    },
+    enabled: !event,
   });
 
-  if (isPending) return null;
+  const fifaEvent = event ?? fetchedEvent;
+  if (!event && isPending) return null;
   if (!fifaEvent) return <div>Error looking for event</div>;
   if (error) return <div>Error: {error.message}</div>;
 

@@ -103,7 +103,7 @@ multi-series day to lock that behavior in.
   - Files: `useCombinedSchedule.ts` (+ test).
   - Size: S
 
-- [ ] **T7 — Merged schedule UI + calendar links.** `combined-schedule.tsx` renders the
+- [x] **T7 — Merged schedule UI + calendar links.** `combined-schedule.tsx` renders the
   merged list: cricket entries via new `cricket-teams/cricket-team-event-card.tsx`
   (IPL-style + series name + format badge), league entries via each league's existing
   card (adapted to accept a pre-fetched event where they currently take a `$ref`).

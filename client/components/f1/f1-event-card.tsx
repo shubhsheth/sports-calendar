@@ -18,21 +18,28 @@ import { LiveBadge } from "@/components/ui/live-badge";
 
 type F1EventCardProps = {
   league: string;
-  eventRef: EventRef;
+  eventRef?: EventRef;
+  /** Pre-fetched event (home merged schedule); skips the ref fetch. */
+  event?: F1Event;
   filters: F1EventFilters;
 };
 
-function F1EventCard({ league, eventRef, filters }: F1EventCardProps) {
+function F1EventCard({ league, eventRef, event, filters }: F1EventCardProps) {
   const {
-    data: f1Event,
+    data: fetchedEvent,
     isPending,
     error,
   } = useQuery({
-    queryKey: [league, "event", eventRef.$ref],
-    queryFn: () => fetchEventDetails<F1Event>(eventRef.$ref),
+    queryKey: [league, "event", eventRef?.$ref],
+    queryFn: () => {
+      if (!eventRef) throw new Error("eventRef is required without event");
+      return fetchEventDetails<F1Event>(eventRef.$ref);
+    },
+    enabled: !event,
   });
 
-  if (isPending)
+  const f1Event = event ?? fetchedEvent;
+  if (!event && isPending)
     return <div className="h-48 w-full animate-pulse rounded-xl bg-muted" />;
   if (!f1Event || error) return null;
 
