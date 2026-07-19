@@ -10,6 +10,8 @@
 export type StoredFilters = {
   teamIds?: unknown;
   types?: unknown;
+  teamId?: unknown; // cricket-team rows: the followed team
+  formats?: unknown; // cricket-team rows: match-format filter
 };
 
 export type PersonalCalendarData = {

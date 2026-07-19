@@ -143,7 +143,7 @@ multi-series day to lock that behavior in.
     `client/api/calendar/types.ts`.
   - Size: S
 
-- [ ] **T10 — Personal feed backend branch.** `functions/calendar/personalFeed.ts`:
+- [x] **T10 — Personal feed backend branch.** `functions/calendar/personalFeed.ts`:
   handle `cricket-team` subscriptions (validate stored filters → fetch team events →
   format filter → transform) and pinned events (`espn_event_id` = `"{seriesId}:{eventId}"`
   → series calendar → matching event), deduped by `uid` with the rest of the feed.

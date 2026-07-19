@@ -68,7 +68,7 @@ after the human approves the increment.
 - [x] T7 — Team page download + feed links (rework)
 - [x] T8 — Backend team feed
 - [x] T9 — Subscription schema migration + client types
-- [ ] T10 — Personal feed backend branch
+- [x] T10 — Personal feed backend branch
 - [ ] T11 — Client My Calendar integration
 - [ ] T12 — Analytics
 - [ ] T13 — Update documentation
@@ -94,6 +94,13 @@ after the human approves the increment.
   `home-filters`, `selectionState` multi-select, `useCombinedSchedule`,
   `combined-schedule`, `selection-calendar-links`, and the league cards' `event`
   prop adaptations (reverted to ref-only).
+- **T10 (2026-07-19):** cricket runs as its own slice (`buildCricketTeamIcsEvents`)
+  beside the league loop, kicked off concurrently and merged before the UID
+  dedupe — the league pipeline map assumes one arg-less fetch per league and
+  can't express N-teams-per-league. Pins resolve via `fetchSeriesCalendar` +
+  per-day fetches only (test asserts zero header/discovery calls); malformed
+  pin ids and unknown-team subscriptions log + skip. All 9 my-feed Deno tests
+  green.
 - **T9 (2026-07-19):** migration also adds a check the spec didn't spell out:
   `cricket-team` rows must carry `filters->>'teamId'` (a teamId-less row would
   silently collide via `coalesce('')` with league semantics). Verified against
