@@ -20,6 +20,8 @@ const nflDetail = await fixture("nfl.json");
 const f1Detail = await fixture("f1.json");
 const fifaDetail = await fixture("fifa.json");
 const iplScoreboard = await fixture("ipl-scoreboard.json");
+const cricketHeader = await fixture("cricket-header.json");
+const cricketSeries = await fixture("cricket-series-scoreboard.json");
 
 // Import the app without binding a port: stub Deno.serve for the duration of
 // the (dynamic) import, since index.ts calls Deno.serve at module top level.
@@ -71,6 +73,18 @@ function installFetchMock(): void {
         : input instanceof URL
           ? input.href
           : input.url;
+
+    // Cricket team discovery: serve the same multi-series header (India in
+    // series 24301 only) for every sampled day/month.
+    if (url.includes("/scoreboard/header")) {
+      return Promise.resolve(jsonResponse(cricketHeader));
+    }
+
+    // Cricket team series scoreboard (calendar + the SL v IND Test) for
+    // India's one discovered series.
+    if (url.includes("/cricket/24301/scoreboard")) {
+      return Promise.resolve(jsonResponse(cricketSeries));
+    }
 
     // IPL: date-range scoreboard. One event on the first season date only.
     if (url.includes("/cricket/") && url.includes("/scoreboard")) {
@@ -130,6 +144,65 @@ Deno.test("each league route returns valid text/calendar ICS (200)", async () =>
         assert(body.includes(marker), `${route}: ICS body missing "${marker}"`);
       }
     }
+  } finally {
+    restoreFetch();
+  }
+});
+
+Deno.test("cricket-team route returns the team's matches across its series", async () => {
+  installFetchMock();
+  try {
+    const res = await app.request("/calendar/cricket-team/6.ics");
+    assert(res.status === 200, `expected 200, got ${res.status}`);
+    const body = await res.text();
+    for (const marker of ["BEGIN:VCALENDAR", "BEGIN:VEVENT", "UID:", "DTSTART"]) {
+      assert(body.includes(marker), `ICS body missing "${marker}"`);
+    }
+    // The fixture's one India match: a multi-day Test with series context.
+    assert(body.includes("Sri Lanka v India"), "missing match title");
+    assert(body.includes("1st Test"), "missing format detail in title");
+    assert(body.includes("India tour of Sri Lanka 2026"), "missing series name");
+    assert(body.includes("DTEND"), "Test should span DTSTART→DTEND");
+    // The series calendar repeats the Test's match days; dedupe → one VEVENT.
+    const vevents = body.split("BEGIN:VEVENT").length - 1;
+    assert(vevents === 1, `expected 1 VEVENT after dedupe, got ${vevents}`);
+  } finally {
+    restoreFetch();
+  }
+});
+
+Deno.test("cricket-team format filter narrows the feed", async () => {
+  installFetchMock();
+  try {
+    const kept = await app.request("/calendar/cricket-team/6.ics?formats=test");
+    assert(kept.status === 200, `formats=test: got ${kept.status}`);
+    const keptBody = await kept.text();
+    assert(keptBody.includes("BEGIN:VEVENT"), "formats=test should keep the Test");
+
+    // Filtering to ODIs leaves no events — still a valid, empty calendar.
+    const empty = await app.request("/calendar/cricket-team/6.ics?formats=odi");
+    assert(empty.status === 200, `formats=odi: got ${empty.status}`);
+    const emptyBody = await empty.text();
+    assert(emptyBody.includes("BEGIN:VCALENDAR"), "empty feed still valid ICS");
+    assert(!emptyBody.includes("BEGIN:VEVENT"), "formats=odi should drop the Test");
+  } finally {
+    restoreFetch();
+  }
+});
+
+Deno.test("cricket-team route rejects bad teams and formats", async () => {
+  installFetchMock();
+  try {
+    const unknownTeam = await app.request("/calendar/cricket-team/999.ics");
+    assert(unknownTeam.status === 400, `unknown team: got ${unknownTeam.status}`);
+
+    const notAFeed = await app.request("/calendar/cricket-team/foo.ics");
+    assert(notAFeed.status === 404, `non-numeric id: got ${notAFeed.status}`);
+
+    const badFormat = await app.request(
+      "/calendar/cricket-team/6.ics?formats=t10"
+    );
+    assert(badFormat.status === 400, `bad format: got ${badFormat.status}`);
   } finally {
     restoreFetch();
   }

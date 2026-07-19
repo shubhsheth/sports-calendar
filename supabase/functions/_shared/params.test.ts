@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  parseCricketTeamParams,
   parseNbaParams,
   parseNflParams,
   parseIplParams,
@@ -61,5 +62,30 @@ describe("parseF1Params", () => {
 
   it("does not reject an unrecognized showPastEvents value", () => {
     expect(parseF1Params({ showPastEvents: "nope" }).ok).toBe(true);
+  });
+});
+
+describe("parseCricketTeamParams", () => {
+  it("accepts a curated team with no format filter", () => {
+    expect(parseCricketTeamParams("6", {})).toEqual({
+      ok: true,
+      value: { showPastEvents: true, formats: [] },
+    });
+  });
+
+  it("parses and validates formats", () => {
+    expect(parseCricketTeamParams("6", { formats: "test,odi" })).toEqual({
+      ok: true,
+      value: { showPastEvents: true, formats: ["test", "odi"] },
+    });
+    const bad = parseCricketTeamParams("6", { formats: "test,t10" });
+    expect(bad.ok).toBe(false);
+    expect(!bad.ok && bad.error).toContain("t10");
+  });
+
+  it("rejects teams outside the curated list", () => {
+    const result = parseCricketTeamParams("999", {});
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.error).toContain("999");
   });
 });

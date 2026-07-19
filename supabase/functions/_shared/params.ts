@@ -1,10 +1,13 @@
 import type {
+  CricketMatchFormat,
+  CricketTeamFilters,
   F1EventFilters,
   FifaEventFilters,
   IplEventFilters,
   NbaEventFilters,
   NflEventFilters,
 } from "@sports-calendar/shared";
+import { CRICKET_NATIONAL_TEAMS } from "@sports-calendar/shared";
 
 export type ParseResult<T> =
   | { ok: true; value: T }
@@ -59,6 +62,46 @@ export function parseIplParams(query: Query): ParseResult<IplEventFilters> {
 
 export function parseFifaParams(query: Query): ParseResult<FifaEventFilters> {
   return parseTeamFilters(query);
+}
+
+const CRICKET_VALID_FORMATS: CricketMatchFormat[] = [
+  "test",
+  "odi",
+  "t20i",
+  "other",
+];
+
+/**
+ * Validates a cricket-team feed request: the team must be one of the curated
+ * national sides (the feed runs a discovery scan per team, so arbitrary ids
+ * are rejected) and `formats` must name known match formats.
+ */
+export function parseCricketTeamParams(
+  teamId: string,
+  query: Query
+): ParseResult<CricketTeamFilters> {
+  if (!CRICKET_NATIONAL_TEAMS.some(team => team.id === teamId)) {
+    return { ok: false, error: `Unknown cricket team: ${teamId}` };
+  }
+
+  const formats = parseCommaList(query.formats);
+  const invalid = formats.filter(
+    f => !CRICKET_VALID_FORMATS.includes(f as CricketMatchFormat)
+  );
+  if (invalid.length > 0) {
+    return {
+      ok: false,
+      error: `Invalid format(s): ${invalid.join(", ")} (valid: ${CRICKET_VALID_FORMATS.join(", ")})`,
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      showPastEvents: SHOW_PAST_EVENTS,
+      formats: formats as CricketMatchFormat[],
+    },
+  };
 }
 
 export function parseF1Params(query: Query): ParseResult<F1EventFilters> {

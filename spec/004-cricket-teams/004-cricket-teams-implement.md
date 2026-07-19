@@ -66,7 +66,7 @@ after the human approves the increment.
 - [x] T5 — Home segmented selector (rework)
 - [x] T6 — Team schedule page (rework)
 - [x] T7 — Team page download + feed links (rework)
-- [ ] T8 — Backend team feed
+- [x] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
 - [ ] T11 — Client My Calendar integration
@@ -94,6 +94,15 @@ after the human approves the increment.
   `home-filters`, `selectionState` multi-select, `useCombinedSchedule`,
   `combined-schedule`, `selection-calendar-links`, and the league cards' `event`
   prop adaptations (reverted to ref-only).
+- **T8 (2026-07-19):** route is `/calendar/cricket-team/:file` with a numeric
+  `(\d+)\.ics` gate (404) before curated-team validation (400) — mirrors the
+  personal feed's file-pattern style rather than `registerLeagueRoute` (which
+  has no path params). Empty filtered results return a valid empty VCALENDAR
+  (verified `createEvents([])` yields a value, not an error). Deno test env:
+  the repo's deno.lock needs a recent Deno (2.1.x panics on startup; 2.9.3
+  works) — installed via deno.land installer, not in the CI gate. Test fetch
+  mock: cricket handlers (`/scoreboard/header`, `/cricket/24301/scoreboard`)
+  must precede the generic IPL `/cricket/…/scoreboard` branch.
 - **T5–T7 rework (2026-07-19):** home-selector.tsx (segmented chips +
   `TeamTileGrid`; tab persisted via `utils/homeTab.ts` — non-component exports
   split out for the react-refresh lint rule); team route

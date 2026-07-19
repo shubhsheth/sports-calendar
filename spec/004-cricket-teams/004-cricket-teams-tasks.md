@@ -119,7 +119,7 @@ multi-series day to lock that behavior in.
   - Files: `cricket-team-calendar-links.tsx`, team route.
   - Size: S
 
-- [ ] **T8 — Backend team feed.** `supabase/functions/_shared/params.ts`: parse/validate
+- [x] **T8 — Backend team feed.** `supabase/functions/_shared/params.ts`: parse/validate
   `teamId` (must be one of the curated 12) and `formats`. `functions/calendar/index.ts`:
   `GET /calendar/cricket-team/:teamId.ics` → `fetchAllCricketTeamEvents` →
   `filterCricketTeamEvents` → transform → `createEvents` + `icsHeaders()`; unknown team
