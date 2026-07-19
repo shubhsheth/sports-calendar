@@ -63,9 +63,9 @@ after the human approves the increment.
 - [x] T2 — Series discovery
 - [x] T3 — Team event fetch + normalization
 - [x] T4 — Filters + ICS transform
-- [ ] T5 — Home segmented selector (rework)
-- [ ] T6 — Team schedule page (rework)
-- [ ] T7 — Team page download + feed links (rework)
+- [x] T5 — Home segmented selector (rework)
+- [x] T6 — Team schedule page (rework)
+- [x] T7 — Team page download + feed links (rework)
 - [ ] T8 — Backend team feed
 - [ ] T9 — Subscription schema migration + client types
 - [ ] T10 — Personal feed backend branch
@@ -94,6 +94,18 @@ after the human approves the increment.
   `home-filters`, `selectionState` multi-select, `useCombinedSchedule`,
   `combined-schedule`, `selection-calendar-links`, and the league cards' `event`
   prop adaptations (reverted to ref-only).
+- **T5–T7 rework (2026-07-19):** home-selector.tsx (segmented chips +
+  `TeamTileGrid`; tab persisted via `utils/homeTab.ts` — non-component exports
+  split out for the react-refresh lint rule); team route
+  `cricket-teams.$teamId.tsx` (one query, format pills + show-past via
+  `cricket-team-filter-selector.tsx`/`utils/filterState.ts`, not-found /
+  loading / error / empty states); `cricket-team-calendar-links.tsx` (download
+  `{team}-cricket.ics` + AddToCalendarFeedLinks). Deleted the entire rejected
+  surface; league cards reverted via `git checkout 9c58bf6 --`. Landed as ONE
+  commit — the pieces don't compile independently (team tiles use the typed
+  route). Playwright smoke (intercepted fixtures): default Leagues tab
+  identical to before, 12 team tiles, tab persistence, India page schedule +
+  links, Test-filter empties T20I list, unknown id → not-found.
 - **T7 (first build, superseded — 2026-07-19):** ref-based league cards (nba/nfl/f1/fifa) gained an
   optional `event` prop (query `enabled: !event`) so the merged list passes
   pre-fetched events; cards' internal re-filter gets a keep-all filter from

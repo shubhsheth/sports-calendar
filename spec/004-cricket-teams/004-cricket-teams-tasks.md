@@ -84,7 +84,7 @@ multi-series day to lock that behavior in.
     `shared/src/index.ts`.
   - Size: M
 
-- [ ] **T5 — Home segmented selector.** `client/components/home/home-selector.tsx`: a
+- [x] **T5 — Home segmented selector.** `client/components/home/home-selector.tsx`: a
   segmented Leagues | Teams chip control (last tab persisted with
   `useLocalStorageState`); Leagues tab renders the existing five league tiles
   unchanged, Teams tab renders 12 team tiles (logo + name from
@@ -98,7 +98,7 @@ multi-series day to lock that behavior in.
     rejected surface.
   - Size: M
 
-- [ ] **T6 — Team schedule page.** `client/routes/cricket-teams.$teamId.tsx`: one
+- [x] **T6 — Team schedule page.** `client/routes/cricket-teams.$teamId.tsx`: one
   `useQuery` on `fetchAllCricketTeamEvents`, chronological list of the existing
   `cricket-team-event-card.tsx`, format pills + show-past toggle via
   `cricket-team-filter-selector.tsx` with toggle helpers in
@@ -109,7 +109,7 @@ multi-series day to lock that behavior in.
   - Files: route, `cricket-team-filter-selector.tsx`, `utils/filterState.ts` (+ test).
   - Size: M
 
-- [ ] **T7 — Team page download + feed links.** `cricket-team-calendar-links.tsx`:
+- [x] **T7 — Team page download + feed links.** `cricket-team-calendar-links.tsx`:
   one-time `.ics` download of the filtered schedule (shared transform; events already
   fetched) and `add-to-calendar-feed-links.tsx` wired to the existing
   `buildCricketTeamFeedUrl` (`/cricket-team/{teamId}.ics?formats=…`).

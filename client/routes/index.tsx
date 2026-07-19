@@ -1,21 +1,12 @@
-import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { analytics } from "@/lib/analytics";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
-import { HomeFilters } from "@/components/home/home-filters";
-import { CombinedSchedule } from "@/components/home/combined-schedule";
-import { SelectionCalendarLinks } from "@/components/home/selection-calendar-links";
-import { useCombinedSchedule } from "@/components/home/utils/useCombinedSchedule";
+import { HomeTabSelector, TeamTileGrid } from "@/components/home/home-selector";
 import {
-  EMPTY_HOME_SELECTION,
-  HOME_SELECTION_STORAGE_KEY,
-  hasSelection,
-  normalizeSelection,
-  toggleFormat,
-  toggleLeague,
-  toggleTeam,
-  type HomeSelection,
-} from "@/components/home/utils/selectionState";
+  HOME_TAB_STORAGE_KEY,
+  normalizeHomeTab,
+  type HomeTab,
+} from "@/components/home/utils/homeTab";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -33,47 +24,16 @@ export const Route = createFileRoute("/")({
 });
 
 function IndexComponent() {
-  const [storedSelection, setStoredSelection] =
-    useLocalStorageState<HomeSelection>(
-      HOME_SELECTION_STORAGE_KEY,
-      EMPTY_HOME_SELECTION
-    );
-  const selection = normalizeSelection(storedSelection);
-  const [showPastEvents, setShowPastEvents] = useState(false);
-
-  const { entries, isLoading, failedSources } = useCombinedSchedule(
-    selection,
-    showPastEvents
+  const [storedTab, setStoredTab] = useLocalStorageState<HomeTab>(
+    HOME_TAB_STORAGE_KEY,
+    "leagues"
   );
-  const selectionActive = hasSelection(selection);
+  const tab = normalizeHomeTab(storedTab);
 
   return (
     <div className="grid gap-6">
-      <HomeFilters
-        selection={selection}
-        onToggleTeam={teamId =>
-          setStoredSelection(toggleTeam(selection, teamId))
-        }
-        onToggleLeague={league =>
-          setStoredSelection(toggleLeague(selection, league))
-        }
-        onToggleFormat={format =>
-          setStoredSelection(toggleFormat(selection, format))
-        }
-      />
-      {selectionActive && (
-        <>
-          <SelectionCalendarLinks selection={selection} entries={entries} />
-          <CombinedSchedule
-            entries={entries}
-            isLoading={isLoading}
-            failedSources={failedSources}
-            showPastEvents={showPastEvents}
-            onToggleShowPast={setShowPastEvents}
-          />
-        </>
-      )}
-      <NavigationGrid />
+      <HomeTabSelector tab={tab} onTabChange={setStoredTab} />
+      {tab === "leagues" ? <NavigationGrid /> : <TeamTileGrid />}
     </div>
   );
 }
