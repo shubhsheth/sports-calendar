@@ -188,7 +188,7 @@ multi-series day to lock that behavior in.
   - Files: `docs/ESPN_API.md`, `docs/PROJECT_OVERVIEW.md`, `docs/BACKEND.md`, `CLAUDE.md`.
   - Size: S
 
-- [ ] **T14 — Full verification.** CI gate green. Manual round trip: home Teams tab →
+- [x] **T14 — Full verification.** CI gate green. Manual round trip: home Teams tab →
   India tile → team page lists matches across the currently published series with
   correct formats → filter to Tests → download ICS → subscribe feed URL → save two
   teams + pin one match → My Calendar shows all → combined feed contains both teams'

@@ -72,9 +72,36 @@ after the human approves the increment.
 - [x] T11 — Client My Calendar integration
 - [x] T12 — Analytics
 - [x] T13 — Update documentation
-- [ ] T14 — Full verification
+- [x] T14 — Full verification
+
+## Deploy-time checklist (environment-blocked; must run before/at deploy)
+This container has no Supabase CLI, Docker, or real Supabase project, so these
+success-criteria facets were verified by proxy (stubbed Postgres, Deno fixture
+tests, mocked supabase-js) and must be confirmed against the real stack:
+1. Apply the migration: `supabase db push` (or `db reset` locally) — re-run the
+   T9/T11 assertion script against the real DB if convenient.
+2. Deploy the function: `supabase functions deploy calendar` (CI does this on
+   `supabase/functions/**` or `shared/**` changes via deploy-functions.yml).
+3. Signed-in round trip on the deployed stack: follow India + Australia from
+   their team pages → both appear on My Calendar → open the personal feed URL
+   in a real calendar app → both teams' matches present, plus any pinned match,
+   deduped. Pin a match, confirm it resolves to name/date.
+4. Subscribe `…/cricket-team/6.ics` directly in a calendar app; confirm it
+   refreshes (new series appear) on the app's next poll.
 
 ## Notes
+- **T14 (2026-07-19):** full verification. CI gate green (lint 18 pre-existing
+  warnings/0 errors, format clean, 252 vitest, build ok); Deno suites 5 + 9
+  green; `tsc -p shared` clean, `tsc -b tsconfig.app` only the 2 pre-existing
+  my-calendar test-cast errors. Live ESPN round trip: India 52 matches
+  (9 Test/20 ODI/23 T20I) → Test filter 9 → 52-VEVENT ICS with multi-day
+  DTEND; Australia 34 matches (13 Test) → valid ICS — proves multi-team +
+  multi-day. Browser round trip (Playwright + intercepted fixtures, sandbox
+  has no outbound net): 10/10 checks — Leagues tab = existing grid with no
+  cricket fetches, Teams tab 12 tiles persisting across reload, India tile →
+  team page (series card, "3rd T20I" badge, calendar links, download),
+  Test-only filter empties the T20I list, unknown id → not-found. Success
+  criteria all met except the real-Supabase/calendar-app facets above.
 - **T13 (2026-07-19):** ESPN_API.md gains the cricket series-discovery section
   (endpoint quirks, dead ends, verified team ids) plus a future-sports note
   (Core per-team events endpoint, global soccer ids); BACKEND.md documents the
