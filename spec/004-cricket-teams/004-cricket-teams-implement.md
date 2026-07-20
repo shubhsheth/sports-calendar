@@ -69,12 +69,27 @@ after the human approves the increment.
 - [x] T8 — Backend team feed
 - [x] T9 — Subscription schema migration + client types
 - [x] T10 — Personal feed backend branch
-- [ ] T11 — Client My Calendar integration
+- [x] T11 — Client My Calendar integration
 - [ ] T12 — Analytics
 - [ ] T13 — Update documentation
 - [ ] T14 — Full verification
 
 ## Notes
+- **T11 (2026-07-19):** found and fixed a latent T9 break: the client upsert
+  targeted `onConflict: "calendar_id,league"`, a constraint the migration had
+  dropped — and PostgREST cannot target expression indexes. The migration now
+  creates a stored generated column `team_key` (mirrors `filters->>'teamId'`)
+  with a plain `unique (calendar_id, league, team_key)` constraint, keeping
+  ONE upsert path for leagues and cricket teams alike (re-verified in
+  Postgres, incl. ON CONFLICT upserts for both row kinds — 8 assertions).
+  `removeSubscription` gained an optional `teamId` (filters by `team_key`);
+  SaveLeagueButton matches cricket subscriptions per `filters.teamId`; the
+  cricket card pins `"{seriesId}:{eventId}"`; `fetchPinnedEventDetails`
+  resolves cricket pins from the series' match days cached per series; My
+  Calendar rows label cricket subscriptions by team name with format
+  summaries and remove per team. LEAGUE_LABELS gained "cricket-team"
+  (Record<League,…> had been a latent type error since T9 — the CI gate never
+  typechecks).
 - **UX pivot (2026-07-17, after T1):** the picker page + dedicated team page were
   replaced by Teams + Leagues multi-select filters on the home page populating one
   merged chronological schedule (league pages unchanged; teams filter = the 12

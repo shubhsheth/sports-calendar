@@ -1,7 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CricketTeamEvent } from "@sports-calendar/shared";
 import CricketTeamEventCard from "./cricket-team-event-card";
+
+// The card embeds PinEventButton, which needs auth context; accounts are
+// "not configured" here so it renders nothing.
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
+    enabled: false,
+    loading: false,
+    user: null,
+    signInWithGoogle: vi.fn(),
+    signInWithMagicLink: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
 
 const daysFromNow = (days: number) =>
   new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
@@ -61,9 +75,17 @@ function makeEvent(
   };
 }
 
+function renderCard(event: CricketTeamEvent) {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CricketTeamEventCard event={event} />
+    </QueryClientProvider>
+  );
+}
+
 describe("CricketTeamEventCard", () => {
   it("shows teams, series name, format badge, and venue", () => {
-    render(<CricketTeamEventCard event={makeEvent()} />);
+    renderCard(makeEvent());
     expect(screen.getByText("Sri Lanka")).toBeInTheDocument();
     expect(screen.getByText("India")).toBeInTheDocument();
     expect(
@@ -75,22 +97,16 @@ describe("CricketTeamEventCard", () => {
   });
 
   it("falls back to the format code when ESPN gives no detail", () => {
-    render(
-      <CricketTeamEventCard
-        event={makeEvent({ format: "t20i", formatDetail: "" })}
-      />
-    );
+    renderCard(makeEvent({ format: "t20i", formatDetail: "" }));
     expect(screen.getByText("T20I")).toBeInTheDocument();
   });
 
   it("shows the live badge across a multi-day Test in progress", () => {
-    render(
-      <CricketTeamEventCard
-        event={makeEvent({
-          date: daysFromNow(-2),
-          endDate: daysFromNow(2),
-        })}
-      />
+    renderCard(
+      makeEvent({
+        date: daysFromNow(-2),
+        endDate: daysFromNow(2),
+      })
     );
     expect(screen.getByText(/live/i)).toBeInTheDocument();
   });

@@ -153,7 +153,7 @@ multi-series day to lock that behavior in.
   - Files: `personalFeed.ts` (+ test), `_shared/personalCalendar.ts` if types need it.
   - Size: S
 
-- [ ] **T11 — Client My Calendar integration.** Team page: "Save to My Calendar"
+- [x] **T11 — Client My Calendar integration.** Team page: "Save to My Calendar"
   (upsert `cricket-team` + teamId + formats; reflects saved state) and pin/unpin on
   the team page's cards storing `"{seriesId}:{eventId}"`; signed-out clicks prompt
   sign-in (existing pattern). My Calendar page lists cricket-team subscriptions

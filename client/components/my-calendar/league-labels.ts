@@ -6,4 +6,5 @@ export const LEAGUE_LABELS: Record<League, string> = {
   f1: "F1",
   ipl: "IPL",
   fifa: "FIFA",
+  "cricket-team": "Cricket",
 };

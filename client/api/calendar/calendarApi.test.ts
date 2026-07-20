@@ -147,7 +147,7 @@ describe("calendarApi", () => {
   });
 
   describe("subscriptions", () => {
-    it("upserts on the (calendar, league) key", async () => {
+    it("upserts on the (calendar, league, team_key) key", async () => {
       const select = stubQuery({ data: CAL_ROW });
       const upsert = stubQuery({});
       holder.client = fakeClient([select, upsert], "user-1");
@@ -159,7 +159,7 @@ describe("calendarApi", () => {
           league: "nba",
           filters: { teamIds: ["10", "14"] },
         },
-        { onConflict: "calendar_id,league" }
+        { onConflict: "calendar_id,league,team_key" }
       );
     });
 
@@ -170,6 +170,16 @@ describe("calendarApi", () => {
       await removeSubscription("f1");
       expect(del.delete).toHaveBeenCalled();
       expect(del.eq).toHaveBeenCalledWith("league", "f1");
+      expect(del.eq).toHaveBeenCalledTimes(1);
+    });
+
+    it("removes one followed cricket team by team_key", async () => {
+      const del = stubQuery({});
+      holder.client = fakeClient([del], "user-1");
+
+      await removeSubscription("cricket-team", "6");
+      expect(del.eq).toHaveBeenCalledWith("league", "cricket-team");
+      expect(del.eq).toHaveBeenCalledWith("team_key", "6");
     });
   });
 

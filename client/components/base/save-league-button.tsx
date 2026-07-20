@@ -14,6 +14,22 @@ type SaveLeagueButtonProps = {
 };
 
 /**
+ * Whether the calendar already holds this subscription. Cricket-team rows are
+ * per followed team, so their match includes `filters.teamId`.
+ */
+function matchesSubscription(
+  subscription: { league: League; filters: SubscriptionFilters },
+  league: League,
+  filters: SubscriptionFilters
+): boolean {
+  if (subscription.league !== league) return false;
+  if (league === "cricket-team") {
+    return subscription.filters.teamId === filters.teamId;
+  }
+  return true;
+}
+
+/**
  * Saves the league (with the currently selected filters) to the signed-in
  * user's personal calendar; saving again replaces the stored filters. Signed
  * out it prompts sign-in; renders nothing when accounts aren't configured.
@@ -44,7 +60,9 @@ function SaveLeagueButton({
   }
 
   const isSubscribed =
-    calendar?.subscriptions.some(s => s.league === league) ?? false;
+    calendar?.subscriptions.some(s =>
+      matchesSubscription(s, league, subscriptionFilters)
+    ) ?? false;
 
   const handleSave = () => {
     upsertSubscription.mutate(

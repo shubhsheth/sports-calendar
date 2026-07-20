@@ -11,6 +11,7 @@ import { transformCricketTeamEventsToIcs } from "@sports-calendar/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import { buildCricketTeamFeedUrl } from "./utils/buildCricketTeamFeedUrl";
 
 type CricketTeamCalendarLinksProps = {
@@ -50,7 +51,7 @@ export function CricketTeamCalendarLinks({
       <CardHeader>
         <CardTitle className="text-base">Add to your calendar</CardTitle>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent className="pb-0 grid gap-2">
         <Button
           className="w-full"
           variant="outline"
@@ -64,6 +65,10 @@ export function CricketTeamCalendarLinks({
           )}
           Download .ics
         </Button>
+        <SaveLeagueButton
+          league="cricket-team"
+          subscriptionFilters={{ teamId: team.id, formats: filters.formats }}
+        />
       </CardContent>
       <AddToCalendarFeedLinks
         league="cricket-team"

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { RefreshCw, Trash2 } from "lucide-react";
-import { translateF1EventTypeId } from "@sports-calendar/shared";
+import {
+  CRICKET_NATIONAL_TEAMS,
+  translateF1EventTypeId,
+} from "@sports-calendar/shared";
 import type { CalendarSubscription } from "@/api/calendar/types";
 import { SignInDialog } from "@/components/auth/sign-in-dialog";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
@@ -107,7 +110,7 @@ function CalendarContent() {
             <ul className="divide-y">
               {calendar.subscriptions.map(subscription => (
                 <SubscriptionItem
-                  key={subscription.league}
+                  key={`${subscription.league}-${subscription.filters.teamId ?? ""}`}
                   subscription={subscription}
                 />
               ))}
@@ -139,6 +142,13 @@ function CalendarContent() {
   );
 }
 
+const FORMAT_LABELS: Record<string, string> = {
+  test: "Test",
+  odi: "ODI",
+  t20i: "T20I",
+  other: "Other",
+};
+
 /** Human summary of a subscription's stored filters. */
 function describeFilters(subscription: CalendarSubscription): string {
   const { league, filters } = subscription;
@@ -147,9 +157,25 @@ function describeFilters(subscription: CalendarSubscription): string {
     if (types.length === 0) return "All sessions";
     return types.map(translateF1EventTypeId).join(", ");
   }
+  if (league === "cricket-team") {
+    const formats = filters.formats ?? [];
+    if (formats.length === 0) return "All formats";
+    return formats.map(f => FORMAT_LABELS[f] ?? f).join(", ");
+  }
   const teamIds = filters.teamIds ?? [];
   if (teamIds.length === 0) return "All teams";
   return `${teamIds.length} team${teamIds.length === 1 ? "" : "s"} selected`;
+}
+
+/** Row label: the team name for a followed cricket team, else the league. */
+function subscriptionLabel(subscription: CalendarSubscription): string {
+  if (subscription.league === "cricket-team") {
+    const team = CRICKET_NATIONAL_TEAMS.find(
+      t => t.id === subscription.filters.teamId
+    );
+    return team?.name ?? "Cricket team";
+  }
+  return LEAGUE_LABELS[subscription.league];
 }
 
 function SubscriptionItem({
@@ -158,12 +184,13 @@ function SubscriptionItem({
   subscription: CalendarSubscription;
 }) {
   const removeSubscription = useRemoveSubscription();
+  const label = subscriptionLabel(subscription);
 
   return (
     <li className="flex items-center justify-between gap-2 py-2">
       <div className="flex items-center gap-2 min-w-0">
         <Badge variant="secondary" className="uppercase shrink-0">
-          {LEAGUE_LABELS[subscription.league]}
+          {label}
         </Badge>
         <span className="text-sm text-muted-foreground truncate">
           {describeFilters(subscription)}
@@ -172,11 +199,14 @@ function SubscriptionItem({
       <Button
         variant="ghost"
         size="icon"
-        aria-label={`Remove ${LEAGUE_LABELS[subscription.league]} subscription`}
+        aria-label={`Remove ${label} subscription`}
         disabled={removeSubscription.isPending}
         onClick={() =>
           removeSubscription.mutate(
-            { league: subscription.league },
+            {
+              league: subscription.league,
+              teamId: subscription.filters.teamId,
+            },
             {
               onSuccess: () =>
                 analytics.leagueRemovedFromMyCalendar(subscription.league),

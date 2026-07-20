@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
 import { LiveBadge } from "@/components/ui/live-badge";
+import PinEventButton from "@/components/base/pin-event-button";
 
 type CricketTeamEventCardProps = {
   event: CricketTeamEvent;
@@ -64,6 +65,12 @@ function CricketTeamEventCard({ event }: CricketTeamEventCardProps) {
             </>
           )}
         </p>
+        {/* Composite id: the personal feed resolves pins from the series'
+            calendar, which needs the series id alongside the event id. */}
+        <PinEventButton
+          league="cricket-team"
+          espnEventId={`${event.seriesId}:${event.id}`}
+        />
       </CardFooter>
     </Card>
   );

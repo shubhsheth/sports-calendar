@@ -28,7 +28,7 @@ function signedIn(overrides: Partial<AuthValue> = {}) {
   } as AuthValue;
 }
 
-function calendarWith(subscriptions: { league: string }[]) {
+function calendarWith(subscriptions: { league: string; filters?: unknown }[]) {
   return {
     data: { id: "cal-1", feedToken: "t", subscriptions, pinnedEvents: [] },
   } as ReturnType<typeof useMyCalendar>;
@@ -99,5 +99,32 @@ describe("SaveLeagueButton", () => {
       { league: "f1", filters: { types: ["3"] } },
       expect.anything()
     );
+  });
+
+  it("matches cricket-team subscriptions per followed team", () => {
+    mockUseMyCalendar.mockReturnValue(
+      calendarWith([{ league: "cricket-team", filters: { teamId: "6" } }])
+    );
+
+    const { rerender } = render(
+      <SaveLeagueButton
+        league="cricket-team"
+        subscriptionFilters={{ teamId: "6", formats: [] }}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: /update my calendar/i })
+    ).toBeInTheDocument();
+
+    // A different team is not yet subscribed.
+    rerender(
+      <SaveLeagueButton
+        league="cricket-team"
+        subscriptionFilters={{ teamId: "2", formats: [] }}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: /save to my calendar/i })
+    ).toBeInTheDocument();
   });
 });
