@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddToCalendarFeedLinks from "@/components/base/add-to-calendar-feed-links";
 import SaveLeagueButton from "@/components/base/save-league-button";
+import { analytics } from "@/lib/analytics";
 import { buildCricketTeamFeedUrl } from "./utils/buildCricketTeamFeedUrl";
 
 type CricketTeamCalendarLinksProps = {
@@ -39,6 +40,7 @@ export function CricketTeamCalendarLinks({
     try {
       const result = createEvents(transformCricketTeamEventsToIcs(events));
       if (result.value) {
+        analytics.calendarDownloaded("cricket-team");
         fileDownload(result.value, `${team.name.toLowerCase()}-cricket.ics`);
       }
     } finally {

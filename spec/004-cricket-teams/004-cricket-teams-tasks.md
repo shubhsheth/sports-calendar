@@ -167,7 +167,7 @@ multi-series day to lock that behavior in.
     components.
   - Size: M
 
-- [ ] **T12 — Analytics.** Typed events per `client/lib/analytics.ts` conventions with
+- [x] **T12 — Analytics.** Typed events per `client/lib/analytics.ts` conventions with
   league `"cricket-team"`: home tab + team-tile selection, team page view, format
   filter toggles, download, feed-link clicks, save/pin — matching what existing
   leagues track.

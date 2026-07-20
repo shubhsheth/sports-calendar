@@ -1,6 +1,7 @@
 import type { CricketTeamFilters } from "@sports-calendar/shared";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { analytics } from "@/lib/analytics";
 import {
   CRICKET_FORMAT_OPTIONS,
   toggleFormatFilter,
@@ -36,7 +37,14 @@ export function CricketTeamFilterSelector({
             }
             aria-pressed={filters.formats.includes(format.id)}
             className="rounded-full"
-            onClick={() => toggleFormatFilter(format.id, filters, setFilters)}
+            onClick={() => {
+              analytics.filterEventTypeToggled(
+                "cricket-team",
+                format.id,
+                filters.formats.includes(format.id) ? "removed" : "added"
+              );
+              toggleFormatFilter(format.id, filters, setFilters);
+            }}
           >
             {format.label}
           </Button>
@@ -46,7 +54,13 @@ export function CricketTeamFilterSelector({
         <Checkbox
           id="show-past-events"
           checked={filters.showPastEvents}
-          onCheckedChange={() => toggleShowPastEvents(filters, setFilters)}
+          onCheckedChange={() => {
+            analytics.filterShowPastEventsToggled(
+              "cricket-team",
+              !filters.showPastEvents
+            );
+            toggleShowPastEvents(filters, setFilters);
+          }}
         />
         <label htmlFor="show-past-events" className="text-sm">
           Show past events

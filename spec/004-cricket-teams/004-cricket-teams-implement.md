@@ -70,11 +70,18 @@ after the human approves the increment.
 - [x] T9 — Subscription schema migration + client types
 - [x] T10 — Personal feed backend branch
 - [x] T11 — Client My Calendar integration
-- [ ] T12 — Analytics
+- [x] T12 — Analytics
 - [ ] T13 — Update documentation
 - [ ] T14 — Full verification
 
 ## Notes
+- **T12 (2026-07-19):** two new typed events (`home_tab_selected`,
+  `cricket_team_selected`); everything else reuses the generic per-league
+  functions with league "cricket-team" — format pills via
+  `filterEventTypeToggled`, show-past via `filterShowPastEventsToggled`,
+  download via `calendarDownloaded`; feed links, save, pin/unpin, and remove
+  already flowed the league value through the shared components. Router
+  pageview covers team-page views (same as league pages — no bespoke event).
 - **T11 (2026-07-19):** found and fixed a latent T9 break: the client upsert
   targeted `onConflict: "calendar_id,league"`, a constraint the migration had
   dropped — and PostgREST cannot target expression indexes. The migration now

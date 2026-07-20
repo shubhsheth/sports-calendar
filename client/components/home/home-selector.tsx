@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { CRICKET_NATIONAL_TEAMS } from "@sports-calendar/shared";
 import { Button } from "@/components/ui/button";
+import { analytics } from "@/lib/analytics";
 import type { HomeTab } from "./utils/homeTab";
 
 type HomeTabSelectorProps = {
@@ -13,6 +14,10 @@ type HomeTabSelectorProps = {
  * below is the route's concern — this is just the switch.
  */
 export function HomeTabSelector({ tab, onTabChange }: HomeTabSelectorProps) {
+  const selectTab = (next: HomeTab) => {
+    analytics.homeTabSelected(next);
+    onTabChange(next);
+  };
   return (
     <div
       className="flex justify-center gap-2"
@@ -24,7 +29,7 @@ export function HomeTabSelector({ tab, onTabChange }: HomeTabSelectorProps) {
         variant={tab === "leagues" ? "default" : "outline"}
         aria-pressed={tab === "leagues"}
         className="rounded-full"
-        onClick={() => onTabChange("leagues")}
+        onClick={() => selectTab("leagues")}
       >
         Leagues
       </Button>
@@ -33,7 +38,7 @@ export function HomeTabSelector({ tab, onTabChange }: HomeTabSelectorProps) {
         variant={tab === "teams" ? "default" : "outline"}
         aria-pressed={tab === "teams"}
         className="rounded-full"
-        onClick={() => onTabChange("teams")}
+        onClick={() => selectTab("teams")}
       >
         Teams
       </Button>
@@ -51,6 +56,7 @@ export function TeamTileGrid() {
           to="/cricket-teams/$teamId"
           params={{ teamId: team.id }}
           className="border-1 rounded-lg py-8 px-4 text-center hover:bg-gray-100 flex flex-col items-center gap-3"
+          onClick={() => analytics.cricketTeamSelected(team.id)}
         >
           <img
             src={team.logo}
