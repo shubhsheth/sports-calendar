@@ -4,6 +4,8 @@
 
 A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend. Signed-in users (Supabase Auth) get a **personal calendar**: filtered league subscriptions plus individually pinned games, combined into one secret-token feed URL.
 
+Beyond leagues, the app has a **teams dimension** for cricket: the home page is a segmented Leagues | Teams tile selector, and each of the 12 ICC full-member sides gets a `/cricket-teams/{teamId}` page aggregating its matches across every tour and tournament (ESPN has no cricket team-schedule endpoint — see `docs/ESPN_API.md` for the series-discovery pipeline), with format filters, `.ics` download, a live feed, and My Calendar integration.
+
 This is an npm-workspaces monorepo: a `client/` SPA (deployed to GitHub Pages), a `shared/` package of ESPN/league logic reused by both surfaces, and a `supabase/` Edge Function that serves the subscription feeds.
 
 Deployed at: https://shubhsheth.github.io/sports-calendar/
@@ -61,6 +63,12 @@ shared/                          # @sports-calendar/shared — logic reused by c
     │   ├── filters.ts           #   filter<League>Events
     │   ├── fetch.ts             #   fetchAll<League>Events (full-season fetch)
     │   └── transform.ts         #   transform<League>EventsToIcs
+    ├── cricketTeam/             # Cricket teams dimension (cross-series)
+    │   ├── types.ts             #   event/filter types, CRICKET_NATIONAL_TEAMS, durations
+    │   ├── discovery.ts         #   discoverTeamSeriesIds (header-endpoint scan)
+    │   ├── fetch.ts             #   fetchAllCricketTeamEvents (series calendars → days)
+    │   ├── filters.ts           #   format filter + endDate-aware past check
+    │   └── transform.ts         #   ICS transform (multi-day Tests span DTSTART→DTEND)
     └── index.ts                 # Barrel re-exporting everything above
 
 client/                          # @sports-calendar/client — the React SPA
@@ -94,12 +102,21 @@ client/                          # @sports-calendar/client — the React SPA
 │   │   ├── nba-filter-pills.tsx
 │   │   └── utils/               # client-side glue: fetchNbaEventRefs, fetchNbaTeams,
 │   │                            #   buildNbaFeedUrl, filter-state toggles
+│   ├── home/
+│   │   ├── home-selector.tsx    # Segmented Leagues | Teams control + team tile grid
+│   │   └── utils/homeTab.ts     # Tab type + localStorage normalization
+│   ├── cricket-teams/           # Team page UI:
+│   │   ├── cricket-team-event-card.tsx      # card (series name + format badge)
+│   │   ├── cricket-team-filter-selector.tsx # format pills + show-past toggle
+│   │   ├── cricket-team-calendar-links.tsx  # download + feed links + save
+│   │   └── utils/               # buildCricketTeamFeedUrl, filter-state toggles
 │   ├── header/header.tsx
 │   ├── footer/footer.tsx
 │   └── ui/                      # shadcn components (Card, Button, Badge, Sheet, Checkbox, Select, etc.)
 ├── routes/
 │   ├── __root.tsx               # Layout: Header + Outlet + Footer
-│   ├── index.tsx                # Home: sport selection grid
+│   ├── index.tsx                # Home: segmented Leagues | Teams tile selector
+│   ├── cricket-teams.$teamId.tsx# Cricket team schedule page
 │   ├── my-calendar.tsx          # Personal calendar (signed-in)
 │   ├── nba.tsx  nfl.tsx  f1.tsx  ipl.tsx  fifa.tsx
 └── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init + AuthProvider
@@ -137,7 +154,8 @@ Following many `$ref`s at once (full-season export and feeds) is capped via `map
 - 30-min stale time + 60-min GC = aggressive caching (no repeat network calls on revisit)
 
 ### 5. Per-Sport Self-Contained Modules
-Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`) owns its logic in two places:
+Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`, plus the cross-series
+`cricketTeam/` dimension) owns its logic in two places:
 - `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Supabase backend.
 - `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder of client-side glue only: infinite-scroll fetch wrappers, team fetchers, feed-URL builders, and filter-state toggle helpers. The filtering predicates, transforms, durations, and event-status helpers are imported from `@sports-calendar/shared` rather than duplicated here.
 
@@ -148,8 +166,10 @@ Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to
 Signing in (Supabase Auth: Google OAuth or magic link; `client/components/auth/`)
 unlocks a personal calendar stored in Supabase Postgres. From any league page,
 "Save to My Calendar" stores that league with the currently selected filters
-(`calendar_subscriptions`, one row per league, upsert semantics) and each event
-card gets a pin toggle (`calendar_pinned_events`). The `/my-calendar` route lists
+(`calendar_subscriptions`, one row per league — cricket teams get one row per
+followed team, keyed by a generated `team_key` column — upsert semantics) and
+each event card gets a pin toggle (`calendar_pinned_events`; cricket pins store
+`"{seriesId}:{eventId}"`). The `/my-calendar` route lists
 everything with remove actions and surfaces the combined feed URL
 (`<base>/my/<feed_token>.ics`, regenerable). All client access goes through
 supabase-js against RLS owner-only tables (`client/api/calendar/`); the Edge
@@ -162,7 +182,7 @@ anonymous app is unchanged.
 - Initialises PostHog from `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` env vars; silently no-ops if the key is absent (safe for dev/test)
 - Exports a typed `analytics` object with one function per tracked interaction
 - Page views are captured via a `router.subscribe('onResolved', ...)` hook in `main.tsx`, so every TanStack Router navigation fires `$pageview` automatically
-- All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`, `"fifa"`) for easy segmentation in PostHog
+- All events carry a `league` property (`"nfl"`, `"nba"`, `"f1"`, `"ipl"`, `"fifa"`, `"cricket-team"`) for easy segmentation in PostHog
 
 The full catalogue of tracked events lives in `client/lib/analytics.ts` — one typed function per interaction (page views, filter toggles, downloads, feed-link clicks, pagination).
 
@@ -186,6 +206,14 @@ User navigates to /nba (NBA/NFL/F1/FIFA — ESPN Core API, $ref pagination)
 User navigates to /ipl (ESPN Site API — inline data, no $ref)
   → Each "page" is one calendar date; useInfiniteQuery walks the season day by day
   → Events come back fully populated (teams/logos inline), no follow-up fetch
+
+User picks a team from home's Teams tab → /cricket-teams/6 (India)
+  → One useQuery: fetchAllCricketTeamEvents
+      series discovery (header endpoint, daily + monthly scan)
+      → per-series match-day calendars → per-day scoreboards
+      → filter to the team, dedupe (a Test appears once per match day), sort
+  → Format pills + show-past toggle filter client-side; cards render inline
+  → Download / live feed (/cricket-team/6.ics) / Save / Pin from the same page
 
 Download button (one-time .ics file):
   → Fetch all event refs (from cache + remaining pages)

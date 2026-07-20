@@ -71,10 +71,17 @@ after the human approves the increment.
 - [x] T10 — Personal feed backend branch
 - [x] T11 — Client My Calendar integration
 - [x] T12 — Analytics
-- [ ] T13 — Update documentation
+- [x] T13 — Update documentation
 - [ ] T14 — Full verification
 
 ## Notes
+- **T13 (2026-07-19):** ESPN_API.md gains the cricket series-discovery section
+  (endpoint quirks, dead ends, verified team ids) plus a future-sports note
+  (Core per-team events endpoint, global soccer ids); BACKEND.md documents the
+  cricket-team route, team_key uniqueness, and composite pin ids;
+  PROJECT_OVERVIEW.md updates the objective, trees, patterns, analytics league
+  list, and data flow. CLAUDE.md untouched — it contains only behavioral
+  guidelines, no commands/endpoints to update (checked, not assumed).
 - **T12 (2026-07-19):** two new typed events (`home_tab_selected`,
   `cricket_team_selected`); everything else reuses the generic per-league
   functions with league "cricket-team" — format pills via

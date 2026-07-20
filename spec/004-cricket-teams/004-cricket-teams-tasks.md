@@ -177,7 +177,7 @@ multi-series day to lock that behavior in.
   - Files: `client/lib/analytics.ts`, call sites in cricket-teams components.
   - Size: S
 
-- [ ] **T13 — Update documentation.** `docs/ESPN_API.md`: cricket series-discovery
+- [x] **T13 — Update documentation.** `docs/ESPN_API.md`: cricket series-discovery
   section (header endpoint, series calendars, no team endpoint, format `class` field,
   verified team-ID table, Core-API team-events endpoint noted for future sports).
   `docs/PROJECT_OVERVIEW.md`: new module/routes/data flow. `docs/BACKEND.md`: new feed
