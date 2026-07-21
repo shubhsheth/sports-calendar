@@ -11,10 +11,10 @@ type CricketTeamEventCardProps = {
 };
 
 /**
- * One match on the home merged schedule. Mirrors the IPL card, plus the two
+ * One match on a team's schedule page. Mirrors the IPL card, plus the two
  * things a cross-series list needs for context: the series name and a format
- * badge ("2nd T20I"). Filtering happens upstream (`useCombinedSchedule`), so
- * this card is purely presentational.
+ * badge ("2nd T20I"). Filtering happens upstream in the route (via
+ * `filterCricketTeamEvents`), so this card is purely presentational.
  */
 function CricketTeamEventCard({ event }: CricketTeamEventCardProps) {
   const homeCompetitor = event.competitors.find(c => c.homeAway === "home");
