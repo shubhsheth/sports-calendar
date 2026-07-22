@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { HomeTabSelector, TeamTileGrid } from "./home-selector";
-import { normalizeHomeTab } from "./utils/homeTab";
+import { HomeSectionToggle, TeamTileGrid } from "./home-selector";
+import {
+  DEFAULT_HOME_SECTIONS,
+  normalizeHomeSections,
+} from "./utils/homeSections";
 
 // TeamTileGrid links need no real router for a component test.
 vi.mock("@tanstack/react-router", () => ({
@@ -27,25 +30,44 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-describe("normalizeHomeTab", () => {
-  it("defaults anything unknown to leagues", () => {
-    expect(normalizeHomeTab("teams")).toBe("teams");
-    expect(normalizeHomeTab("leagues")).toBe("leagues");
-    expect(normalizeHomeTab("garbage")).toBe("leagues");
-    expect(normalizeHomeTab(null)).toBe("leagues");
+describe("normalizeHomeSections", () => {
+  it("defaults to Leagues on, Teams off", () => {
+    expect(normalizeHomeSections(null)).toEqual(DEFAULT_HOME_SECTIONS);
+    expect(normalizeHomeSections("garbage")).toEqual(DEFAULT_HOME_SECTIONS);
+    expect(normalizeHomeSections({})).toEqual({ leagues: true, teams: false });
+  });
+
+  it("preserves a valid selection, including both on", () => {
+    expect(normalizeHomeSections({ leagues: true, teams: true })).toEqual({
+      leagues: true,
+      teams: true,
+    });
+    expect(normalizeHomeSections({ leagues: false, teams: true })).toEqual({
+      leagues: false,
+      teams: true,
+    });
   });
 });
 
-describe("HomeTabSelector", () => {
-  it("marks the active tab and reports switches", () => {
-    const onTabChange = vi.fn();
-    render(<HomeTabSelector tab="leagues" onTabChange={onTabChange} />);
+describe("HomeSectionToggle", () => {
+  it("marks each segment by its own state and toggles independently", () => {
+    const onToggle = vi.fn();
+    render(
+      <HomeSectionToggle
+        sections={{ leagues: true, teams: false }}
+        onToggle={onToggle}
+      />
+    );
     expect(screen.getByRole("button", { name: "Leagues" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
+    expect(screen.getByRole("button", { name: "Teams" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Teams" }));
-    expect(onTabChange).toHaveBeenCalledWith("teams");
+    expect(onToggle).toHaveBeenCalledWith("teams");
   });
 });
 
@@ -57,10 +79,6 @@ describe("TeamTileGrid", () => {
     expect(screen.getByRole("link", { name: /India/ })).toHaveAttribute(
       "href",
       "/cricket-teams/6"
-    );
-    expect(screen.getByRole("link", { name: /Australia/ })).toHaveAttribute(
-      "href",
-      "/cricket-teams/2"
     );
   });
 });

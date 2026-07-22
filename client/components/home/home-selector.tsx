@@ -1,52 +1,55 @@
 import { Link } from "@tanstack/react-router";
 import { CRICKET_NATIONAL_TEAMS } from "@sports-calendar/shared";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { analytics } from "@/lib/analytics";
-import type { HomeTab } from "./utils/homeTab";
+import type { HomeSection, HomeSections } from "./utils/homeSections";
 
-type HomeTabSelectorProps = {
-  tab: HomeTab;
-  onTabChange: (tab: HomeTab) => void;
+type HomeSectionToggleProps = {
+  sections: HomeSections;
+  onToggle: (section: HomeSection) => void;
 };
 
 /**
- * The home page's segmented Leagues | Teams control. Which tile grid renders
- * below is the route's concern — this is just the switch.
+ * A single segmented pill — Leagues on the left, Teams on the right — where
+ * each half toggles independently, so the user can show one grid or both.
  */
-export function HomeTabSelector({ tab, onTabChange }: HomeTabSelectorProps) {
-  const selectTab = (next: HomeTab) => {
-    analytics.homeTabSelected(next);
-    onTabChange(next);
+export function HomeSectionToggle({
+  sections,
+  onToggle,
+}: HomeSectionToggleProps) {
+  const toggle = (section: HomeSection) => {
+    analytics.homeSectionToggled(section, !sections[section]);
+    onToggle(section);
   };
+  const segment = (section: HomeSection, label: string) => (
+    <button
+      type="button"
+      aria-pressed={sections[section]}
+      onClick={() => toggle(section)}
+      className={cn(
+        "rounded-full px-5 py-1.5 text-sm font-medium transition-colors",
+        sections[section]
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div
-      className="flex justify-center gap-2"
+      className="flex w-fit rounded-full border p-0.5"
       role="group"
       aria-label="Browse by"
     >
-      <Button
-        size="sm"
-        variant={tab === "leagues" ? "default" : "outline"}
-        aria-pressed={tab === "leagues"}
-        className="rounded-full"
-        onClick={() => selectTab("leagues")}
-      >
-        Leagues
-      </Button>
-      <Button
-        size="sm"
-        variant={tab === "teams" ? "default" : "outline"}
-        aria-pressed={tab === "teams"}
-        className="rounded-full"
-        onClick={() => selectTab("teams")}
-      >
-        Teams
-      </Button>
+      {segment("leagues", "Leagues")}
+      {segment("teams", "Teams")}
     </div>
   );
 }
 
-/** The Teams tab's tile grid: 12 national sides, styled like the league tiles. */
+/** The Teams grid: 12 national sides, styled like the league tiles. */
 export function TeamTileGrid() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-3xl mx-auto">

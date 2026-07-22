@@ -1,12 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { analytics } from "@/lib/analytics";
 import { useLocalStorageState } from "@/hooks/useLocalStorageState";
-import { HomeTabSelector, TeamTileGrid } from "@/components/home/home-selector";
 import {
-  HOME_TAB_STORAGE_KEY,
-  normalizeHomeTab,
-  type HomeTab,
-} from "@/components/home/utils/homeTab";
+  HomeSectionToggle,
+  TeamTileGrid,
+} from "@/components/home/home-selector";
+import {
+  DEFAULT_HOME_SECTIONS,
+  HOME_SECTIONS_STORAGE_KEY,
+  normalizeHomeSections,
+  type HomeSection,
+  type HomeSections,
+} from "@/components/home/utils/homeSections";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -24,16 +29,24 @@ export const Route = createFileRoute("/")({
 });
 
 function IndexComponent() {
-  const [storedTab, setStoredTab] = useLocalStorageState<HomeTab>(
-    HOME_TAB_STORAGE_KEY,
-    "leagues"
+  const [stored, setStored] = useLocalStorageState<HomeSections>(
+    HOME_SECTIONS_STORAGE_KEY,
+    DEFAULT_HOME_SECTIONS
   );
-  const tab = normalizeHomeTab(storedTab);
+  const sections = normalizeHomeSections(stored);
+  const toggle = (section: HomeSection) =>
+    setStored({ ...sections, [section]: !sections[section] });
 
   return (
     <div className="grid gap-6">
-      <HomeTabSelector tab={tab} onTabChange={setStoredTab} />
-      {tab === "leagues" ? <NavigationGrid /> : <TeamTileGrid />}
+      <HomeSectionToggle sections={sections} onToggle={toggle} />
+      {sections.leagues && <NavigationGrid />}
+      {sections.teams && <TeamTileGrid />}
+      {!sections.leagues && !sections.teams && (
+        <p className="text-sm text-muted-foreground text-center">
+          Select Leagues or Teams to browse.
+        </p>
+      )}
     </div>
   );
 }

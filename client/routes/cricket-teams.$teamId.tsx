@@ -7,9 +7,11 @@ import {
   fetchAllCricketTeamEvents,
   filterCricketTeamEvents,
 } from "@sports-calendar/shared";
+import SaveLeagueButton from "@/components/base/save-league-button";
 import CricketTeamEventCard from "@/components/cricket-teams/cricket-team-event-card";
 import { CricketTeamFilterSelector } from "@/components/cricket-teams/cricket-team-filter-selector";
-import { CricketTeamCalendarLinks } from "@/components/cricket-teams/cricket-team-calendar-links";
+import { CricketTeamFilterPills } from "@/components/cricket-teams/cricket-team-filter-pills";
+import { CricketTeamDownloadButton } from "@/components/cricket-teams/cricket-team-download-button";
 
 export const Route = createFileRoute("/cricket-teams/$teamId")({
   component: CricketTeamComponent,
@@ -62,57 +64,59 @@ function CricketTeamComponent() {
   const filteredEvents = filterCricketTeamEvents(events ?? [], filters);
 
   return (
-    <div className="max-w-3xl mx-auto grid gap-6">
-      <div className="flex items-center gap-4">
-        <img
-          src={team.logo}
-          alt=""
-          className="h-12 w-12 object-contain"
-          loading="lazy"
-        />
-        <div>
-          <h1 className="text-2xl font-semibold">{team.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            Every match across all tours and tournaments
-          </p>
+    <div className="max-w-3xl mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">
+          {team.name} Schedule
+        </h1>
+        <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
+          <CricketTeamDownloadButton
+            team={team}
+            events={filteredEvents}
+            filters={filters}
+          />
+          <SaveLeagueButton
+            league="cricket-team"
+            subscriptionFilters={{ teamId: team.id, formats: filters.formats }}
+          />
+          <CricketTeamFilterSelector
+            filters={filters}
+            setFilters={setFilters}
+          />
         </div>
       </div>
 
-      <CricketTeamFilterSelector filters={filters} setFilters={setFilters} />
+      <CricketTeamFilterPills filters={filters} setFilters={setFilters} />
 
-      <CricketTeamCalendarLinks
-        team={team}
-        events={filteredEvents}
-        filters={filters}
-      />
+      <div className="flex flex-wrap gap-4">
+        {isPending && (
+          <div className="grid gap-4 w-full" aria-label="Loading schedule">
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="h-40 w-full animate-pulse rounded-xl bg-muted"
+              />
+            ))}
+          </div>
+        )}
 
-      {isPending && (
-        <div className="grid gap-4" aria-label="Loading schedule">
-          {[0, 1, 2].map(i => (
-            <div
-              key={i}
-              className="h-40 w-full animate-pulse rounded-xl bg-muted"
-            />
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            Couldn&apos;t load the schedule. Please try again later.
+          </p>
+        )}
+
+        {!isPending && !error && filteredEvents.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No matches for the selected filters.
+          </p>
+        )}
+
+        <div className="grid gap-4 w-full">
+          {filteredEvents.map(event => (
+            <CricketTeamEventCard key={event.id} event={event} />
           ))}
         </div>
-      )}
-
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          Couldn&apos;t load the schedule. Please try again later.
-        </p>
-      )}
-
-      {!isPending && !error && filteredEvents.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          No matches for the selected filters.
-        </p>
-      )}
-
-      <div className="grid gap-4">
-        {filteredEvents.map(event => (
-          <CricketTeamEventCard key={event.id} event={event} />
-        ))}
       </div>
     </div>
   );
