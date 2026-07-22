@@ -40,7 +40,8 @@ export function useUpsertSubscription() {
 export function useRemoveSubscription() {
   const invalidate = useInvalidateMyCalendar();
   return useMutation({
-    mutationFn: (args: { league: League }) => removeSubscription(args.league),
+    mutationFn: (args: { league: League; teamId?: string }) =>
+      removeSubscription(args.league, args.teamId),
     onSuccess: invalidate,
   });
 }

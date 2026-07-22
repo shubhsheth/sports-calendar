@@ -12,6 +12,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
+    "resolveJsonModule": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "types": ["vitest/globals"]

@@ -1,0 +1,83 @@
+{
+  "leagues": [
+    {
+      "id": "24289",
+      "name": "West Indies tour of India 2026/27",
+      "calendar": [
+        "2026-09-27T00:00:00Z",
+        "2026-09-30T00:00:00Z",
+        "2026-10-03T00:00:00Z",
+        "2026-10-06T00:00:00Z",
+        "2026-10-09T00:00:00Z",
+        "2026-10-11T00:00:00Z",
+        "2026-10-14T00:00:00Z",
+        "2026-10-17T00:00:00Z"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "1529227",
+      "uid": "s:200~e:1529227",
+      "date": "2026-09-27T08:30Z",
+      "name": "India v West Indies",
+      "shortName": "IND v WI",
+      "endDate": "2026-09-28T23:59Z",
+      "competitions": [
+        {
+          "date": "2026-09-27T08:30Z",
+          "timeValid": true,
+          "description": "1st ODI",
+          "status": {
+            "type": {
+              "id": "0",
+              "state": "pre",
+              "description": "Scheduled",
+              "detail": "Scheduled",
+              "shortDetail": "Scheduled"
+            },
+            "summary": "Starts at 14:00 local time"
+          },
+          "competitors": [
+            {
+              "uid": "s:200~e:1529227~c:1529227~t:6",
+              "order": 1,
+              "homeAway": "home",
+              "winner": "false",
+              "score": "",
+              "team": {
+                "id": "6",
+                "displayName": "India",
+                "abbreviation": "IND",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/6.png"
+              }
+            },
+            {
+              "uid": "s:200~e:1529227~c:1529227~t:4",
+              "order": 2,
+              "homeAway": "away",
+              "winner": "false",
+              "score": "",
+              "team": {
+                "id": "4",
+                "displayName": "West Indies",
+                "abbreviation": "WI",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/4.png"
+              }
+            }
+          ],
+          "endDate": "2026-09-28T23:59Z",
+          "class": {
+            "internationalClassId": "2",
+            "generalClassCard": "ODI",
+            "name": "One-Day Internationals",
+            "eventType": "ODI"
+          },
+          "venue": {
+            "fullName": "Greenfield International Stadium, Thiruvananthapuram"
+          }
+        }
+      ]
+    }
+  ]
+}

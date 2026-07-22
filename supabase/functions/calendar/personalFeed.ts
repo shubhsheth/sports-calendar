@@ -1,5 +1,12 @@
 import type { EventAttributes } from "ics";
 import {
+  type CricketTeamEvent,
+  fetchAllCricketTeamEvents,
+  fetchSeriesCalendar,
+  fetchSeriesEventsByDate,
+  filterCricketTeamEvents,
+  mapWithConcurrency,
+  transformCricketTeamEventsToIcs,
   fetchAllNbaEvents,
   filterNbaEvents,
   transformNbaEventsToIcs,
@@ -17,6 +24,7 @@ import {
   transformFifaEventsToIcs,
 } from "@sports-calendar/shared";
 import {
+  parseCricketTeamParams,
   parseNbaParams,
   parseNflParams,
   parseF1Params,
@@ -103,12 +111,79 @@ function filtersToQuery(filters: StoredFilters): Record<string, string> {
   return query;
 }
 
+const CRICKET_PIN_CONCURRENCY = 8;
+
+/**
+ * Cricket-team slice of the personal feed. Unlike the leagues, several
+ * `cricket-team` subscriptions may exist (one per followed team), each
+ * fetched via its own discovery scan; pinned matches store
+ * `"{seriesId}:{eventId}"` so they resolve from that one series' calendar
+ * without any discovery. Invalid subscriptions and unresolvable pins are
+ * skipped rather than failing the feed.
+ */
+async function buildCricketTeamIcsEvents(
+  calendar: PersonalCalendarData
+): Promise<EventAttributes[]> {
+  const subscriptions = calendar.subscriptions.filter(
+    s => s.league === "cricket-team"
+  );
+  const pins = calendar.pinnedEvents.filter(p => p.league === "cricket-team");
+
+  const perTeam = await Promise.all(
+    subscriptions.map(async subscription => {
+      const teamId =
+        typeof subscription.filters?.teamId === "string"
+          ? subscription.filters.teamId
+          : "";
+      const query: Record<string, string> = {};
+      if (Array.isArray(subscription.filters?.formats)) {
+        query.formats = subscription.filters.formats.join(",");
+      }
+      const parsed = parseCricketTeamParams(teamId, query);
+      if (!parsed.ok) {
+        console.error(`Skipping cricket-team subscription: ${parsed.error}`);
+        return [];
+      }
+      const events = await fetchAllCricketTeamEvents(teamId);
+      return filterCricketTeamEvents(events, parsed.value);
+    })
+  );
+
+  const perPin = await Promise.all(
+    pins.map(async pin => {
+      const [seriesId, eventId] = pin.espnEventId.split(":");
+      if (!seriesId || !eventId) return [];
+      try {
+        const days = await fetchSeriesCalendar(seriesId);
+        const byDay = await mapWithConcurrency(
+          days,
+          CRICKET_PIN_CONCURRENCY,
+          day => fetchSeriesEventsByDate({ id: seriesId, name: "" }, day)
+        );
+        const match = byDay.flat().find(event => event.id === eventId);
+        return match ? [match] : [];
+      } catch (error) {
+        console.error(`Skipping cricket pin ${pin.espnEventId}:`, error);
+        return [];
+      }
+    })
+  );
+
+  // A pinned match that also falls under a subscription appears once.
+  const selected = new Map<string, CricketTeamEvent>();
+  for (const event of [...perTeam.flat(), ...perPin.flat()]) {
+    if (!selected.has(event.id)) selected.set(event.id, event);
+  }
+  return transformCricketTeamEventsToIcs([...selected.values()]);
+}
+
 /**
  * Combined feed pipeline: for each league the calendar references, fetch the
  * season once, take the union of the subscription's filtered events and the
  * pinned events (by event id), transform to ICS, then dedupe by UID.
- * A subscription whose stored filters fail validation is skipped rather than
- * failing the whole feed.
+ * Cricket-team subscriptions/pins contribute via their own pipeline (several
+ * teams may be followed at once). A subscription whose stored filters fail
+ * validation is skipped rather than failing the whole feed.
  */
 export async function buildCombinedIcsEvents(
   calendar: PersonalCalendarData
@@ -119,6 +194,7 @@ export async function buildCombinedIcsEvents(
       calendar.pinnedEvents.some(p => p.league === league)
   );
 
+  const cricketPromise = buildCricketTeamIcsEvents(calendar);
   const perLeague = await Promise.all(
     involved.map(async league => {
       const pipe = PIPELINES[league];
@@ -159,9 +235,11 @@ export async function buildCombinedIcsEvents(
     })
   );
 
+  const cricketIcsEvents = await cricketPromise;
+
   const seenUids = new Set<string>();
   const combined: EventAttributes[] = [];
-  for (const icsEvent of perLeague.flat()) {
+  for (const icsEvent of [...perLeague.flat(), ...cricketIcsEvents]) {
     const uid = icsEvent.uid;
     if (uid) {
       if (seenUids.has(uid)) continue;

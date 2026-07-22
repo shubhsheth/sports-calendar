@@ -18,6 +18,13 @@ function capture(event: string, props?: Record<string, unknown>) {
 export const analytics = {
   pageView: (path: string) => capture("$pageview", { path }),
   leagueSelected: (league: string) => capture("league_selected", { league }),
+  homeSectionToggled: (section: "leagues" | "teams", enabled: boolean) =>
+    capture("home_section_toggled", { section, enabled }),
+  cricketTeamSelected: (teamId: string) =>
+    capture("cricket_team_selected", {
+      league: "cricket-team",
+      team_id: teamId,
+    }),
   filterPanelOpened: (league: string) =>
     capture("filter_panel_opened", { league }),
   filterShowPastEventsToggled: (league: string, enabled: boolean) =>

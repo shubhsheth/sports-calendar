@@ -156,6 +156,36 @@ describe("MyCalendarPage", () => {
     );
   });
 
+  it("lists a followed cricket team by name and removes just that team", () => {
+    mockUseMyCalendar.mockReturnValue(
+      calendarQuery({
+        ...POPULATED,
+        subscriptions: [
+          {
+            league: "cricket-team",
+            filters: { teamId: "6", formats: ["test", "odi"] },
+          },
+          { league: "cricket-team", filters: { teamId: "2" } },
+        ],
+        pinnedEvents: [],
+      })
+    );
+    renderPage();
+
+    expect(screen.getByText("India")).toBeInTheDocument();
+    expect(screen.getByText("Test, ODI")).toBeInTheDocument();
+    expect(screen.getByText("Australia")).toBeInTheDocument();
+    expect(screen.getByText("All formats")).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /remove india subscription/i })
+    );
+    expect(removeMutate).toHaveBeenCalledWith(
+      { league: "cricket-team", teamId: "6" },
+      expect.anything()
+    );
+  });
+
   it("shows the feed links and regenerates the URL after confirmation", () => {
     mockUseMyCalendar.mockReturnValue(calendarQuery(POPULATED));
     renderPage();

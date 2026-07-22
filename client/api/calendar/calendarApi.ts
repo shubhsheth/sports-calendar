@@ -85,7 +85,12 @@ export async function listCalendar(): Promise<MyCalendar | null> {
   };
 }
 
-/** Add the league, or replace its stored filters if already subscribed. */
+/**
+ * Add the subscription, or replace its stored filters if already present.
+ * The conflict target includes `team_key` (a generated column mirroring
+ * `filters->>'teamId'`), so leagues stay one-row-per-league while each
+ * followed cricket team gets its own row.
+ */
 export async function upsertSubscription(
   league: League,
   filters: SubscriptionFilters
@@ -97,19 +102,28 @@ export async function upsertSubscription(
     .from("calendar_subscriptions")
     .upsert(
       { calendar_id: calendar.id, league, filters },
-      { onConflict: "calendar_id,league" }
+      { onConflict: "calendar_id,league,team_key" }
     );
   if (error) throw new Error(error.message);
 }
 
-export async function removeSubscription(league: League): Promise<void> {
+/**
+ * Remove a subscription. `teamId` narrows the delete to one followed cricket
+ * team; without it every row of the league goes (leagues have one anyway).
+ */
+export async function removeSubscription(
+  league: League,
+  teamId?: string
+): Promise<void> {
   const client = requireClient();
   await requireUserId();
 
-  const { error } = await client
+  let query = client
     .from("calendar_subscriptions")
     .delete()
     .eq("league", league);
+  if (teamId !== undefined) query = query.eq("team_key", teamId);
+  const { error } = await query;
   if (error) throw new Error(error.message);
 }
 

@@ -14,7 +14,8 @@ community-maintained endpoint docs.
 | Domain | Shape | Used for |
 |--------|-------|----------|
 | `sports.core.api.espn.com` (Core) | Structured `$ref` stubs, lazy-loaded | NBA, NFL, F1, FIFA |
-| `site.api.espn.com` (Site) | Richer inline data, no `$ref` following | IPL (cricket) |
+| `site.api.espn.com` (Site) | Richer inline data, no `$ref` following | IPL, cricket team series |
+| `site.web.api.espn.com` (Site web) | Scoreboard header: all series active in a span | Cricket series discovery |
 
 No authentication is required and rate limits are unpublished. The Core API's
 `$ref` pattern maps naturally onto the infinite-scroll + per-card fetch
@@ -92,6 +93,42 @@ Regular Season · `3` PO Playoffs · `4` AS All-Star · `5` FIN Finals; unknown 
 are ignored. F1's session-type IDs and their quirks are documented on
 `shared/src/f1/types.ts`.
 
+## Cricket teams: series discovery
+
+The cricket-team dimension (follow e.g. India across everything it plays) can't
+use either pipeline above, because ESPN models every cricket tour/tournament as
+its own short-lived "league" (a *series id*) and has **no team-schedule
+endpoint** — every `…/cricket/**/teams*` shape 404s/400s, cricket is absent
+from the Core API, `core.espnuk.org` is unreachable, and ESPNcricinfo's
+`hs-consumer-api` is bot-blocked. Don't retry those.
+
+The working pipeline (`shared/src/cricketTeam/`), all verified live:
+
+1. **Discover series** — `site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=…`
+   lists every series active in the span with events + competitor team ids
+   inline. `dates=` takes a day (`YYYYMMDD`) or a month (`YYYYMM`); ranges and
+   comma lists return empty. Month mode has sharp edges — fully past months are
+   permanently empty, a cold ESPN cache can return a transient empty, the
+   current month truncates a few days past "today", and busy leagues' event
+   lists get chronologically truncated. Coarse day-sampling is unsafe:
+   alternate-day bilateral series phase-lock entirely between samples. The
+   hybrid scan in `discovery.ts` (daily for lookback + current month, monthly
+   forward, retry → daily fallback, truncation top-up) exists because of these
+   quirks; its docstrings carry the details.
+2. **Series calendar** — any `…/cricket/{seriesId}/scoreboard` response carries
+   `leagues[0].calendar`, the series' exact match days. Multi-day Tests appear
+   once per match *day*, so events must be deduped by id.
+3. **Events per day** — `…/cricket/{seriesId}/scoreboard?dates=YYYYMMDD` is the
+   same inline shape IPL parses, plus `endDate` (multi-day Tests) and
+   `competitions[0].class` (`internationalClassId` `1`/`2`/`3` → Test/ODI/T20I)
+   with `competitions[0].description` (e.g. "2nd T20I").
+
+Curated men's full-member team ids (verified against live scoreboards;
+women's/U19/A sides have distinct ids, so competitor matching must be exact):
+England 1 · Australia 2 · South Africa 3 · West Indies 4 · New Zealand 5 ·
+India 6 · Pakistan 7 · Sri Lanka 8 · Zimbabwe 9 · Bangladesh 25 · Ireland 29 ·
+Afghanistan 40. The list lives in `shared/src/cricketTeam/types.ts`.
+
 ## ICS export
 
 Each league transforms its events to iCalendar in
@@ -118,3 +155,11 @@ ESPN sports. Candidate identifiers from the Public-ESPN-API reference:
 **Caution:** team sports with non-standard period structures (baseball innings,
 soccer halves) have different competition shapes, and other racing series may not
 use F1's multi-session-per-event model.
+
+**Team dimensions for other sports** (verified, unused so far): the Core API
+serves per-team season schedules at
+`…/{sport}/leagues/{league}/seasons/{year}/teams/{teamId}/events` (standard
+`$ref` page — plugs straight into the existing refs pipeline), the Site API
+lists teams with logos at `…/{sport}/{league}/teams`, and soccer team ids are
+global across league slugs (Barcelona is `83` in `esp.1` and `uefa.champions`
+alike), so cross-competition club pages are feasible.

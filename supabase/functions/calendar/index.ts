@@ -20,6 +20,12 @@ import {
   transformFifaEventsToIcs,
 } from "@sports-calendar/shared";
 import {
+  fetchAllCricketTeamEvents,
+  filterCricketTeamEvents,
+  transformCricketTeamEventsToIcs,
+} from "@sports-calendar/shared";
+import {
+  parseCricketTeamParams,
   parseNbaParams,
   parseNflParams,
   parseF1Params,
@@ -100,6 +106,33 @@ registerLeagueRoute(
   filterFifaEvents,
   transformFifaEventsToIcs
 );
+
+/** `<teamId>.ics` — team ids are numeric; anything else 404s before validation. */
+const CRICKET_TEAM_FILE_PATTERN = /^(\d+)\.ics$/;
+
+/**
+ * Cricket team feed: every match the team plays across all its series. Unlike
+ * the league routes there is no fixed season — each request re-runs series
+ * discovery, so newly announced tours appear in subscribed calendars without
+ * user action. Same parse → fetch → filter → transform tail as the leagues.
+ */
+app.get("/calendar/cricket-team/:file", async (c: Context) => {
+  const match = CRICKET_TEAM_FILE_PATTERN.exec(c.req.param("file") ?? "");
+  if (!match) return c.text("Not Found", 404);
+
+  const parsed = parseCricketTeamParams(match[1], c.req.query());
+  if (!parsed.ok) return c.text(parsed.error, 400);
+
+  const events = await fetchAllCricketTeamEvents(match[1]);
+  const filtered = filterCricketTeamEvents(events, parsed.value);
+  const result = createEvents(transformCricketTeamEventsToIcs(filtered));
+  if (!result.value) {
+    console.error("Failed to create iCal:", result.error);
+    return c.text("Failed to generate calendar", 500);
+  }
+
+  return new Response(result.value, { headers: icsHeaders() });
+});
 
 /** `<feed_token>.ics` — tokens are UUIDs, anything else 404s without a lookup. */
 const FEED_FILE_PATTERN =
