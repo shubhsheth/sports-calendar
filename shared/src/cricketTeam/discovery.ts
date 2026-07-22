@@ -3,12 +3,6 @@ import { CRICKET_TEAM_DISCOVERY } from "./types.ts";
 
 const FETCH_CONCURRENCY = 8;
 
-// A month-response league with this many events listed may have been
-// chronologically truncated by ESPN (observed: The Hundred cut mid-month at 20
-// events while smaller series listed complete months), so its remaining days
-// get a daily top-up scan.
-const TRUNCATION_SUSPECT_EVENT_COUNT = 15;
-
 /** One series (ESPN cricket "league") a team was discovered in. */
 export type CricketSeriesRef = {
   id: string;
@@ -17,7 +11,7 @@ export type CricketSeriesRef = {
 
 // Internal types for the scoreboard header response (only the fields read here)
 type HeaderCompetitor = { id: string };
-type HeaderEvent = { date?: string; competitors?: HeaderCompetitor[] };
+type HeaderEvent = { competitors?: HeaderCompetitor[] };
 type HeaderLeague = { id: string; name: string; events?: HeaderEvent[] };
 type HeaderResponse = { sports?: Array<{ leagues?: HeaderLeague[] }> };
 
@@ -32,19 +26,6 @@ function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setUTCDate(next.getUTCDate() + days);
   return next;
-}
-
-/** Every day of `month` (`YYYYMM`) as `YYYYMMDD` params. */
-function daysOfMonth(month: string): string[] {
-  const year = Number(month.slice(0, 4));
-  const monthIndex = Number(month.slice(4)) - 1;
-  const days: string[] = [];
-  let current = new Date(Date.UTC(year, monthIndex, 1));
-  while (current.getUTCMonth() === monthIndex) {
-    days.push(toDayParam(current));
-    current = addDays(current, 1);
-  }
-  return days;
 }
 
 /**
@@ -126,15 +107,14 @@ function leagueHasTeam(league: HeaderLeague, teamId: string): boolean {
  * by exact id, since women's/U19/A sides are distinct teams with their own ids
  * (e.g. England is 1, England Under-19s is 971).
  *
- * The scan issues the queries from `getDiscoveryQueries`, then repairs the
- * month endpoint's two verified failure modes:
- *
- * - A month can transiently return empty while ESPN warms its cache — retried
- *   once, then degraded to daily requests for that month's days.
- * - A month response can chronologically truncate a busy league's event list
- *   (see `TRUNCATION_SUSPECT_EVENT_COUNT`), which could hide this team's
- *   matches in a dense tournament — the days after such a league's last
- *   listed event get a daily top-up scan.
+ * Discovery only needs to spot each series **once**: the caller
+ * (`fetchAllCricketTeamEvents`) then pulls that series' full event list by
+ * year. That is why no per-day "truncation top-up" is needed even though busy
+ * month responses truncate long event lists — a national side is never in the
+ * dense domestic leagues that get truncated, and its own bilateral series /
+ * ICC events are short enough that at least one of their matches always lands
+ * in a daily query or the head of a month response. The only repair kept is a
+ * single retry for a month that returns empty on a cold ESPN cache.
  *
  * @param teamId - ESPN cricket team id (see `CRICKET_NATIONAL_TEAMS`).
  * @param now - The reference "today" for the window; defaults to current time.
@@ -162,48 +142,16 @@ export async function discoverTeamSeriesIds(
   );
   collect(dailyLeagues.flat());
 
-  const monthlyResults = await mapWithConcurrency(
+  const monthlyLeagues = await mapWithConcurrency(
     months,
     FETCH_CONCURRENCY,
     async month => {
-      let leagues = await fetchHeaderLeagues(month);
-      if (leagues.length === 0) leagues = await fetchHeaderLeagues(month);
-      return { month, leagues };
+      const leagues = await fetchHeaderLeagues(month);
+      // Retry once for a cold-cache empty before giving up on the month.
+      return leagues.length > 0 ? leagues : await fetchHeaderLeagues(month);
     }
   );
-
-  const topUpDays = new Set<string>();
-  for (const { month, leagues } of monthlyResults) {
-    if (leagues.length === 0) {
-      // Month endpoint failed twice — cover the whole month daily instead.
-      for (const day of daysOfMonth(month)) topUpDays.add(day);
-      continue;
-    }
-    collect(leagues);
-    for (const league of leagues) {
-      const events = league.events ?? [];
-      if (events.length < TRUNCATION_SUSPECT_EVENT_COUNT) continue;
-      if (leagueHasTeam(league, teamId)) continue;
-      const lastListedDay = events
-        .map(e => (e.date ?? "").slice(0, 10).replaceAll("-", ""))
-        .filter(d => d.length === 8)
-        .sort()
-        .at(-1);
-      if (!lastListedDay) continue;
-      for (const day of daysOfMonth(month)) {
-        if (day > lastListedDay) topUpDays.add(day);
-      }
-    }
-  }
-
-  if (topUpDays.size > 0) {
-    const topUpLeagues = await mapWithConcurrency(
-      [...topUpDays].sort(),
-      FETCH_CONCURRENCY,
-      fetchHeaderLeagues
-    );
-    collect(topUpLeagues.flat());
-  }
+  collect(monthlyLeagues.flat());
 
   return [...seriesById.values()];
 }

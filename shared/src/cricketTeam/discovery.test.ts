@@ -41,9 +41,9 @@ describe("getDiscoveryQueries", () => {
   const { dailyDates, months } = getDiscoveryQueries(NOW);
 
   it("covers lookback through the end of the current month daily", () => {
-    expect(dailyDates[0]).toBe("20260625"); // 30 days before NOW
+    expect(dailyDates[0]).toBe("20260711"); // 14 days before NOW
     expect(dailyDates.at(-1)).toBe("20260731");
-    expect(dailyDates).toHaveLength(37); // Jun 25 → Jul 31, every day
+    expect(dailyDates).toHaveLength(21); // Jul 11 → Jul 31, every day
   });
 
   it("covers following months through the lookahead horizon monthly", () => {
@@ -60,7 +60,7 @@ describe("getDiscoveryQueries", () => {
 
   it("crosses year boundaries in the daily span", () => {
     const yearEnd = getDiscoveryQueries(new Date("2026-12-20T00:00:00Z"));
-    expect(yearEnd.dailyDates[0]).toBe("20261120");
+    expect(yearEnd.dailyDates[0]).toBe("20261206"); // 14 days before
     expect(yearEnd.dailyDates.at(-1)).toBe("20261231");
     expect(yearEnd.months[0]).toBe("202701");
   });
@@ -130,28 +130,10 @@ describe("discoverTeamSeriesIds", () => {
     expect(requestedParams.filter(p => p === "202608")).toHaveLength(2);
   });
 
-  it("falls back to daily requests for a month that stays empty", async () => {
-    server.use(
-      http.get(HEADER_URL, ({ request }) => {
-        const date = record(request);
-        if (date === "202609") return HttpResponse.json(emptyHeader);
-        if (date.startsWith("202609")) {
-          return HttpResponse.json(headerFixture); // daily fallback finds it
-        }
-        return HttpResponse.json(emptyHeader);
-      })
-    );
-    const series = await discoverTeamSeriesIds("6", NOW);
-    expect(series).toEqual([INDIA_ZIM_SERIES]);
-    const septemberDays = requestedParams.filter(
-      p => p.length === 8 && p.startsWith("202609")
-    );
-    expect(septemberDays).toHaveLength(30);
-  });
-
-  it("top-up-scans days a truncated busy league leaves uncovered", async () => {
-    // August response: one dense league truncated at Aug 16 without the team;
-    // the team's series only surfaces on the residual days' daily responses.
+  it("does not top-up-scan a truncated busy league (spotting a series once is enough)", async () => {
+    // A dense domestic league truncated mid-month WITHOUT the team must not
+    // trigger any per-day rescan — the team is found via its own series, and
+    // the caller pulls that series' full schedule by year.
     const truncatedMonth = {
       sports: [
         {
@@ -159,8 +141,7 @@ describe("discoverTeamSeriesIds", () => {
             {
               id: "19601",
               name: "The Hundred Men's Competition",
-              events: Array.from({ length: 20 }, (_, i) => ({
-                date: `2026-08-${String(i < 16 ? i + 1 : 16).padStart(2, "0")}T18:00Z`,
+              events: Array.from({ length: 20 }, () => ({
                 competitors: [{ id: "1204501" }, { id: "1204497" }],
               })),
             },
@@ -172,17 +153,16 @@ describe("discoverTeamSeriesIds", () => {
       http.get(HEADER_URL, ({ request }) => {
         const date = record(request);
         if (date === "202608") return HttpResponse.json(truncatedMonth);
-        if (date.length === 8 && date > "20260816" && date <= "20260831") {
-          return HttpResponse.json(headerFixture);
-        }
-        return HttpResponse.json(emptyHeader);
+        return HttpResponse.json(headerFixture);
       })
     );
-    const series = await discoverTeamSeriesIds("6", NOW);
-    expect(series).toEqual([INDIA_ZIM_SERIES]);
-    const topUpDays = requestedParams.filter(
-      p => p.length === 8 && p > "20260816" && p <= "20260831"
+    await discoverTeamSeriesIds("6", NOW);
+    // Only the planned queries ran — no extra August daily top-up requests.
+    const { dailyDates, months } = getDiscoveryQueries(NOW);
+    const augustDailies = requestedParams.filter(
+      p => p.length === 8 && p.startsWith("202608")
     );
-    expect(topUpDays).toHaveLength(15); // Aug 17–31
+    expect(augustDailies).toHaveLength(0);
+    expect(requestedParams.length).toBe(dailyDates.length + months.length);
   });
 });

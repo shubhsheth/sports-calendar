@@ -121,13 +121,13 @@ describe("fetchSeriesEventsByDate", () => {
 });
 
 describe("fetchAllCricketTeamEvents", () => {
-  it("discovers series, walks calendars, filters to the team, dedupes, and sorts", async () => {
+  it("discovers series, fetches each by year, filters to the team, dedupes, and sorts", async () => {
     const scoreboardDates: string[] = [];
     server.use(
       // Discovery: India appears only in series 24301.
       http.get(HEADER_URL, () => HttpResponse.json(headerFixture)),
-      // The series' scoreboard: a calendar of repeated Test days, always
-      // returning the same Test event (as ESPN does) plus a non-India match.
+      // Each series is fetched once per window year (a whole-year request
+      // returning all its events); the same events come back for either year.
       http.get(SCOREBOARD_URL, ({ request, params }) => {
         expect(params.seriesId).toBe("24301");
         const date = new URL(request.url).searchParams.get("dates");
@@ -141,21 +141,11 @@ describe("fetchAllCricketTeamEvents", () => {
 
     const events = await fetchAllCricketTeamEvents("6", NOW);
 
-    // 10 calendar days fetched, once each…
-    expect(scoreboardDates.sort()).toEqual([
-      "20260815",
-      "20260816",
-      "20260817",
-      "20260818",
-      "20260819",
-      "20260823",
-      "20260824",
-      "20260825",
-      "20260826",
-      "20260827",
-    ]);
-    // …but the repeated Test dedupes to one event, and both fixture events
-    // include India, so both are kept, sorted by date.
+    // Year params only (YYYY), one per window year — not per match day.
+    expect(scoreboardDates.sort()).toEqual(["2026", "2027"]);
+    expect(scoreboardDates.every(d => /^\d{4}$/.test(d))).toBe(true);
+    // The two India fixture events are kept and deduped across the two years,
+    // sorted by date; the non-India match is dropped.
     expect(events.map(e => e.id)).toEqual(["1544001", "1529227"]);
   });
 

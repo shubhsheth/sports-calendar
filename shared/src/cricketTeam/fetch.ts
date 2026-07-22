@@ -1,4 +1,5 @@
 import type { CricketMatchFormat, CricketTeamEvent } from "./types.ts";
+import { CRICKET_TEAM_DISCOVERY } from "./types.ts";
 import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
 import { discoverTeamSeriesIds, type CricketSeriesRef } from "./discovery.ts";
 
@@ -144,35 +145,64 @@ export async function fetchSeriesCalendar(seriesId: string): Promise<string[]> {
 }
 
 /**
- * Fetches one day of a series from the Site API scoreboard
- * (`…/cricket/{seriesId}/scoreboard?dates=YYYYMMDD`). Events come back inline
- * (competitors, logos, venue, status — same shape as IPL) and are normalized
- * into `CricketTeamEvent`s, tagging each with the series and its match format
- * (from `competitions[0].class`). Days with no matches return an empty array.
+ * Fetches a slice of a series from the Site API scoreboard
+ * (`…/cricket/{seriesId}/scoreboard?dates=…`). `dates` accepts a day
+ * (`YYYYMMDD`) or a whole year (`YYYY`) — a year returns every one of that
+ * series' matches in a single request (verified live), which is how the
+ * team-schedule fetch avoids one request per match day. Events come back
+ * inline (competitors, logos, venue, status — same shape as IPL) and are
+ * normalized into `CricketTeamEvent`s, tagging each with the series and its
+ * match format (from `competitions[0].class`). Empty slices return `[]`.
  *
  * @param series - The series to fetch (id + display name).
- * @param dateStr - The day to fetch, as `YYYYMMDD`.
- * @returns The day's matches; empty if there are none.
+ * @param datesParam - `YYYYMMDD` (one day) or `YYYY` (a whole year).
+ * @returns The slice's matches; empty if there are none.
  */
-export async function fetchSeriesEventsByDate(
+export async function fetchSeriesEvents(
   series: CricketSeriesRef,
-  dateStr: string
+  datesParam: string
 ): Promise<CricketTeamEvent[]> {
-  const url = `https://site.api.espn.com/apis/site/v2/sports/cricket/${series.id}/scoreboard?dates=${dateStr}`;
-  const response = await fetch(url);
-  const data = (await response.json()) as SeriesScoreboardResponse;
-  const name = data.leagues?.[0]?.name ?? series.name;
-  return (data.events ?? []).map(e =>
-    normalizeEvent(e, { id: series.id, name })
-  );
+  const url = `https://site.api.espn.com/apis/site/v2/sports/cricket/${series.id}/scoreboard?dates=${datesParam}`;
+  try {
+    const response = await fetch(url);
+    const data = (await response.json()) as SeriesScoreboardResponse;
+    const name = data.leagues?.[0]?.name ?? series.name;
+    return (data.events ?? []).map(e =>
+      normalizeEvent(e, { id: series.id, name })
+    );
+  } catch {
+    return []; // a failed series slice shouldn't sink the whole schedule
+  }
+}
+
+/** @deprecated Prefer {@link fetchSeriesEvents}; kept for pinned-match lookup. */
+export const fetchSeriesEventsByDate = fetchSeriesEvents;
+
+/** The distinct calendar years the discovery window touches (usually 1–2). */
+function windowYears(now: Date): string[] {
+  const { LOOKBACK_DAYS, LOOKAHEAD_DAYS } = CRICKET_TEAM_DISCOVERY;
+  const first = new Date(now);
+  first.setUTCDate(first.getUTCDate() - LOOKBACK_DAYS);
+  const last = new Date(now);
+  last.setUTCDate(last.getUTCDate() + LOOKAHEAD_DAYS);
+  const years: string[] = [];
+  for (let y = first.getUTCFullYear(); y <= last.getUTCFullYear(); y++) {
+    years.push(String(y));
+  }
+  return years;
 }
 
 /**
  * Fetches every match a national team plays in the discovery window, across
- * all its series: series discovery (`discoverTeamSeriesIds`) → each series'
- * match-day calendar → each day's events → keep events where the team is a
- * competitor (exact id) → dedupe by event id (a Test returns once per match
- * day) → sort chronologically.
+ * all its series: series discovery (`discoverTeamSeriesIds`) → each discovered
+ * series fetched whole by year (`fetchSeriesEvents`, one request per year the
+ * window spans, usually one or two) → keep events where the team is a
+ * competitor (exact id) → dedupe by event id (a series appearing in two years,
+ * or a Test, resolves to one event) → sort chronologically.
+ *
+ * The window years, not the exact day range, bound the fetch — so a discovered
+ * series' complete schedule is returned even if only part of it falls inside
+ * the ±day window. Past matches are simply hidden by the default filter.
  *
  * @param teamId - ESPN cricket team id (see `CRICKET_NATIONAL_TEAMS`).
  * @param now - The reference "today" for the window; defaults to current time.
@@ -183,24 +213,19 @@ export async function fetchAllCricketTeamEvents(
   now: Date = new Date()
 ): Promise<CricketTeamEvent[]> {
   const series = await discoverTeamSeriesIds(teamId, now);
+  const years = windowYears(now);
 
-  const calendars = await mapWithConcurrency(
-    series,
-    FETCH_CONCURRENCY,
-    async s => ({ series: s, days: await fetchSeriesCalendar(s.id) })
+  const seriesYears = series.flatMap(s =>
+    years.map(year => ({ series: s, year }))
   );
-  const seriesDays = calendars.flatMap(({ series: s, days }) =>
-    days.map(day => ({ series: s, day }))
-  );
-
-  const eventsByDay = await mapWithConcurrency(
-    seriesDays,
+  const eventsByFetch = await mapWithConcurrency(
+    seriesYears,
     FETCH_CONCURRENCY,
-    ({ series: s, day }) => fetchSeriesEventsByDate(s, day)
+    ({ series: s, year }) => fetchSeriesEvents(s, year)
   );
 
   const eventsById = new Map<string, CricketTeamEvent>();
-  for (const event of eventsByDay.flat()) {
+  for (const event of eventsByFetch.flat()) {
     if (!eventsById.has(event.id) && hasCompetitor(event, teamId)) {
       eventsById.set(event.id, event);
     }

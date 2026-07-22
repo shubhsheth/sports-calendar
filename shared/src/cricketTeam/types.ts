@@ -88,11 +88,12 @@ export const CRICKET_NATIONAL_TEAMS: CricketNationalTeam[] = [
  * Series-discovery window: how far back and forward the scan looks for series
  * the team plays in. How the window is actually covered — daily requests for
  * the lookback + current month, one month-granularity request per future
- * month — is decided by `getDiscoveryQueries` in `discovery.ts`, which
- * documents the header endpoint's quirks that force that split (~45–50
- * requests for this window).
+ * month — is decided by `getDiscoveryQueries` in `discovery.ts`. The lookback
+ * is short because past matches are hidden by default and, once a series is
+ * discovered, `fetchAllCricketTeamEvents` pulls its complete history by year
+ * regardless of the window.
  */
 export const CRICKET_TEAM_DISCOVERY = {
-  LOOKBACK_DAYS: 30,
+  LOOKBACK_DAYS: 14,
   LOOKAHEAD_DAYS: 180,
 };
