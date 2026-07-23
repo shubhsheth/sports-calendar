@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sports Calendar has moved</title>
+    <link rel="canonical" href="__FIREBASE_URL__/" />
+    <script>
+      // Path-preserving redirect to the new Firebase Hosting origin. Replace
+      // __FIREBASE_URL__ with the live URL (e.g. https://<project>.web.app)
+      // before publishing this to the gh-pages branch — see the deploy
+      // checklist in spec/005-firebase-migration.
+      var target = "__FIREBASE_URL__";
+      var rest = location.pathname.replace(/^\/sports-calendar/, "");
+      location.replace(target + rest + location.search + location.hash);
+    </script>
+    <meta http-equiv="refresh" content="0; url=__FIREBASE_URL__/" />
+  </head>
+  <body>
+    <p>
+      Sports Calendar has moved to
+      <a href="__FIREBASE_URL__/">its new home</a>.
+    </p>
+  </body>
+</html>

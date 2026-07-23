@@ -64,7 +64,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   Verify: CI gate green; headless-browser smoke (both env modes) against dev
   server; `npm run preview` serves deep links.
 
-- [ ] **T6 — CI/CD rewrite.** `deploy.yml`: build → `firebase deploy --only
+- [x] **T6 — CI/CD rewrite.** `deploy.yml`: build → `firebase deploy --only
   hosting,functions,firestore` via `FirebaseExtended/action-hosting-deploy` +
   CLI (service-account secret `FIREBASE_SERVICE_ACCOUNT`); `preview.yml`:
   Hosting preview channels with PR comment; delete `deploy-functions.yml`;

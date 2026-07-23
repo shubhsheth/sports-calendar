@@ -69,7 +69,7 @@ and in tasks.md after the human approves the increment.
 - [x] T3 — Firestore rules + data layer
 - [x] T4 — Client auth swap
 - [x] T5 — Hosting cutover in the client
-- [ ] T6 — CI/CD rewrite
+- [x] T6 — CI/CD rewrite
 - [ ] T7 — Decommission Supabase
 - [ ] T8 — Full verification
 
@@ -164,5 +164,36 @@ and in tasks.md after the human approves the increment.
   `preview.yml` still passes it (harmless no-op); T6 removes it from the
   workflow. If a PR preview runs in the T5→T6 window its assets resolve at
   root (visually off under the gh-pages subpath) but the build itself is green.
+
+- **T6 (done):** `deploy.yml` → Firebase: build client + functions bundle, then
+  `firebase deploy --only hosting,functions,firestore` via the CLI with a
+  service-account file (`FIREBASE_SERVICE_ACCOUNT` secret →
+  `GOOGLE_APPLICATION_CREDENTIALS`). `preview.yml` → per-PR Firebase Hosting
+  preview channels via `FirebaseExtended/action-hosting-deploy` (auto PR
+  comment). `deploy-functions.yml` deleted (Supabase). Both deploy steps are
+  guarded `if: vars.FIREBASE_PROJECT_ID != ''` — so until the maintainer sets
+  that repo variable (deploy checklist), the lint/test/build gate still runs on
+  every push/PR and the deploy is *skipped*, keeping CI green pre-config; it
+  activates automatically once the var is set. `VITE_BASE_PATH` removed from
+  workflows; Node bumped 20 → 22 (functions runtime).
+  - **firebase.json** gained a `functions` block: `source: functions`,
+    `runtime: nodejs22`, `predeploy` runs the esbuild bundle, `ignore` excludes
+    `src`/`node_modules`/config so only the bundled `lib/` + `package.json` ship.
+    The `/calendar/**` rewrite now targets `{functionId: calendar, region:
+    us-central1}` (Gen2 form).
+  - **functions/package.json** split so the cloud prod-install pulls only the
+    runtime externals: `dependencies` = firebase-admin + firebase-functions;
+    everything bundled (shared, hono, @hono/node-server, ics, dayjs) + esbuild/
+    express → `devDependencies`. Verified the bundle still `require()`s only
+    `firebase-admin/*` and `firebase-functions/*`.
+  - **Validation:** workflows + firebase.json parse; the **functions emulator
+    loads the bundled `calendar` HTTP function** ("Loaded functions definitions
+    from source: calendar", node@22) — de-risks the real deploy and T8. CI gate
+    green (281 tests).
+  - **gh-pages redirect stub:** `scripts/gh-pages-stub/{index.html,404.html,README.md}`
+    — path-preserving client redirect with a `__FIREBASE_URL__` placeholder the
+    maintainer fills and publishes to the `gh-pages` branch at deploy time
+    (checklist). Not auto-published because the target URL isn't known until the
+    project exists.
 
 (more notes below as tasks land; deploy checklist lands here at T8)

@@ -1,11 +1,11 @@
-name: Deploy to GitHub Pages
+name: Deploy to Firebase
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   deploy:
@@ -17,7 +17,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Install dependencies
@@ -29,18 +29,31 @@ jobs:
       - name: Test
         run: npm run test:run
 
-      - name: Build
+      - name: Build client
         run: npm run build
         env:
-          VITE_BASE_PATH: /sports-calendar/
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
           VITE_CALENDAR_FEED_BASE_URL: ${{ vars.VITE_CALENDAR_FEED_BASE_URL }}
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
 
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
+      - name: Build functions
+        run: npm run build --workspace functions
+
+      # Runs only once FIREBASE_PROJECT_ID is set (see the deploy checklist in
+      # spec 005 implement.md). Until then the build/test steps above still gate
+      # every push; the deploy is skipped rather than failing on missing config.
+      - name: Deploy to Firebase
+        if: ${{ vars.FIREBASE_PROJECT_ID != '' }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx firebase deploy \
+            --only hosting,functions,firestore \
+            --project "$FIREBASE_PROJECT_ID" \
+            --non-interactive
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
