@@ -1,0 +1,128 @@
+{
+  "sports": [
+    {
+      "id": "200",
+      "name": "Cricket",
+      "leagues": [
+        {
+          "id": "19943",
+          "name": "Lanka Premier League",
+          "isTournament": true,
+          "events": [
+            {
+              "id": "1537341",
+              "date": "2026-07-25T09:30:00Z",
+              "shortName": "GAG v KAR",
+              "competitors": [
+                {
+                  "id": "1382877",
+                  "displayName": "Galle Gallants"
+                },
+                {
+                  "id": "1238371",
+                  "displayName": "Kandy Royals"
+                }
+              ]
+            },
+            {
+              "id": "1537342",
+              "date": "2026-07-25T14:00:00Z",
+              "shortName": "DAS v CLK",
+              "competitors": [
+                {
+                  "id": "1238375",
+                  "displayName": "Dambulla Sixers"
+                },
+                {
+                  "id": "1238372",
+                  "displayName": "Colombo Kaps"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "24436",
+          "name": "Pakistan tour of West Indies 2026",
+          "isTournament": false,
+          "events": [
+            {
+              "id": "1538630",
+              "date": "2026-07-25T14:00:00Z",
+              "shortName": "WI v PAK",
+              "competitors": [
+                {
+                  "id": "4",
+                  "displayName": "West Indies"
+                },
+                {
+                  "id": "7",
+                  "displayName": "Pakistan"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "21376",
+          "name": "The Hundred Women's Competition",
+          "isTournament": true,
+          "events": [
+            {
+              "id": "1521201",
+              "date": "2026-07-25T10:00:00Z",
+              "shortName": "SRL-W v SB-W",
+              "competitors": [
+                {
+                  "id": "1208120",
+                  "displayName": "Sunrisers Leeds (Women)"
+                },
+                {
+                  "id": "1208121",
+                  "displayName": "Southern Brave (Women)"
+                }
+              ]
+            },
+            {
+              "id": "1521202",
+              "date": "2026-07-25T13:30:00Z",
+              "shortName": "WF-W v MIL-W",
+              "competitors": [
+                {
+                  "id": "1208124",
+                  "displayName": "Welsh Fire (Women)"
+                },
+                {
+                  "id": "1208122",
+                  "displayName": "MI London (Women)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "24301",
+          "name": "India tour of Zimbabwe 2026",
+          "isTournament": false,
+          "events": [
+            {
+              "id": "1530061",
+              "date": "2026-07-25T11:00:00Z",
+              "shortName": "ZIM v IND",
+              "competitors": [
+                {
+                  "id": "9",
+                  "displayName": "Zimbabwe"
+                },
+                {
+                  "id": "6",
+                  "displayName": "India"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

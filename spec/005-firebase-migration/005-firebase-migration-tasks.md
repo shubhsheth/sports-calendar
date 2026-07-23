@@ -15,7 +15,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   record the sandbox's capability in implement.md and fall back to
   rules-unit-testing-only verification if absent).
 
-- [ ] **T2 — Functions workspace (pure port, still ESPN-live).** New
+- [x] **T2 — Functions workspace (pure port, still ESPN-live).** New
   `functions/` npm workspace (Node 22): move `params.ts`, `icsHeaders.ts`,
   `personalFeed.ts`, and the Hono app from `supabase/functions/` (imports
   repointed; `Deno.serve` → `onRequest` + `@hono/node-server` request

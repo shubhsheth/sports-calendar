@@ -1,0 +1,85 @@
+{
+  "leagues": [
+    {
+      "id": "24567",
+      "name": "India tour of Sri Lanka 2026",
+      "calendar": [
+        "2026-08-15T00:00:00Z",
+        "2026-08-16T00:00:00Z",
+        "2026-08-17T00:00:00Z",
+        "2026-08-18T00:00:00Z",
+        "2026-08-19T00:00:00Z",
+        "2026-08-23T00:00:00Z",
+        "2026-08-24T00:00:00Z",
+        "2026-08-25T00:00:00Z",
+        "2026-08-26T00:00:00Z",
+        "2026-08-27T00:00:00Z"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "1544001",
+      "uid": "s:200~e:1544001",
+      "date": "2026-08-15T04:30Z",
+      "name": "Sri Lanka v India",
+      "shortName": "SL v IND",
+      "endDate": "2026-08-20T23:59Z",
+      "competitions": [
+        {
+          "date": "2026-08-15T04:30Z",
+          "timeValid": true,
+          "description": "1st Test",
+          "status": {
+            "type": {
+              "id": "0",
+              "state": "pre",
+              "description": "Scheduled",
+              "detail": "Scheduled",
+              "shortDetail": "Scheduled"
+            },
+            "summary": "Starts at 10:00 local time"
+          },
+          "competitors": [
+            {
+              "uid": "s:200~e:1544001~c:1544001~t:8",
+              "order": 1,
+              "homeAway": "home",
+              "winner": "false",
+              "score": "",
+              "team": {
+                "id": "8",
+                "displayName": "Sri Lanka",
+                "abbreviation": "SL",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/8.png"
+              }
+            },
+            {
+              "uid": "s:200~e:1544001~c:1544001~t:6",
+              "order": 2,
+              "homeAway": "away",
+              "winner": "false",
+              "score": "",
+              "team": {
+                "id": "6",
+                "displayName": "India",
+                "abbreviation": "IND",
+                "logo": "https://a.espncdn.com/i/teamlogos/cricket/500/6.png"
+              }
+            }
+          ],
+          "endDate": "2026-08-20T23:59Z",
+          "class": {
+            "internationalClassId": "1",
+            "generalClassCard": "Test",
+            "name": "Test matches",
+            "eventType": "Test"
+          },
+          "venue": {
+            "fullName": "Galle International Stadium"
+          }
+        }
+      ]
+    }
+  ]
+}

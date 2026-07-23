@@ -65,7 +65,7 @@ and in tasks.md after the human approves the increment.
 
 ## Progress
 - [x] T1 — Firebase scaffolding + emulators
-- [ ] T2 — Functions workspace (pure port)
+- [x] T2 — Functions workspace (pure port)
 - [ ] T3 — Firestore rules + data layer
 - [ ] T4 — Client auth swap
 - [ ] T5 — Hosting cutover in the client
@@ -84,5 +84,27 @@ and in tasks.md after the human approves the increment.
   only; emulators bind 127.0.0.1 fine. Top-level `emulators.host` config key is
   ineffective (doesn't reach the internal hub/logging emulators), so it was not
   added — the warnings are cosmetic.
+
+- **T2 (done):** New `functions/` npm workspace (added to root `workspaces`),
+  Node 22. Ported `app.ts` (Hono app, `Deno.serve` dropped — `index.ts` wraps it
+  with `onRequest` + `@hono/node-server` `getRequestListener`), `params.ts`/
+  `icsHeaders.ts`/`personalFeed.ts` (copies, relative `.ts` imports → extensionless),
+  and `personalCalendar.ts` rewritten on `firebase-admin/firestore`
+  (`collection("calendars").where("feedToken","==",token).limit(1)` +
+  subcollection reads; Firestore initialized lazily so importing the module never
+  needs Admin creds). `icsHeaders` now emits `max-age=300, s-maxage=3600` (CDN).
+  Bundle: `esbuild.mjs` → CJS `lib/index.js` (278 kB), inlining shared/hono/ics/
+  dayjs, externalizing firebase-admin/functions (Firebase runtime provides them).
+  Decisions: (a) **CJS** output (no `type:module` in functions/package.json) —
+  safest for Cloud Functions + CJS firebase-admin/functions externals; esbuild.mjs
+  is `.mjs` so it runs as ESM regardless. (b) Tests **mock `./personalCalendar`**
+  (`vi.mock`) so firebase-admin never loads in vitest and the my-feed tests inject
+  `PersonalCalendarData` directly instead of stubbing PostgREST. (c) Fixtures
+  imported as JSON modules (vite resolves them) — `new URL(import.meta.url)`
+  filesystem resolution misbehaves under vitest. 26 functions tests (app routes,
+  cricket-team, personal-feed combine/dedupe/skip, params) run in the root suite
+  (252 → 278). Added `functions/tsconfig.json` (eslint project service) and
+  `functions/lib` to eslint ignores. Real cloud deploy + emulator function-load
+  deferred to T6/T8.
 
 (more notes below as tasks land; deploy checklist lands here at T8)

@@ -1,0 +1,40 @@
+{
+  "$ref": "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/501",
+  "id": "501",
+  "date": "2099-09-15T17:00:00Z",
+  "name": "Kansas City Chiefs at Buffalo Bills",
+  "shortName": "KC @ BUF",
+  "season": { "$ref": "https://example.test/season" },
+  "competitions": [
+    {
+      "$ref": "https://example.test/comp",
+      "id": "501",
+      "date": "2099-09-15T17:00:00Z",
+      "type": { "id": "2", "text": "Regular Season", "abbreviation": "RS" },
+      "timeValid": true,
+      "recent": false,
+      "bracketAvailable": false,
+      "venue": {
+        "$ref": "https://example.test/venue",
+        "fullName": "Highmark Stadium",
+        "address": { "city": "Orchard Park", "state": "NY" }
+      },
+      "competitors": [
+        {
+          "$ref": "https://example.test/c1",
+          "homeAway": "home",
+          "team": {
+            "$ref": "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/teams/2"
+          }
+        },
+        {
+          "$ref": "https://example.test/c2",
+          "homeAway": "away",
+          "team": {
+            "$ref": "https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/teams/12"
+          }
+        }
+      ]
+    }
+  ]
+}
