@@ -3,5 +3,4 @@ node_modules
 *.md
 public
 client/routeTree.gen.ts
-supabase/functions
-supabase/.temp
+functions/lib

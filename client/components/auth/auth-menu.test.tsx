@@ -34,7 +34,7 @@ beforeEach(() => {
 });
 
 describe("AuthMenu", () => {
-  it("renders nothing when Supabase is not configured", () => {
+  it("renders nothing when Firebase is not configured", () => {
     mockUseAuth.mockReturnValue(authState({ enabled: false }));
     const { container } = render(<AuthMenu />);
     expect(container).toBeEmptyDOMElement();

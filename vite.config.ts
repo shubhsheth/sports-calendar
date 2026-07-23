@@ -30,12 +30,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./client/test/setup.ts"],
-    // The calendar function's integration tests run under Deno, not vitest.
     // The Firestore rules tests need the emulator (npm run test:rules).
-    exclude: [
-      ...configDefaults.exclude,
-      "supabase/functions/calendar/**",
-      "firestore.rules.test.ts",
-    ],
+    exclude: [...configDefaults.exclude, "firestore.rules.test.ts"],
   },
 });

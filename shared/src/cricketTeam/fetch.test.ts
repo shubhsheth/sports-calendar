@@ -8,11 +8,11 @@ import {
 } from "./fetch.ts";
 // Real (trimmed) fixtures: India tour of Sri Lanka (multi-day 1st Test, whose
 // calendar lists each Test match day) and WI tour of India (dated 1st ODI).
-import seriesFixture from "../../../supabase/functions/calendar/fixtures/cricket-series-scoreboard.json";
-import odiFixture from "../../../supabase/functions/calendar/fixtures/cricket-odi-scoreboard.json";
+import seriesFixture from "./fixtures/cricket-series-scoreboard.json";
+import odiFixture from "./fixtures/cricket-odi-scoreboard.json";
 // Header fixture drives discovery inside fetchAllCricketTeamEvents: India (6)
 // appears only in series 24301.
-import headerFixture from "../../../supabase/functions/calendar/fixtures/cricket-header.json";
+import headerFixture from "./fixtures/cricket-header.json";
 
 const HEADER_URL =
   "https://site.web.api.espn.com/apis/personalized/v2/scoreboard/header";

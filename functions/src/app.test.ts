@@ -1,5 +1,5 @@
-// Integration tests for the feed backend Hono app (ported from the Supabase
-// Edge Function's Deno tests to vitest). ESPN is mocked by stubbing global
+// Integration tests for the feed backend Hono app (ported from the original
+// Deno edge-function tests to vitest). ESPN is mocked by stubbing global
 // `fetch` with fixture JSON, so no network is required. The Firestore-backed
 // calendar lookup is mocked away since the league / cricket-team routes never
 // use it (and mocking it keeps firebase-admin out of these tests).

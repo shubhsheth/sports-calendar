@@ -5,7 +5,7 @@ import { discoverTeamSeriesIds, getDiscoveryQueries } from "./discovery.ts";
 // Real (trimmed) header response for 2026-07-25: four series, India (6) only
 // in 24301, Pakistan (7) only in 24436, plus a franchise tournament and a
 // women's competition as negative cases.
-import headerFixture from "../../../supabase/functions/calendar/fixtures/cricket-header.json";
+import headerFixture from "./fixtures/cricket-header.json";
 
 const INDIA_ZIM_SERIES = { id: "24301", name: "India tour of Zimbabwe 2026" };
 const NOW = new Date("2026-07-25T12:00:00Z");

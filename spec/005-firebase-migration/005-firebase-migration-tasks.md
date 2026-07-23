@@ -73,7 +73,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   builds locally (`npm run build`, functions bundle, rules compile via
   emulator).
 
-- [ ] **T7 — Decommission Supabase.** Delete `supabase/` and
+- [x] **T7 — Decommission Supabase.** Delete `supabase/` and
   `client/lib/supabase.ts`; remove `@supabase/supabase-js`; purge
   `VITE_SUPABASE_*` references; `git grep -i supabase` clean in source. Update
   `docs/PROJECT_OVERVIEW.md` + rewrite `docs/BACKEND.md` for the Firebase

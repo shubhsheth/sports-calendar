@@ -35,8 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!auth) return;
 
     // If the app was opened via an email sign-in link, complete the sign-in
-    // (Firebase, unlike supabase-js, needs this done explicitly on the landing
-    // page). The email was stored when the link was requested.
+    // (Firebase needs this done explicitly on the landing page — there's no
+    // automatic URL-session detection). The email was stored when the link was
+    // requested.
     if (isSignInWithEmailLink(auth, window.location.href)) {
       const email = window.localStorage.getItem(EMAIL_STORAGE_KEY);
       if (email) {

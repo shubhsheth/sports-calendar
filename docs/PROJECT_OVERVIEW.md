@@ -2,13 +2,11 @@
 
 ## Main Goal
 
-A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Supabase Edge Function backend. Signed-in users (Supabase Auth) get a **personal calendar**: filtered league subscriptions plus individually pinned games, combined into one secret-token feed URL.
+A React SPA that fetches sports schedules from the **ESPN APIs**, displaying them with infinite scroll and event filtering. Fixtures can be exported as an `.ics` file for import into any calendar app, or followed as a **live, auto-updating subscription feed** served by a Cloud Functions backend. Signed-in users (Firebase Auth) get a **personal calendar**: filtered league subscriptions plus individually pinned games, combined into one secret-token feed URL.
 
 Beyond leagues, the app has a **teams dimension** for cricket: the home page is a segmented Leagues | Teams tile selector, and each of the 12 ICC full-member sides gets a `/cricket-teams/{teamId}` page aggregating its matches across every tour and tournament (ESPN has no cricket team-schedule endpoint — see `docs/ESPN_API.md` for the series-discovery pipeline), with format filters, `.ics` download, a live feed, and My Calendar integration.
 
-This is an npm-workspaces monorepo: a `client/` SPA (deployed to GitHub Pages), a `shared/` package of ESPN/league logic reused by both surfaces, and a `supabase/` Edge Function that serves the subscription feeds.
-
-Deployed at: https://shubhsheth.github.io/sports-calendar/
+This is an npm-workspaces monorepo: a `client/` SPA (deployed to Firebase Hosting), a `shared/` package of ESPN/league logic reused by both surfaces, and a `functions/` Cloud Function that serves the subscription feeds. Firebase also provides Auth and Firestore for the personal calendars.
 
 ---
 
@@ -27,9 +25,9 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 | Calendar Export | `ics` v3.8 + `js-file-download` |
 | Infinite Scroll | `react-intersection-observer` |
 | Analytics | PostHog (`posthog-js`) |
-| Backend | Supabase Edge Function — Hono on Deno |
-| Auth & User Data | Supabase Auth (Google + magic link) + Postgres with RLS, via `@supabase/supabase-js` |
-| Deployment | GitHub Pages (client) + Supabase (function), via GitHub Actions |
+| Backend | Cloud Functions (2nd gen) — Hono on Node |
+| Auth & User Data | Firebase Auth (Google + email link) + Cloud Firestore with security rules, via `firebase` |
+| Deployment | Firebase Hosting + Functions + Firestore, via GitHub Actions |
 
 ---
 
@@ -38,7 +36,7 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 | File | Description |
 |------|-------------|
 | `docs/ESPN_API.md` | ESPN Core/Site API reference — endpoints, `$ref` pattern, per-league event structures, fetch pipeline, ICS mapping, and candidate leagues for expansion |
-| `docs/BACKEND.md` | Supabase Edge Function — calendar feed endpoints, params, headers, local dev, and deploy |
+| `docs/BACKEND.md` | Cloud Functions feed backend + Firestore/Auth — endpoints, data model, rules, local dev, and deploy |
 
 ---
 
@@ -48,7 +46,7 @@ Deployed at: https://shubhsheth.github.io/sports-calendar/
 docs/
 ├── PROJECT_OVERVIEW.md          # This file
 ├── ESPN_API.md                  # ESPN Core/Site API reference
-└── BACKEND.md                   # Supabase calendar feed function
+└── BACKEND.md                   # Cloud Functions feed backend + Firestore/Auth
 .env.example                     # Environment variables (PostHog key/host, calendar feed base URL)
 
 shared/                          # @sports-calendar/shared — logic reused by client + backend
@@ -74,14 +72,14 @@ shared/                          # @sports-calendar/shared — logic reused by c
 client/                          # @sports-calendar/client — the React SPA
 ├── api/espn/
 │   └── fetchTeamDetails.ts      # Team info by ref URL (NBA/NFL)
-├── api/calendar/                # Personal calendar CRUD via supabase-js (RLS)
+├── api/calendar/                # Personal calendar CRUD via firebase/firestore (rules)
 │   ├── calendarApi.ts           # get-or-create, subscriptions, pins, token regen
 │   ├── fetchPinnedEventDetails.ts # Name/date for pinned events (core API / IPL season)
 │   └── types.ts                 # League, SubscriptionFilters, MyCalendar shapes
 ├── lib/
 │   ├── analytics.ts             # PostHog init + typed event tracking helpers
 │   ├── buildCalendarFeedUrl.ts  # Builds subscription feed URLs from VITE_CALENDAR_FEED_BASE_URL
-│   ├── supabase.ts              # supabase-js singleton (null without env vars)
+│   ├── firebase.ts              # firebase app + auth/db singletons (null without env vars)
 │   └── utils.ts                 # cn() class merging utility
 ├── hooks/
 │   ├── useAuth.ts               # Auth context + hook (provider in components/auth)
@@ -121,13 +119,16 @@ client/                          # @sports-calendar/client — the React SPA
 │   ├── nba.tsx  nfl.tsx  f1.tsx  ipl.tsx  fifa.tsx
 └── main.tsx                     # React Query (stale: 30m, gc: 60m) + Router bootstrap + PostHog init + AuthProvider
 
-supabase/                        # Calendar feed backend (see docs/BACKEND.md)
-├── config.toml
-├── migrations/                  # Postgres schema: calendars, subscriptions, pinned events (RLS)
-└── functions/
-    ├── deno.json
-    ├── _shared/                 # params.ts (query parsing), icsHeaders.ts, personalCalendar.ts
-    └── calendar/                # Hono app: GET /calendar/{nba,nfl,f1,ipl,fifa}.ics + /calendar/my/<token>.ics
+functions/                       # Calendar feed backend — Cloud Functions (see docs/BACKEND.md)
+├── esbuild.mjs                  # Bundles src → lib/index.js
+└── src/
+    ├── index.ts                 # onRequest entry wrapping the Hono app
+    ├── app.ts                   # Hono app: /calendar/{nba,nfl,f1,ipl,fifa}.ics + /cricket-team/<id>.ics + /my/<token>.ics
+    ├── params.ts icsHeaders.ts personalFeed.ts
+    └── personalCalendar.ts      # Firestore calendar lookup by feed token (Admin SDK)
+
+firestore.rules                  # Owner-only Firestore security rules
+firebase.json                    # Hosting rewrites, functions, firestore, emulators
 ```
 
 ---
@@ -156,25 +157,26 @@ Following many `$ref`s at once (full-season export and feeds) is capped via `map
 ### 5. Per-Sport Self-Contained Modules
 Each sport (`nba/`, `nfl/`, `f1/`, `ipl/`, `fifa/`, plus the cross-series
 `cricketTeam/` dimension) owns its logic in two places:
-- `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Supabase backend.
+- `shared/src/<league>/` — `types`, `filters`, `fetch` (full-season), `transform` (to ICS). This is the source of truth reused by the Cloud Functions backend.
 - `client/components/<league>/` — the card, filter selector/pills, and a `utils/` folder of client-side glue only: infinite-scroll fetch wrappers, team fetchers, feed-URL builders, and filter-state toggle helpers. The filtering predicates, transforms, durations, and event-status helpers are imported from `@sports-calendar/shared` rather than duplicated here.
 
 ### 5a. Calendar Feed Subscriptions
-Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to-calendar-feed-links.tsx` surfaces Copy / Apple / Google links whose URLs are built by `client/lib/buildCalendarFeedUrl.ts` from `VITE_CALENDAR_FEED_BASE_URL`. Those URLs point at the Supabase Edge Function (`supabase/functions/calendar/`), which re-fetches from ESPN on each request so subscribed calendars stay current. See `docs/BACKEND.md`.
+Beyond one-time `.ics` download, the app offers live subscription feeds. `add-to-calendar-feed-links.tsx` surfaces Copy / Apple / Google links whose URLs are built by `client/lib/buildCalendarFeedUrl.ts` from `VITE_CALENDAR_FEED_BASE_URL`. Those URLs point at the Cloud Function (`functions/src/`, reached via the Firebase Hosting `/calendar/**` rewrite), which re-fetches from ESPN on each request so subscribed calendars stay current. See `docs/BACKEND.md`.
 
 ### 5b. Personal Calendars (accounts)
-Signing in (Supabase Auth: Google OAuth or magic link; `client/components/auth/`)
-unlocks a personal calendar stored in Supabase Postgres. From any league page,
-"Save to My Calendar" stores that league with the currently selected filters
-(`calendar_subscriptions`, one row per league — cricket teams get one row per
-followed team, keyed by a generated `team_key` column — upsert semantics) and
-each event card gets a pin toggle (`calendar_pinned_events`; cricket pins store
-`"{seriesId}:{eventId}"`). The `/my-calendar` route lists
-everything with remove actions and surfaces the combined feed URL
-(`<base>/my/<feed_token>.ics`, regenerable). All client access goes through
-supabase-js against RLS owner-only tables (`client/api/calendar/`); the Edge
-Function reads by token with the service role (see `docs/BACKEND.md`). Without
-`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` every account surface hides and the
+Signing in (Firebase Auth: Google OAuth or email link; `client/components/auth/`)
+unlocks a personal calendar stored in Cloud Firestore under `calendars/{uid}`.
+From any league page, "Save to My Calendar" stores that league with the
+currently selected filters (a `subscriptions/{subKey}` doc, one per league —
+cricket teams get one per followed team, keyed `cricket-team__<teamId>` —
+`set` semantics) and each event card gets a pin toggle
+(`pinnedEvents/{league}_{espnEventId}`; cricket pins store
+`"{seriesId}:{eventId}"`). The `/my-calendar` route lists everything with
+remove actions and surfaces the combined feed URL
+(`<base>/my/<feedToken>.ics`, regenerable). All client access goes through
+`firebase/firestore` against owner-only security rules (`client/api/calendar/`);
+the Cloud Function reads by token with the Admin SDK (see `docs/BACKEND.md`).
+Without the `VITE_FIREBASE_*` config every account surface hides and the
 anonymous app is unchanged.
 
 ### 6. Analytics with PostHog
@@ -222,13 +224,13 @@ Download button (one-time .ics file):
   → Write .ics Blob → js-file-download
 
 Subscribe (live feed):
-  → buildCalendarFeedUrl(league, params) → <VITE_CALENDAR_FEED_BASE_URL>/<league>.ics?…
-  → Calendar app polls the Supabase Edge Function (docs/BACKEND.md)
+  → buildCalendarFeedUrl(league, params) → <origin>/calendar/<league>.ics?…
+  → Calendar app polls the Cloud Function via the Hosting rewrite (docs/BACKEND.md)
   → Function fetches fresh ESPN data → filters → returns .ics on every request
 
 Personal calendar (signed in):
-  → Save league / pin event → supabase-js writes RLS-protected rows
+  → Save league / pin event → firebase/firestore writes owner-scoped docs
   → My Calendar page lists subscriptions + pins (React Query: useMyCalendar)
-  → Calendar app polls <base>/my/<feed_token>.ics
-  → Function: token → calendar rows → per league fetch/filter/pin-union → deduped .ics
+  → Calendar app polls <origin>/calendar/my/<feedToken>.ics
+  → Function: token → Firestore calendar → per league fetch/filter/pin-union → deduped .ics
 ```

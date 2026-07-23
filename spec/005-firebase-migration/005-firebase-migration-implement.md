@@ -70,7 +70,7 @@ and in tasks.md after the human approves the increment.
 - [x] T4 — Client auth swap
 - [x] T5 — Hosting cutover in the client
 - [x] T6 — CI/CD rewrite
-- [ ] T7 — Decommission Supabase
+- [x] T7 — Decommission Supabase
 - [ ] T8 — Full verification
 
 ## Notes
@@ -195,5 +195,22 @@ and in tasks.md after the human approves the increment.
     maintainer fills and publishes to the `gh-pages` branch at deploy time
     (checklist). Not auto-published because the target URL isn't known until the
     project exists.
+
+- **T7 (done):** Deleted `supabase/` entirely and `client/lib/supabase.ts`;
+  removed `@supabase/supabase-js`. `git grep -i supabase` is now clean outside
+  `spec/` (the migration record) and `package-lock.json`. **Fixture relocation:**
+  two shared tests (`shared/src/cricketTeam/{fetch,discovery}.test.ts`) imported
+  cricket fixtures from `supabase/functions/calendar/fixtures/`, so those three
+  JSON files moved to `shared/src/cricketTeam/fixtures/` and the imports were
+  repointed — otherwise deleting `supabase/` would have broken shared. Cleaned
+  the now-dangling config refs (`eslint.config.js`, `.prettierignore`,
+  `vite.config.ts` test-exclude) and reworded comments that named Supabase
+  (auth-provider/menu, functions tests). Rewrote `docs/BACKEND.md` for the
+  Firebase architecture (Functions + Firestore model + rules + Auth + emulators
+  + deploy) and updated `docs/PROJECT_OVERVIEW.md` and `README.md`. Test count
+  269 (was 281): the −12 is the duplicate `supabase/_shared/params.test.ts`,
+  identical to `functions/src/params.test.ts` which remains — no lost coverage.
+  The real Supabase project can be paused/deleted by the maintainer (T8 deploy
+  checklist).
 
 (more notes below as tasks land; deploy checklist lands here at T8)

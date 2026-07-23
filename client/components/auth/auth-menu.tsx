@@ -8,7 +8,7 @@ import { analytics } from "@/lib/analytics";
 /**
  * Header auth control: a Sign in button (opening the sign-in dialog) when
  * signed out, or the user's email + sign-out when signed in. Renders nothing
- * while the initial session loads or when Supabase isn't configured.
+ * while the initial session loads or when Firebase isn't configured.
  */
 export function AuthMenu() {
   const { enabled, loading, user, signOut } = useAuth();

@@ -1,5 +1,5 @@
 // Integration tests for the personal combined feed (GET /calendar/my/:token.ics),
-// ported from the Supabase Edge Function's Deno tests. ESPN is stubbed via
+// ported from the original Deno feed-function tests. ESPN is stubbed via
 // global `fetch`; the Firestore calendar lookup is mocked so tests inject
 // calendar contents directly (the PersonalCalendarData shape) instead of
 // stubbing PostgREST.
