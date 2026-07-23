@@ -56,7 +56,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   swaps the `User` type. Update auth tests. Verify: CI gate green; emulator
   smoke sign-in (auth emulator) if JVM available.
 
-- [ ] **T5 — Hosting cutover in the client.** Remove the base path: vite
+- [x] **T5 — Hosting cutover in the client.** Remove the base path: vite
   `base: "/"` unconditionally, drop `VITE_BASE_PATH` plumbing, `redirectUrl()`
   simplification, delete the `404.html` copy step from the build script.
   `buildCalendarFeedUrl` defaults to same-origin `/calendar` (env override

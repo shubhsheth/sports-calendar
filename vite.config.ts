@@ -7,9 +7,8 @@ import { configDefaults } from "vitest/config";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base:
-    process.env.VITE_BASE_PATH ??
-    (process.env.NODE_ENV === "production" ? "/sports-calendar/" : "/"),
+  // Firebase Hosting serves at the domain root, so the app lives at "/".
+  base: "/",
   plugins: [
     tanstackRouter({
       routesDirectory: "./client/routes",

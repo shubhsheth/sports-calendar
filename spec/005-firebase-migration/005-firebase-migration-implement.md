@@ -68,7 +68,7 @@ and in tasks.md after the human approves the increment.
 - [x] T2 — Functions workspace (pure port)
 - [x] T3 — Firestore rules + data layer
 - [x] T4 — Client auth swap
-- [ ] T5 — Hosting cutover in the client
+- [x] T5 — Hosting cutover in the client
 - [ ] T6 — CI/CD rewrite
 - [ ] T7 — Decommission Supabase
 - [ ] T8 — Full verification
@@ -148,5 +148,21 @@ and in tasks.md after the human approves the increment.
   hook type, and test. Auth-emulator live sign-in smoke deferred to T8 (the web
   SDK talks to real Firebase unless `connectAuthEmulator` is wired; unit tests
   cover the provider logic). Suite 279 → 281.
+
+- **T5 (done):** vite `base: "/"` (was the `/sports-calendar/` production
+  default); build script drops the `cp dist/index.html dist/404.html` step
+  (Firebase Hosting's SPA rewrite handles fallback). `buildCalendarFeedUrl`
+  defaults to `${window.location.origin}/calendar` (env override via
+  `||`); the one feed-URL test (cricket) updated to the origin-based
+  expectation. `.env.example`: `VITE_FIREBASE_*` in, Supabase vars out.
+  Verified: built `dist/index.html` references `/assets/...` (no
+  `/sports-calendar/` anywhere), no `404.html` emitted, `/my-calendar` deep
+  link serves 200, headless smoke with dummy `VITE_FIREBASE_*` passes (Sign in
+  button present, all league pages render at root, zero console errors — one
+  pre-existing FIFA ESPN-fetch-timeout flake, unrelated). Suite still 281.
+  **Sequencing note:** `VITE_BASE_PATH` is now unused by `vite.config.ts` but
+  `preview.yml` still passes it (harmless no-op); T6 removes it from the
+  workflow. If a PR preview runs in the T5→T6 window its assets resolve at
+  root (visually off under the gh-pages subpath) but the build itself is green.
 
 (more notes below as tasks land; deploy checklist lands here at T8)
