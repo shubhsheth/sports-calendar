@@ -6,7 +6,7 @@ import { defineConfig } from "vitest/config";
 // without an emulator.
 export default defineConfig({
   test: {
-    include: ["firestore.rules.test.ts"],
+    include: ["firestore.rules.test.ts", "firestore.e2e.test.ts"],
     environment: "node",
     // The rules-testing SDK can be slow to connect on first use.
     testTimeout: 20000,

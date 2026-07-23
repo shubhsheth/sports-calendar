@@ -30,7 +30,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./client/test/setup.ts"],
-    // The Firestore rules tests need the emulator (npm run test:rules).
-    exclude: [...configDefaults.exclude, "firestore.rules.test.ts"],
+    // The Firestore rules + e2e tests need the emulator (npm run test:rules).
+    exclude: [
+      ...configDefaults.exclude,
+      "firestore.rules.test.ts",
+      "firestore.e2e.test.ts",
+    ],
   },
 });

@@ -71,7 +71,7 @@ and in tasks.md after the human approves the increment.
 - [x] T5 — Hosting cutover in the client
 - [x] T6 — CI/CD rewrite
 - [x] T7 — Decommission Supabase
-- [ ] T8 — Full verification
+- [x] T8 — Full verification
 
 ## Notes
 - **T1 (done):** Sandbox has OpenJDK 21, so the Firestore emulator runs here —
@@ -213,4 +213,58 @@ and in tasks.md after the human approves the increment.
   The real Supabase project can be paused/deleted by the maintainer (T8 deploy
   checklist).
 
-(more notes below as tasks land; deploy checklist lands here at T8)
+- **T8 (done):** Final verification.
+  - CI gate green: `npm run lint` (0 errors, 18 pre-existing warnings),
+    `format:check` clean, `npm run test:run` **269 passed**, `npm run build` +
+    functions bundle build.
+  - Emulator suite (`npm run test:rules`, OpenJDK 21): **11 passed** — 9 security
+    rules (owner CRUD, cross-user + anon denial, league whitelist, cricket-team
+    `teamId` invariant) + 2 e2e (the Admin-SDK feed reader maps the calendarApi
+    doc scheme — feedToken/league/filters/espnEventId, both cricket teams keyed
+    distinctly — against real Firestore; unknown token → null).
+  - Functions emulator loads the bundled `calendar` HTTP function on node@22 (T6).
+  - Headless smoke both env modes: **anon** — no Sign in / Save / pin UI, deep
+    links render at root, My Calendar explains accounts unconfigured, 0 console
+    errors; **auth-ui** (dummy `VITE_FIREBASE_*`) — Sign in button, Save to My
+    Calendar on all routes, pin buttons, sign-in dialog, My Calendar prompts
+    sign-in, 0 console errors. (Both runs show one FIFA "event cards" timeout —
+    a pre-existing ESPN-fetch-through-proxy flake in the smoke harness, not a
+    code regression; the page renders and logs zero console errors.)
+  - **Not runnable in-sandbox** (no real Firebase project / credentials): the
+    live signed-in round trip and the real `firebase deploy`. Covered by the
+    checklist below.
+
+## Deploy checklist (maintainer, once — needs a real Firebase project)
+1. **Create the project** at console.firebase.google.com; upgrade to the
+   **Blaze** plan (required for Cloud Functions outbound to ESPN). Set a Cloud
+   Billing **budget alert at $5**.
+2. **Auth → Sign-in method:** enable **Google**; enable **Email/Password** with
+   the **Email link (passwordless)** toggle. **Auth → Settings → Authorized
+   domains:** add `localhost` and the Hosting domain (`<project>.web.app` is
+   auto-added; add a custom domain if used).
+3. **Firestore:** create the database (production mode); rules deploy from
+   `firestore.rules` on first `firebase deploy`.
+4. **GitHub repo config** (Settings → Secrets and variables → Actions):
+   - **Variables:** `FIREBASE_PROJECT_ID` (the real project id — this is the
+     switch that turns the CI deploy steps on), `VITE_FIREBASE_API_KEY`,
+     `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`,
+     `VITE_FIREBASE_APP_ID` (from the Firebase web app config). Leave
+     `VITE_CALENDAR_FEED_BASE_URL` empty (same-origin default).
+   - **Secret:** `FIREBASE_SERVICE_ACCOUNT` — a service-account JSON with the
+     Firebase Admin / Hosting / Functions / Firestore deploy roles (Firebase
+     console → Project settings → Service accounts, or `firebase init hosting:github`).
+5. **First deploy:** merge to `main` (CI runs `firebase deploy --only
+   hosting,functions,firestore`), or run it locally with the service account.
+   The `.firebaserc` alias is `demo-sports-calendar` for offline emulators — CI
+   passes `--project $FIREBASE_PROJECT_ID`; for local deploys use
+   `firebase use <project>` first.
+6. **Verify live:** sign in with Google AND an email link; save two leagues +
+   follow two cricket teams + pin an event; open the My Calendar feed URL
+   (`https://<project>.web.app/calendar/my/<token>.ics`) in Apple/Google
+   Calendar and confirm the combined ICS (both teams, the pin, no dupes); also
+   check a public league feed and `/calendar/cricket-team/<teamId>.ics`.
+7. **gh-pages redirect stub:** fill `__FIREBASE_URL__` in
+   `scripts/gh-pages-stub/{index.html,404.html}` and publish them to the
+   `gh-pages` branch (see that dir's README).
+8. **Decommission Supabase:** once the live feeds verify, pause or delete the
+   old Supabase project (`bnwiuipxyzwfcdpkkaln`) and revoke its access token.

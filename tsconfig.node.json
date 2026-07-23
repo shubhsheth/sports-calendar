@@ -25,6 +25,7 @@
   "include": [
     "vite.config.ts",
     "vitest.rules.config.ts",
-    "firestore.rules.test.ts"
+    "firestore.rules.test.ts",
+    "firestore.e2e.test.ts"
   ]
 }

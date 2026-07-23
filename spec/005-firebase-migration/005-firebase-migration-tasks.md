@@ -80,7 +80,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   architecture; note the Supabase project itself can be paused/deleted in the
   deploy checklist. Verify: CI gate green; grep clean.
 
-- [ ] **T8 — Full verification.** CI gate + all vitest suites green. Emulator
+- [x] **T8 — Full verification.** CI gate + all vitest suites green. Emulator
   end-to-end: sign in → save two leagues + two cricket teams + pin → personal
   feed through the hosting emulator returns combined deduped ICS (both teams
   present) → remove one team leaves the other → remove/regenerate behaves →
