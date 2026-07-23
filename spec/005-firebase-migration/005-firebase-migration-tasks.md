@@ -6,7 +6,7 @@ Tasks touching Firebase behavior additionally verify against the Emulator Suite
 (`npx firebase emulators:start` / `emulators:exec`). Supabase code keeps working
 until T7 removes it — the two stacks coexist mid-migration.
 
-- [ ] **T1 — Firebase scaffolding + emulators.** Add `firebase-tools` (dev dep),
+- [x] **T1 — Firebase scaffolding + emulators.** Add `firebase-tools` (dev dep),
   `firebase.json` (hosting `public: dist`, SPA rewrite, `/calendar/**` →
   function `calendar` rewrite ordered first; emulator ports for auth,
   firestore, functions, hosting), `.firebaserc` (project placeholder),

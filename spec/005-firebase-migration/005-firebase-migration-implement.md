@@ -64,7 +64,7 @@ and in tasks.md after the human approves the increment.
   (no sync jobs yet).
 
 ## Progress
-- [ ] T1 — Firebase scaffolding + emulators
+- [x] T1 — Firebase scaffolding + emulators
 - [ ] T2 — Functions workspace (pure port)
 - [ ] T3 — Firestore rules + data layer
 - [ ] T4 — Client auth swap
@@ -74,5 +74,15 @@ and in tasks.md after the human approves the increment.
 - [ ] T8 — Full verification
 
 ## Notes
-(populated during implementation — spec drift, environment constraints, deploy
-checklist lands here at T8)
+- **T1 (done):** Sandbox has OpenJDK 21, so the Firestore emulator runs here —
+  no JVM fallback needed; rules tests (T3) can run in-sandbox. `firebase-tools`
+  15.24.0. Emulator suite boots via
+  `npx firebase emulators:exec --only firestore,auth --project demo-sports-calendar`.
+  Using the `demo-` project prefix keeps emulators/CI fully offline (no real
+  credentials); the real project id is supplied at deploy time (T6/checklist),
+  not committed. Harmless `::1` (IPv6-unavailable) warnings in this sandbox
+  only; emulators bind 127.0.0.1 fine. Top-level `emulators.host` config key is
+  ineffective (doesn't reach the internal hub/logging emulators), so it was not
+  added — the warnings are cosmetic.
+
+(more notes below as tasks land; deploy checklist lands here at T8)
