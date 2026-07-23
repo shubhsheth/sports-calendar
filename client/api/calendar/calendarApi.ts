@@ -1,4 +1,14 @@
-import { supabase } from "@/lib/supabase";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import type {
   League,
   MyCalendar,
@@ -7,171 +17,150 @@ import type {
 } from "./types";
 
 /**
- * CRUD for the signed-in user's personal calendar. All calls go straight to
- * Postgres through supabase-js; RLS scopes every query to the current user,
- * so no filters on user identity are needed here.
+ * CRUD for the signed-in user's personal calendar, stored in Firestore under
+ * `calendars/{uid}`. Ownership is the document path (uid), enforced by security
+ * rules, so no user-identity filters are needed here. Document IDs carry the
+ * uniqueness Postgres used to enforce: one calendar per user, one subscription
+ * per league (per followed team for cricket), one pin per (league, event).
  */
 
-type CalendarRow = { id: string; feed_token: string };
-
-type CalendarWithChildrenRow = CalendarRow & {
-  calendar_subscriptions: { league: League; filters: SubscriptionFilters }[];
-  calendar_pinned_events: { league: League; espn_event_id: string }[];
-};
-
-function requireClient() {
-  if (!supabase) throw new Error("Supabase is not configured");
-  return supabase;
+function requireDb() {
+  if (!db) throw new Error("Firebase is not configured");
+  return db;
 }
 
-async function requireUserId(): Promise<string> {
-  const { data } = await requireClient().auth.getSession();
-  const id = data.session?.user.id;
-  if (!id) throw new Error("Not signed in");
-  return id;
+function requireUid(): string {
+  const uid = auth?.currentUser?.uid;
+  if (!uid) throw new Error("Not signed in");
+  return uid;
 }
 
-/** The user's calendar row, created on first use. */
+/**
+ * Subscription doc id, mirroring Postgres's `(league, team_key)` uniqueness:
+ * the bare league for the single-instance leagues, `<league>__<teamId>` for a
+ * followed cricket team (several may coexist).
+ */
+function subscriptionKey(league: League, teamId?: string): string {
+  return teamId ? `${league}__${teamId}` : league;
+}
+
+/**
+ * Pinned-event doc id: `<league>_<espnEventId>` (unique per league+event).
+ * Cricket pin ids are `<seriesId>:<eventId>` — the colon is a legal Firestore
+ * doc-id character.
+ */
+function pinnedKey(league: League, espnEventId: string): string {
+  return `${league}_${espnEventId}`;
+}
+
+/** The user's calendar, created on first use. */
 export async function getOrCreateCalendar(): Promise<{
   id: string;
   feedToken: string;
 }> {
-  const client = requireClient();
-  const userId = await requireUserId();
+  const database = requireDb();
+  const uid = requireUid();
+  const ref = doc(database, "calendars", uid);
 
-  const existing = await client
-    .from("calendars")
-    .select("id, feed_token")
-    .maybeSingle<CalendarRow>();
-  if (existing.error) throw new Error(existing.error.message);
-  if (existing.data) {
-    return { id: existing.data.id, feedToken: existing.data.feed_token };
+  const snapshot = await getDoc(ref);
+  if (snapshot.exists()) {
+    return { id: uid, feedToken: snapshot.get("feedToken") as string };
   }
 
-  const created = await client
-    .from("calendars")
-    .insert({ user_id: userId })
-    .select("id, feed_token")
-    .single<CalendarRow>();
-  if (created.error) throw new Error(created.error.message);
-  return { id: created.data.id, feedToken: created.data.feed_token };
+  const feedToken = crypto.randomUUID();
+  await setDoc(ref, { feedToken, createdAt: serverTimestamp() });
+  return { id: uid, feedToken };
 }
 
 /** The full calendar (subscriptions + pinned events), or null before first use. */
 export async function listCalendar(): Promise<MyCalendar | null> {
-  const client = requireClient();
-  await requireUserId();
+  const database = requireDb();
+  const uid = requireUid();
+  const ref = doc(database, "calendars", uid);
 
-  const { data, error } = await client
-    .from("calendars")
-    .select(
-      "id, feed_token, calendar_subscriptions(league, filters), calendar_pinned_events(league, espn_event_id)"
-    )
-    .maybeSingle<CalendarWithChildrenRow>();
-  if (error) throw new Error(error.message);
-  if (!data) return null;
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) return null;
+
+  const [subscriptions, pinnedEvents] = await Promise.all([
+    getDocs(collection(ref, "subscriptions")),
+    getDocs(collection(ref, "pinnedEvents")),
+  ]);
 
   return {
-    id: data.id,
-    feedToken: data.feed_token,
-    subscriptions: data.calendar_subscriptions.map(row => ({
-      league: row.league,
-      filters: row.filters,
+    id: uid,
+    feedToken: snapshot.get("feedToken") as string,
+    subscriptions: subscriptions.docs.map(row => ({
+      league: row.get("league") as League,
+      filters: (row.get("filters") ?? {}) as SubscriptionFilters,
     })),
-    pinnedEvents: data.calendar_pinned_events.map(row => ({
-      league: row.league,
-      espnEventId: row.espn_event_id,
+    pinnedEvents: pinnedEvents.docs.map(row => ({
+      league: row.get("league") as League,
+      espnEventId: row.get("espnEventId") as string,
     })),
   };
 }
 
 /**
- * Add the subscription, or replace its stored filters if already present.
- * The conflict target includes `team_key` (a generated column mirroring
- * `filters->>'teamId'`), so leagues stay one-row-per-league while each
- * followed cricket team gets its own row.
+ * Add the subscription, or replace its stored filters if already present. The
+ * doc id keys leagues one-per-league and cricket teams one-per-followed-team.
  */
 export async function upsertSubscription(
   league: League,
   filters: SubscriptionFilters
 ): Promise<void> {
-  const client = requireClient();
-  const calendar = await getOrCreateCalendar();
-
-  const { error } = await client
-    .from("calendar_subscriptions")
-    .upsert(
-      { calendar_id: calendar.id, league, filters },
-      { onConflict: "calendar_id,league,team_key" }
-    );
-  if (error) throw new Error(error.message);
+  const database = requireDb();
+  const { id: uid } = await getOrCreateCalendar();
+  const key = subscriptionKey(league, filters.teamId);
+  await setDoc(doc(database, "calendars", uid, "subscriptions", key), {
+    league,
+    filters,
+  });
 }
 
 /**
  * Remove a subscription. `teamId` narrows the delete to one followed cricket
- * team; without it every row of the league goes (leagues have one anyway).
+ * team; without it the league's own subscription doc is removed.
  */
 export async function removeSubscription(
   league: League,
   teamId?: string
 ): Promise<void> {
-  const client = requireClient();
-  await requireUserId();
-
-  let query = client
-    .from("calendar_subscriptions")
-    .delete()
-    .eq("league", league);
-  if (teamId !== undefined) query = query.eq("team_key", teamId);
-  const { error } = await query;
-  if (error) throw new Error(error.message);
+  const database = requireDb();
+  const uid = requireUid();
+  const key = subscriptionKey(league, teamId);
+  await deleteDoc(doc(database, "calendars", uid, "subscriptions", key));
 }
 
 export async function pinEvent(
   league: League,
   espnEventId: string
 ): Promise<void> {
-  const client = requireClient();
-  const calendar = await getOrCreateCalendar();
-
-  const { error } = await client.from("calendar_pinned_events").upsert(
-    { calendar_id: calendar.id, league, espn_event_id: espnEventId },
-    {
-      onConflict: "calendar_id,league,espn_event_id",
-      ignoreDuplicates: true,
-    }
-  );
-  if (error) throw new Error(error.message);
+  const database = requireDb();
+  const { id: uid } = await getOrCreateCalendar();
+  const key = pinnedKey(league, espnEventId);
+  await setDoc(doc(database, "calendars", uid, "pinnedEvents", key), {
+    league,
+    espnEventId,
+  });
 }
 
 export async function unpinEvent(
   league: League,
   espnEventId: string
 ): Promise<void> {
-  const client = requireClient();
-  await requireUserId();
-
-  const { error } = await client
-    .from("calendar_pinned_events")
-    .delete()
-    .eq("league", league)
-    .eq("espn_event_id", espnEventId);
-  if (error) throw new Error(error.message);
+  const database = requireDb();
+  const uid = requireUid();
+  const key = pinnedKey(league, espnEventId);
+  await deleteDoc(doc(database, "calendars", uid, "pinnedEvents", key));
 }
 
 /** Rotate the feed token, invalidating the previous feed URL. */
 export async function regenerateFeedToken(): Promise<string> {
-  const client = requireClient();
-  const calendar = await getOrCreateCalendar();
-
-  const { data, error } = await client
-    .from("calendars")
-    .update({ feed_token: crypto.randomUUID() })
-    .eq("id", calendar.id)
-    .select("feed_token")
-    .single<Pick<CalendarRow, "feed_token">>();
-  if (error) throw new Error(error.message);
-  return data.feed_token;
+  const database = requireDb();
+  const { id: uid } = await getOrCreateCalendar();
+  const feedToken = crypto.randomUUID();
+  await updateDoc(doc(database, "calendars", uid), { feedToken });
+  return feedToken;
 }
 
 export type { League, MyCalendar, PinnedEvent, SubscriptionFilters };

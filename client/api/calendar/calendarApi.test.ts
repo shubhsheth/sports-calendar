@@ -1,18 +1,64 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 /**
- * The supabase singleton is swapped per test via this hoisted holder; the
- * module mock exposes it through a getter so each test controls the client.
+ * Unit tests for the Firestore data layer. `@/lib/firebase` (auth + db) and the
+ * `firebase/firestore` functional API are mocked with a tiny in-memory store
+ * keyed by document path, so these run without an emulator and assert the doc
+ * paths, keys, and write ops the layer produces. Rules/behavior against a real
+ * Firestore are covered by firestore.rules.test.ts (npm run test:rules).
  */
 const holder = vi.hoisted(() => ({
-  client: null as unknown,
+  auth: null as { currentUser: { uid: string } | null } | null,
+  db: null as unknown,
+  store: new Map<string, Record<string, unknown>>(),
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  get supabase() {
-    return holder.client;
+vi.mock("@/lib/firebase", () => ({
+  get auth() {
+    return holder.auth;
+  },
+  get db() {
+    return holder.db;
   },
 }));
+
+vi.mock("firebase/firestore", () => {
+  type Ref = { path: string };
+  const ref = (path: string): Ref => ({ path });
+  return {
+    doc: (_db: unknown, ...segments: string[]) => ref(segments.join("/")),
+    collection: (parent: Ref, name: string) => ref(`${parent.path}/${name}`),
+    getDoc: async (r: Ref) => {
+      const data = holder.store.get(r.path);
+      return {
+        exists: () => data !== undefined,
+        get: (field: string) => data?.[field],
+      };
+    },
+    getDocs: async (r: Ref) => {
+      const prefix = `${r.path}/`;
+      const docs = [...holder.store.entries()]
+        .filter(
+          ([p]) => p.startsWith(prefix) && !p.slice(prefix.length).includes("/")
+        )
+        .map(([p, data]) => ({
+          id: p.slice(prefix.length),
+          get: (field: string) => data[field],
+        }));
+      return { docs };
+    },
+    setDoc: async (r: Ref, data: Record<string, unknown>) => {
+      holder.store.set(r.path, data);
+    },
+    updateDoc: async (r: Ref, data: Record<string, unknown>) => {
+      holder.store.set(r.path, { ...holder.store.get(r.path), ...data });
+    },
+    deleteDoc: async (r: Ref) => {
+      holder.store.delete(r.path);
+    },
+    serverTimestamp: () => "SERVER_TS",
+  };
+});
 
 import {
   getOrCreateCalendar,
@@ -24,200 +70,168 @@ import {
   upsertSubscription,
 } from "./calendarApi";
 
-type StubResult = { data?: unknown; error?: { message: string } | null };
-
-/**
- * Chainable, awaitable stand-in for a supabase-js query builder: every
- * method returns the builder, awaiting it resolves with `result`.
- */
-function stubQuery(result: StubResult) {
-  const builder: Record<string, unknown> = {};
-  for (const method of [
-    "select",
-    "insert",
-    "upsert",
-    "update",
-    "delete",
-    "eq",
-    "maybeSingle",
-    "single",
-  ]) {
-    builder[method] = vi.fn(() => builder);
-  }
-  builder.then = (
-    onFulfilled: (value: StubResult) => unknown,
-    onRejected?: (reason: unknown) => unknown
-  ) =>
-    Promise.resolve({ error: null, ...result }).then(onFulfilled, onRejected);
-  return builder as Record<
-    string,
-    ReturnType<typeof vi.fn> & (() => typeof builder)
-  >;
+function signIn(uid = "user-1") {
+  holder.auth = { currentUser: { uid } };
+  holder.db = {};
 }
-
-function fakeClient(queries: ReturnType<typeof stubQuery>[], userId?: string) {
-  let call = 0;
-  return {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: userId ? { user: { id: userId } } : null },
-      }),
-    },
-    from: vi.fn(() => queries[call++]),
-  };
-}
-
-const CAL_ROW = { id: "cal-1", feed_token: "token-1" };
 
 beforeEach(() => {
-  holder.client = null;
+  holder.auth = null;
+  holder.db = null;
+  holder.store.clear();
 });
 
-describe("calendarApi", () => {
-  it("throws when supabase is not configured", async () => {
-    await expect(listCalendar()).rejects.toThrow("Supabase is not configured");
+describe("calendarApi (Firestore)", () => {
+  it("throws when Firebase is not configured", async () => {
+    holder.auth = { currentUser: { uid: "user-1" } };
+    await expect(listCalendar()).rejects.toThrow("Firebase is not configured");
   });
 
   it("throws when not signed in", async () => {
-    holder.client = fakeClient([stubQuery({ data: null })]);
+    holder.db = {};
     await expect(listCalendar()).rejects.toThrow("Not signed in");
   });
 
   describe("getOrCreateCalendar", () => {
-    it("returns the existing calendar", async () => {
-      holder.client = fakeClient([stubQuery({ data: CAL_ROW })], "user-1");
-      await expect(getOrCreateCalendar()).resolves.toEqual({
-        id: "cal-1",
-        feedToken: "token-1",
-      });
+    it("creates the calendar doc at calendars/{uid} on first use", async () => {
+      signIn();
+      const result = await getOrCreateCalendar();
+      expect(result.id).toBe("user-1");
+      expect(result.feedToken).toMatch(/^[0-9a-f-]{36}$/);
+      const stored = holder.store.get("calendars/user-1");
+      expect(stored?.feedToken).toBe(result.feedToken);
+      expect(stored?.createdAt).toBe("SERVER_TS");
     });
 
-    it("creates the calendar on first use", async () => {
-      const select = stubQuery({ data: null });
-      const insert = stubQuery({ data: CAL_ROW });
-      holder.client = fakeClient([select, insert], "user-1");
-
+    it("returns the existing calendar without overwriting", async () => {
+      signIn();
+      holder.store.set("calendars/user-1", { feedToken: "existing" });
       await expect(getOrCreateCalendar()).resolves.toEqual({
-        id: "cal-1",
-        feedToken: "token-1",
+        id: "user-1",
+        feedToken: "existing",
       });
-      expect(insert.insert).toHaveBeenCalledWith({ user_id: "user-1" });
-    });
-
-    it("propagates database errors", async () => {
-      holder.client = fakeClient(
-        [stubQuery({ data: null, error: { message: "boom" } })],
-        "user-1"
-      );
-      await expect(getOrCreateCalendar()).rejects.toThrow("boom");
     });
   });
 
   describe("listCalendar", () => {
     it("returns null before first use", async () => {
-      holder.client = fakeClient([stubQuery({ data: null })], "user-1");
+      signIn();
       await expect(listCalendar()).resolves.toBeNull();
     });
 
-    it("maps rows to the MyCalendar shape", async () => {
-      holder.client = fakeClient(
-        [
-          stubQuery({
-            data: {
-              ...CAL_ROW,
-              calendar_subscriptions: [
-                { league: "nba", filters: { teamIds: ["10"] } },
-              ],
-              calendar_pinned_events: [
-                { league: "ipl", espn_event_id: "401811" },
-              ],
-            },
-          }),
-        ],
-        "user-1"
-      );
+    it("maps the calendar and its subcollections", async () => {
+      signIn();
+      holder.store.set("calendars/user-1", { feedToken: "token-1" });
+      holder.store.set("calendars/user-1/subscriptions/nba", {
+        league: "nba",
+        filters: { teamIds: ["10"] },
+      });
+      holder.store.set("calendars/user-1/subscriptions/cricket-team__6", {
+        league: "cricket-team",
+        filters: { teamId: "6", formats: [] },
+      });
+      holder.store.set("calendars/user-1/pinnedEvents/ipl_701", {
+        league: "ipl",
+        espnEventId: "701",
+      });
 
       await expect(listCalendar()).resolves.toEqual({
-        id: "cal-1",
+        id: "user-1",
         feedToken: "token-1",
-        subscriptions: [{ league: "nba", filters: { teamIds: ["10"] } }],
-        pinnedEvents: [{ league: "ipl", espnEventId: "401811" }],
+        subscriptions: [
+          { league: "nba", filters: { teamIds: ["10"] } },
+          { league: "cricket-team", filters: { teamId: "6", formats: [] } },
+        ],
+        pinnedEvents: [{ league: "ipl", espnEventId: "701" }],
       });
     });
   });
 
   describe("subscriptions", () => {
-    it("upserts on the (calendar, league, team_key) key", async () => {
-      const select = stubQuery({ data: CAL_ROW });
-      const upsert = stubQuery({});
-      holder.client = fakeClient([select, upsert], "user-1");
-
+    it("upserts a league at subscriptions/{league}", async () => {
+      signIn();
       await upsertSubscription("nba", { teamIds: ["10", "14"] });
-      expect(upsert.upsert).toHaveBeenCalledWith(
-        {
-          calendar_id: "cal-1",
-          league: "nba",
-          filters: { teamIds: ["10", "14"] },
-        },
-        { onConflict: "calendar_id,league,team_key" }
-      );
+      expect(holder.store.get("calendars/user-1/subscriptions/nba")).toEqual({
+        league: "nba",
+        filters: { teamIds: ["10", "14"] },
+      });
     });
 
-    it("removes by league (RLS scopes to the own calendar)", async () => {
-      const del = stubQuery({});
-      holder.client = fakeClient([del], "user-1");
+    it("keys a cricket-team subscription by followed team", async () => {
+      signIn();
+      await upsertSubscription("cricket-team", { teamId: "6", formats: [] });
+      await upsertSubscription("cricket-team", { teamId: "2", formats: [] });
+      expect(
+        holder.store.has("calendars/user-1/subscriptions/cricket-team__6")
+      ).toBe(true);
+      expect(
+        holder.store.has("calendars/user-1/subscriptions/cricket-team__2")
+      ).toBe(true);
+    });
 
+    it("removes a league subscription by its doc", async () => {
+      signIn();
+      holder.store.set("calendars/user-1/subscriptions/f1", { league: "f1" });
       await removeSubscription("f1");
-      expect(del.delete).toHaveBeenCalled();
-      expect(del.eq).toHaveBeenCalledWith("league", "f1");
-      expect(del.eq).toHaveBeenCalledTimes(1);
+      expect(holder.store.has("calendars/user-1/subscriptions/f1")).toBe(false);
     });
 
-    it("removes one followed cricket team by team_key", async () => {
-      const del = stubQuery({});
-      holder.client = fakeClient([del], "user-1");
-
+    it("removes only the named cricket team, leaving others", async () => {
+      signIn();
+      holder.store.set("calendars/user-1/subscriptions/cricket-team__6", {
+        league: "cricket-team",
+      });
+      holder.store.set("calendars/user-1/subscriptions/cricket-team__2", {
+        league: "cricket-team",
+      });
       await removeSubscription("cricket-team", "6");
-      expect(del.eq).toHaveBeenCalledWith("league", "cricket-team");
-      expect(del.eq).toHaveBeenCalledWith("team_key", "6");
+      expect(
+        holder.store.has("calendars/user-1/subscriptions/cricket-team__6")
+      ).toBe(false);
+      expect(
+        holder.store.has("calendars/user-1/subscriptions/cricket-team__2")
+      ).toBe(true);
     });
   });
 
   describe("pinned events", () => {
-    it("pins ignoring duplicates", async () => {
-      const select = stubQuery({ data: CAL_ROW });
-      const upsert = stubQuery({});
-      holder.client = fakeClient([select, upsert], "user-1");
-
+    it("pins at pinnedEvents/{league}_{eventId}", async () => {
+      signIn();
       await pinEvent("ipl", "401811");
-      expect(upsert.upsert).toHaveBeenCalledWith(
-        { calendar_id: "cal-1", league: "ipl", espn_event_id: "401811" },
-        {
-          onConflict: "calendar_id,league,espn_event_id",
-          ignoreDuplicates: true,
-        }
-      );
+      expect(
+        holder.store.get("calendars/user-1/pinnedEvents/ipl_401811")
+      ).toEqual({ league: "ipl", espnEventId: "401811" });
+    });
+
+    it("keeps the colon in a cricket pin id", async () => {
+      signIn();
+      await pinEvent("cricket-team", "24301:1544001");
+      expect(
+        holder.store.has(
+          "calendars/user-1/pinnedEvents/cricket-team_24301:1544001"
+        )
+      ).toBe(true);
     });
 
     it("unpins by league and event id", async () => {
-      const del = stubQuery({});
-      holder.client = fakeClient([del], "user-1");
-
+      signIn();
+      holder.store.set("calendars/user-1/pinnedEvents/ipl_401811", {
+        league: "ipl",
+        espnEventId: "401811",
+      });
       await unpinEvent("ipl", "401811");
-      expect(del.eq).toHaveBeenCalledWith("league", "ipl");
-      expect(del.eq).toHaveBeenCalledWith("espn_event_id", "401811");
+      expect(holder.store.has("calendars/user-1/pinnedEvents/ipl_401811")).toBe(
+        false
+      );
     });
   });
 
   it("regenerates the feed token", async () => {
-    const select = stubQuery({ data: CAL_ROW });
-    const update = stubQuery({ data: { feed_token: "token-2" } });
-    holder.client = fakeClient([select, update], "user-1");
-
-    await expect(regenerateFeedToken()).resolves.toBe("token-2");
-    expect(update.update).toHaveBeenCalledWith({
-      feed_token: expect.stringMatching(/^[0-9a-f-]{36}$/),
-    });
-    expect(update.eq).toHaveBeenCalledWith("id", "cal-1");
+    signIn();
+    holder.store.set("calendars/user-1", { feedToken: "token-1" });
+    const next = await regenerateFeedToken();
+    expect(next).toMatch(/^[0-9a-f-]{36}$/);
+    expect(next).not.toBe("token-1");
+    expect(holder.store.get("calendars/user-1")?.feedToken).toBe(next);
   });
 });

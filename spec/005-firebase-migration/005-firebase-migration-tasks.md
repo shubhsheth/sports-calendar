@@ -33,7 +33,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   vitest green including ported league + cricket-team + personal-feed tests;
   bundle builds.
 
-- [ ] **T3 — Firestore rules + data layer.** Write real `firestore.rules`
+- [x] **T3 — Firestore rules + data layer.** Write real `firestore.rules`
   (path-based owner-only for `calendars/{uid}` and subcollections; league
   whitelist incl. `cricket-team`; field checks incl. the cricket-team invariant
   that a `cricket-team` subscription carries a string `teamId`); rules tests via

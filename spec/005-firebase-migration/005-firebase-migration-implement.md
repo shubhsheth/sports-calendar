@@ -66,7 +66,7 @@ and in tasks.md after the human approves the increment.
 ## Progress
 - [x] T1 — Firebase scaffolding + emulators
 - [x] T2 — Functions workspace (pure port)
-- [ ] T3 — Firestore rules + data layer
+- [x] T3 — Firestore rules + data layer
 - [ ] T4 — Client auth swap
 - [ ] T5 — Hosting cutover in the client
 - [ ] T6 — CI/CD rewrite
@@ -106,5 +106,36 @@ and in tasks.md after the human approves the increment.
   (252 → 278). Added `functions/tsconfig.json` (eslint project service) and
   `functions/lib` to eslint ignores. Real cloud deploy + emulator function-load
   deferred to T6/T8.
+
+- **T3 (done):** Real `firestore.rules` (owner-only via the `calendars/{uid}`
+  path; write-time league whitelist + `filters is map` + cricket-team `teamId is
+  string` invariant; deny-by-default). `calendarApi.ts` rewritten on
+  `firebase/firestore`, signatures frozen. Doc-ID model: calendar = `calendars/{uid}`
+  (id returned = uid; `MyCalendar.id` is only ever read as an opaque string —
+  no consumer depends on the old separate uuid); subscription id = `league` or
+  `<league>__<teamId>`; pin id = `<league>_<espnEventId>`. The RLS-reliant deletes
+  now address exact doc paths — the highest-risk item, verified by the rules
+  tests (cross-user + anon denied) and unit tests (correct paths/keys).
+- **Minor within-spec reorder:** `client/lib/firebase.ts` (the null-guarded
+  app + `auth`/`db` singletons) was created in T3, not T4 — the data layer needs
+  `db`/`auth` and both auth (T4) and data share one initialized app. Noted so
+  T4's summary reflects it (T4 now only adds the auth *provider*, not the lib).
+- **removeSubscription semantics:** the Firestore version deletes the exact
+  subscription doc. `removeSubscription("cricket-team")` with **no** teamId would
+  target a non-existent `subscriptions/cricket-team` doc (a no-op), unlike
+  Postgres which deleted every cricket row. No caller does this — the My Calendar
+  page always passes `subscription.filters.teamId` (undefined for leagues, the id
+  for cricket), so behavior is identical for real call sites.
+- **Rules-test infra:** `firestore.rules.test.ts` (@firebase/rules-unit-testing)
+  runs via `npm run test:rules` = `firebase emulators:exec --only firestore …
+  "vitest run --config vitest.rules.config.ts"`. It's excluded from the default
+  `npm run test:run` (needs the emulator) and added to `tsconfig.node.json` for
+  the eslint project service. All 9 rules tests green in-sandbox (OpenJDK 21).
+  Client unit tests: 14 (in-memory Firestore mock). Full suite 278 → 279.
+- **Coexistence note:** between T3 and T4 the AuthProvider still uses Supabase,
+  so `auth.currentUser` (Firebase) is null and calendarApi would throw "Not
+  signed in" if called — but account UI is env-gated (hidden without
+  `VITE_FIREBASE_*`), and nothing is deployed until T6, so no live impact. T4
+  makes Firebase the actual sign-in.
 
 (more notes below as tasks land; deploy checklist lands here at T8)

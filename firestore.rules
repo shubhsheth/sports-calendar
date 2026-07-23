@@ -1,11 +1,39 @@
 rules_version = '2';
 
-// Placeholder: deny everything. Real owner-only rules land in T3. Every path
-// stays locked until then so no accidental open access exists mid-migration.
+// Owner-only access to personal calendars. Ownership is the document path: a
+// calendar lives at calendars/{uid}, so only the signed-in user whose uid
+// matches may read or write it and its subcollections. Everything else is
+// denied by default (no other matches). Writes are additionally shape-checked:
+// league must be whitelisted, and a cricket-team subscription must carry a
+// teamId (mirrors the Postgres CHECK constraints).
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function validLeague(league) {
+      return league in ['nba', 'nfl', 'f1', 'ipl', 'fifa', 'cricket-team'];
+    }
+
+    match /calendars/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /subscriptions/{subId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && validLeague(request.resource.data.league)
+          && request.resource.data.filters is map
+          && (request.resource.data.league != 'cricket-team'
+              || request.resource.data.filters.teamId is string);
+      }
+
+      match /pinnedEvents/{pinId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && validLeague(request.resource.data.league)
+          && request.resource.data.espnEventId is string;
+      }
     }
   }
 }
