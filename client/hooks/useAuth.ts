@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import type { User } from "@supabase/supabase-js";
+import type { User } from "firebase/auth";
 
 export type AuthContextValue = {
-  /** False when Supabase env vars are absent — account UI should hide. */
+  /** False when Firebase env vars are absent — account UI should hide. */
   enabled: boolean;
   /** True until the initial session has been read from storage. */
   loading: boolean;

@@ -1,57 +1,88 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import {
+  GoogleAuthProvider,
+  isSignInWithEmailLink,
+  onAuthStateChanged,
+  sendSignInLinkToEmail,
+  signInWithEmailLink,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  type User,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { AuthContext, type AuthContextValue } from "@/hooks/useAuth";
 
+/** Where the email-link sign-in returns; the email is stashed here between
+ * requesting the link and completing it on return. */
+const EMAIL_STORAGE_KEY = "sports-calendar:magic-link-email";
+
 /**
- * Where auth flows land after the round trip to Google / the magic link.
- * Includes the Vite base path so it works on GitHub Pages
- * (`/sports-calendar/`) and on localhost (`/`).
+ * Where auth flows land after the round trip. Includes the Vite base path so it
+ * works on GitHub Pages (`/sports-calendar/`) and at the domain root.
  */
-function redirectUrl() {
-  return window.location.origin + import.meta.env.BASE_URL;
+function actionCodeSettings() {
+  return {
+    url: window.location.origin + import.meta.env.BASE_URL,
+    handleCodeInApp: true,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(supabase !== null);
+  const [loading, setLoading] = useState(auth !== null);
 
   useEffect(() => {
-    if (!supabase) return;
-    void supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+    if (!auth) return;
+
+    // If the app was opened via an email sign-in link, complete the sign-in
+    // (Firebase, unlike supabase-js, needs this done explicitly on the landing
+    // page). The email was stored when the link was requested.
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      const email = window.localStorage.getItem(EMAIL_STORAGE_KEY);
+      if (email) {
+        void signInWithEmailLink(auth, email, window.location.href)
+          .catch(() => {})
+          .finally(() => {
+            window.localStorage.removeItem(EMAIL_STORAGE_KEY);
+            // Strip the one-time sign-in params from the URL.
+            window.history.replaceState(
+              {},
+              "",
+              window.location.origin + window.location.pathname
+            );
+          });
+      }
+    }
+
+    return onAuthStateChanged(auth, current => {
+      setUser(current);
       setLoading(false);
     });
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-    return () => subscription.subscription.unsubscribe();
   }, []);
 
   const value: AuthContextValue = {
-    enabled: supabase !== null,
+    enabled: auth !== null,
     loading,
     user,
     signInWithGoogle: async () => {
-      if (!supabase) return;
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: redirectUrl() },
-      });
+      if (!auth) return;
+      await signInWithPopup(auth, new GoogleAuthProvider());
     },
     signInWithMagicLink: async (email: string) => {
-      if (!supabase) return { error: "Sign-in is not configured" };
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectUrl() },
-      });
-      return { error: error?.message ?? null };
+      if (!auth) return { error: "Sign-in is not configured" };
+      try {
+        await sendSignInLinkToEmail(auth, email, actionCodeSettings());
+        window.localStorage.setItem(EMAIL_STORAGE_KEY, email);
+        return { error: null };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : "Failed to send link",
+        };
+      }
     },
     signOut: async () => {
-      if (!supabase) return;
-      await supabase.auth.signOut();
+      if (!auth) return;
+      await firebaseSignOut(auth);
     },
   };
 

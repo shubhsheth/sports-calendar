@@ -47,7 +47,7 @@ until T7 removes it — the two stacks coexist mid-migration.
   still client-generated UUID. Update `calendarApi.test.ts` mocks (incl. a
   cricket-team add/remove case). Verify: CI gate + rules tests green.
 
-- [ ] **T4 — Client auth swap.** `client/lib/firebase.ts` singleton from
+- [x] **T4 — Client auth swap.** `client/lib/firebase.ts` singleton from
   `VITE_FIREBASE_*` (null when absent — same feature-off pattern; delete-safe
   alongside supabase.ts until T7). Port `auth-provider.tsx` to `firebase/auth`:
   `onAuthStateChanged`, `signInWithPopup(GoogleAuthProvider)`,

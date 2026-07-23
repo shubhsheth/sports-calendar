@@ -67,7 +67,7 @@ and in tasks.md after the human approves the increment.
 - [x] T1 — Firebase scaffolding + emulators
 - [x] T2 — Functions workspace (pure port)
 - [x] T3 — Firestore rules + data layer
-- [ ] T4 — Client auth swap
+- [x] T4 — Client auth swap
 - [ ] T5 — Hosting cutover in the client
 - [ ] T6 — CI/CD rewrite
 - [ ] T7 — Decommission Supabase
@@ -137,5 +137,16 @@ and in tasks.md after the human approves the increment.
   signed in" if called — but account UI is env-gated (hidden without
   `VITE_FIREBASE_*`), and nothing is deployed until T6, so no live impact. T4
   makes Firebase the actual sign-in.
+
+- **T4 (done):** `auth-provider.tsx` ported to `firebase/auth`:
+  `onAuthStateChanged` (returns the unsubscribe directly),
+  `signInWithPopup(GoogleAuthProvider)`, `sendSignInLinkToEmail` + the on-load
+  `isSignInWithEmailLink`/`signInWithEmailLink` completion path (email stashed in
+  localStorage; URL cleaned via `history.replaceState`), and `signOut`.
+  `useAuth.ts` `User` type now from `firebase/auth`; `enabled = auth !== null`.
+  `client/lib/firebase.ts` already existed (T3), so T4 only touched the provider,
+  hook type, and test. Auth-emulator live sign-in smoke deferred to T8 (the web
+  SDK talks to real Firebase unless `connectAuthEmulator` is wired; unit tests
+  cover the provider logic). Suite 279 → 281.
 
 (more notes below as tasks land; deploy checklist lands here at T8)
