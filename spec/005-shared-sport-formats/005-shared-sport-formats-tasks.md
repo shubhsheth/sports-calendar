@@ -62,7 +62,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Verify: `npx vitest run shared/src/fifa client/components/fifa` green; no
     remaining reference to `FIFA_DURATION_MINUTES`.
 
-- [ ] **T5: Migrate IPL (cricket/t20)**
+- [x] **T5: Migrate IPL (cricket/t20)**
   - Same shape as T2, resolving as `cricket`/`t20` (240) — IPL is franchise T20
     cricket, so it shares the cricket sport entry rather than owning a constant.
   - Covers: FR-4, FR-5, FR-8, NFR-1

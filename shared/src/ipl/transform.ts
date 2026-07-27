@@ -1,9 +1,10 @@
 import type { IplEvent } from "./types.ts";
-import { IPL_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
 export function transformIplEventsToIcs(events: IplEvent[]): EventAttributes[] {
+  const durationMinutes = getDurationMinutes("cricket", "t20");
   return events.map(event => {
     const start = dayjs(event.date);
     return {
@@ -18,8 +19,8 @@ export function transformIplEventsToIcs(events: IplEvent[]): EventAttributes[] {
         start.minute(),
       ],
       duration: {
-        hours: Math.floor(IPL_DURATION_MINUTES / 60),
-        minutes: IPL_DURATION_MINUTES % 60,
+        hours: Math.floor(durationMinutes / 60),
+        minutes: durationMinutes % 60,
       },
       location: event.venue?.fullName,
     };

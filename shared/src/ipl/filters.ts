@@ -1,5 +1,5 @@
 import type { IplEvent, IplEventFilters } from "./types.ts";
-import { IPL_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 export function filterIplEvents(
@@ -20,7 +20,7 @@ export function filterIplEvent(
 ): IplEvent | null {
   if (
     !filters.showPastEvents &&
-    isEventPast(event.date, IPL_DURATION_MINUTES)
+    isEventPast(event.date, getDurationMinutes("cricket", "t20"))
   ) {
     return null;
   }
