@@ -1,4 +1,5 @@
 export * from "./eventStatus.ts";
+export * from "./sports/formats.ts";
 export * from "./espn/fetchEventRefs.ts";
 export * from "./espn/fetchEventDetails.ts";
 export * from "./espn/mapWithConcurrency.ts";

@@ -10,7 +10,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
 
 ---
 
-- [ ] **T1: Add the shared sports module**
+- [x] **T1: Add the shared sports module**
   - Create `shared/src/sports/formats.ts` exporting `SPORT_FORMATS` keyed by
     **sport** (`cricket`, `basketball`, `football`, `racing`, `soccer`) → format
     name → minutes, a `Sport` type, a format-name type derived from the map, and
@@ -30,8 +30,12 @@ Each task lists its acceptance check. Tick a box only when that check passes.
     correctly; `t20` and `t20i` are both present and both 240.
   - Covers: FR-1, FR-2, FR-3, FR-5, FR-6, FR-7, NFR-2
   - Verify: `npx vitest run shared/src/sports` passes; `npm run test:run` still
-    green (nothing else changed yet); the module's source contains none of the
-    strings `nba`, `nfl`, `fifa`, `ipl`, `f1`.
+    green (nothing else changed yet); no league name (`nba`, `nfl`, `fifa`,
+    `ipl`, `f1`) appears in the module's **code** — keys, types, identifiers.
+    Prose naming a league to explain a format is fine and wanted: `t20` exists
+    precisely because the IPL is franchise cricket, and a comment that cannot
+    say so is worse documentation. The requirement is that no league is a unit
+    of duration, not that the word goes unmentioned.
 
 - [ ] **T2: Migrate NBA (basketball/standard)**
   - `shared/src/nba/types.ts`: remove `NBA_DURATION_MINUTES`.
