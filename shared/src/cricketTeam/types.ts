@@ -1,4 +1,5 @@
 import type { IplEvent } from "../ipl/types.ts";
+import { getDurationMinutes, type SportFormat } from "../sports/formats.ts";
 
 /**
  * Match formats, mapped from the Site API's
@@ -27,6 +28,29 @@ export type CricketTeamEvent = IplEvent & {
    */
   endDate?: string;
 };
+
+/**
+ * ESPN's match classes onto cricket's sport formats. Only `t20i` needs
+ * translating: internationals and franchise T20s are one format as far as
+ * duration goes, so the sport map carries a single `t20`. The distinction
+ * survives here rather than in the map because `t20i` is a persisted value —
+ * a feed query param, a filter-pill id, and stored in saved subscriptions —
+ * so it cannot be renamed without breaking existing feeds.
+ */
+const SPORT_FORMAT_BY_MATCH_FORMAT: Record<
+  CricketMatchFormat,
+  SportFormat<"cricket">
+> = {
+  test: "test",
+  odi: "odi",
+  t20i: "t20",
+  other: "other",
+};
+
+/** Nominal duration of a cricket match, in minutes. */
+export function getCricketMatchMinutes(format: CricketMatchFormat): number {
+  return getDurationMinutes("cricket", SPORT_FORMAT_BY_MATCH_FORMAT[format]);
+}
 
 export type CricketTeamFilters = {
   showPastEvents: boolean;

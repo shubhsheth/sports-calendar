@@ -2,7 +2,7 @@ import type { F1Event } from "./types.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 import { translateF1EventTypeAbbr, translateF1EventTypeId } from "./types.ts";
-import { getRacingSessionMinutes } from "../sports/formats.ts";
+import { getF1SessionMinutes } from "./sessions.ts";
 
 const SPONSORS = [
   "Qatar Airways",
@@ -49,7 +49,7 @@ export function cleanUpF1SponsorNames(name: string): string {
 /**
  * Builds one ICS event per F1 session. Title: `F1: {session} ({event name})`
  * with the sponsor prefix stripped; per-session duration comes from
- * `getRacingSessionMinutes` (see `shared/src/sports/formats.ts`).
+ * `getF1SessionMinutes` (see `shared/src/f1/sessions.ts`).
  *
  * @param events - The F1 events (race weekends) to convert.
  * @returns One ICS event attribute object per session.
@@ -61,7 +61,7 @@ export function transformF1EventsToIcs(events: F1Event[]): EventAttributes[] {
     for (const competition of mainEvent.competitions) {
       const start = dayjs(competition.date);
       const title = `F1: ${translateF1EventTypeAbbr(competition.type.abbreviation)} (${cleanUpF1SponsorNames(mainEvent.shortName)})`;
-      const durationMin = getRacingSessionMinutes(competition.type.id);
+      const durationMin = getF1SessionMinutes(competition.type.id);
 
       icsEvents.push({
         uid: `${competition.id}@sports-calendar`,

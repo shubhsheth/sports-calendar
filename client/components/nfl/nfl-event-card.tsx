@@ -49,7 +49,7 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
   const isLive = isEventLive(
     mainCompetition.date,
-    getDurationMinutes("football", "standard")
+    getDurationMinutes("football")
   );
 
   return (

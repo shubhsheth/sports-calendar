@@ -8,7 +8,7 @@ import {
   isEventLive,
   translateF1EventTypeAbbr,
   cleanUpF1SponsorNames,
-  getRacingSessionMinutes,
+  getF1SessionMinutes,
 } from "@sports-calendar/shared";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import dayjs from "dayjs";
@@ -54,7 +54,7 @@ function F1EventCard({ league, eventRef, filters }: F1EventCardProps) {
         <div className="flex flex-col gap-1">
           {filteredF1Event.competitions.map(competition => {
             const isRace = competition.type.abbreviation === "Race";
-            const durationMin = getRacingSessionMinutes(competition.type.id);
+            const durationMin = getF1SessionMinutes(competition.type.id);
             const isLive = isEventLive(competition.date, durationMin);
             return (
               <div

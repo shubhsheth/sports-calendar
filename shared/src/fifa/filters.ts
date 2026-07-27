@@ -25,7 +25,7 @@ export function filterFifaEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, getDurationMinutes("soccer", "standard"))
+      isEventPast(competition.date, getDurationMinutes("soccer"))
     ) {
       return false;
     }

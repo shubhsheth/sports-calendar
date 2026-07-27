@@ -49,7 +49,7 @@ function FifaEventCard({ eventRef, filters }: FifaEventCardProps) {
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
   const isLive = isEventLive(
     mainCompetition.date,
-    getDurationMinutes("soccer", "standard")
+    getDurationMinutes("soccer")
   );
 
   return (

@@ -102,12 +102,22 @@ describe("CricketTeamEventCard", () => {
   });
 
   it("shows the live badge across a multi-day Test in progress", () => {
+    // A Test started 2 days ago is inside its 5-day window. No endDate here:
+    // liveness is derived from the format duration alone.
+    renderCard(makeEvent({ format: "test", date: daysFromNow(-2) }));
+    expect(screen.getByText(/live/i)).toBeInTheDocument();
+  });
+
+  it("hides the live badge once a match is past its window", () => {
+    // The bug this guards: a T20I runs ~4h, but ESPN's endDate sits ~40h out,
+    // so trusting it kept finished matches badged live for over a day.
     renderCard(
       makeEvent({
-        date: daysFromNow(-2),
-        endDate: daysFromNow(2),
+        format: "t20i",
+        date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        endDate: daysFromNow(1),
       })
     );
-    expect(screen.getByText(/live/i)).toBeInTheDocument();
+    expect(screen.queryByText(/live/i)).not.toBeInTheDocument();
   });
 });

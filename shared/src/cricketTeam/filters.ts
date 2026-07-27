@@ -1,5 +1,5 @@
 import type { CricketTeamEvent, CricketTeamFilters } from "./types.ts";
-import { getDurationMinutes } from "../sports/formats.ts";
+import { getCricketMatchMinutes } from "./types.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 export function filterCricketTeamEvents(
@@ -42,5 +42,5 @@ export function filterCricketTeamEvent(
  * disappear three weeks before it was played.
  */
 export function isCricketEventPast(event: CricketTeamEvent): boolean {
-  return isEventPast(event.date, getDurationMinutes("cricket", event.format));
+  return isEventPast(event.date, getCricketMatchMinutes(event.format));
 }

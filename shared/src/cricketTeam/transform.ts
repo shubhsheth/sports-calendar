@@ -1,5 +1,5 @@
 import type { CricketTeamEvent } from "./types.ts";
-import { getDurationMinutes } from "../sports/formats.ts";
+import { getCricketMatchMinutes } from "./types.ts";
 import dayjs, { type Dayjs } from "dayjs";
 import type { EventAttributes } from "ics";
 
@@ -23,7 +23,8 @@ export function transformCricketTeamEventsToIcs(
 ): EventAttributes[] {
   return events.map(event => {
     const start = dayjs(event.date);
-    const base = {
+    const durationMinutes = getCricketMatchMinutes(event.format);
+    return {
       uid: `${event.id}@sports-calendar`,
       title: event.formatDetail
         ? `${event.name} — ${event.formatDetail}`
@@ -31,11 +32,6 @@ export function transformCricketTeamEventsToIcs(
       description: `${event.seriesName}: ${event.name} — ${event.fullStatus.type.description}`,
       start: toDateArray(start),
       location: event.venue?.fullName,
-    };
-
-    const durationMinutes = getDurationMinutes("cricket", event.format);
-    return {
-      ...base,
       duration: {
         hours: Math.floor(durationMinutes / 60),
         minutes: durationMinutes % 60,

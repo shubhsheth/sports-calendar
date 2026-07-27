@@ -7,7 +7,7 @@ export function transformFifaEventsToIcs(
   events: FifaEvent[]
 ): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
-  const durationMinutes = getDurationMinutes("soccer", "standard");
+  const durationMinutes = getDurationMinutes("soccer");
 
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {

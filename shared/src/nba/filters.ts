@@ -22,10 +22,7 @@ export function filterNbaEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(
-        competition.date,
-        getDurationMinutes("basketball", "standard")
-      )
+      isEventPast(competition.date, getDurationMinutes("basketball"))
     ) {
       return false;
     }

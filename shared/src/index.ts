@@ -12,6 +12,7 @@ export * from "./nfl/filters.ts";
 export * from "./nfl/fetch.ts";
 export * from "./nfl/transform.ts";
 export * from "./f1/types.ts";
+export * from "./f1/sessions.ts";
 export * from "./f1/filters.ts";
 export * from "./f1/fetch.ts";
 export * from "./f1/transform.ts";

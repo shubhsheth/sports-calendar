@@ -49,7 +49,7 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
   const isLive = isEventLive(
     mainCompetition.date,
-    getDurationMinutes("basketball", "standard")
+    getDurationMinutes("basketball")
   );
 
   return (

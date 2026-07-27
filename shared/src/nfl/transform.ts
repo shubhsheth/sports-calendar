@@ -12,7 +12,7 @@ import type { EventAttributes } from "ics";
  */
 export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
-  const durationMinutes = getDurationMinutes("football", "standard");
+  const durationMinutes = getDurationMinutes("football");
 
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {

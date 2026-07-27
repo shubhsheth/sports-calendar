@@ -1,5 +1,5 @@
 import type { CricketTeamEvent } from "@sports-calendar/shared";
-import { getDurationMinutes, isEventLive } from "@sports-calendar/shared";
+import { getCricketMatchMinutes, isEventLive } from "@sports-calendar/shared";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
@@ -23,10 +23,7 @@ function CricketTeamEventCard({ event }: CricketTeamEventCardProps) {
   const eventDate = dayjs(event.date).format("MMM D, h:mm A");
   // Same live check every other sport's card uses: started, and inside the
   // format's nominal window.
-  const isLive = isEventLive(
-    event.date,
-    getDurationMinutes("cricket", event.format)
-  );
+  const isLive = isEventLive(event.date, getCricketMatchMinutes(event.format));
   const formatLabel = event.formatDetail || event.format.toUpperCase();
 
   return (

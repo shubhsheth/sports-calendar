@@ -164,7 +164,8 @@ Deno.test("cricket-team route returns the team's matches across its series", asy
     assert(body.includes("India tour of Sri Lanka 2026"), "missing series name");
     // Every match, Tests included, spans its format's nominal duration —
     // ESPN's endDate is padded to a day boundary and sometimes precedes the
-    // start, so it is not used. A Test is five days: DURATION:P5D.
+    // start, so it is not used. A Test is five days, which ics emits as
+    // DURATION:PT120H.
     assert(
       body.includes("DURATION:PT120H"),
       "Test should span its 5-day nominal duration"

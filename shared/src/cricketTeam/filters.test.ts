@@ -1,7 +1,7 @@
 import { filterCricketTeamEvents, isCricketEventPast } from "./filters.ts";
 import { makeCricketTeamEvent } from "./testEvent.ts";
 import { isEventLive } from "../eventStatus.ts";
-import { getDurationMinutes } from "../sports/formats.ts";
+import { getCricketMatchMinutes } from "./types.ts";
 
 const daysFromNow = (days: number) =>
   new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
@@ -63,9 +63,9 @@ describe("isCricketEventPast", () => {
       endDate: daysFromNow(1),
     });
     expect(isCricketEventPast(finishedT20i)).toBe(true);
-    expect(
-      isEventLive(finishedT20i.date, getDurationMinutes("cricket", "t20i"))
-    ).toBe(false);
+    expect(isEventLive(finishedT20i.date, getCricketMatchMinutes("t20i"))).toBe(
+      false
+    );
   });
 
   it("keeps a match inside its window live", () => {
@@ -74,9 +74,9 @@ describe("isCricketEventPast", () => {
       date: hoursFromNow(-2),
     });
     expect(isCricketEventPast(runningOdi)).toBe(false);
-    expect(
-      isEventLive(runningOdi.date, getDurationMinutes("cricket", "odi"))
-    ).toBe(true);
+    expect(isEventLive(runningOdi.date, getCricketMatchMinutes("odi"))).toBe(
+      true
+    );
   });
 
   it("is unaffected by an endDate preceding the start", () => {

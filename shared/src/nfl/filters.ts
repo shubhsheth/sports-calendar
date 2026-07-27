@@ -22,7 +22,7 @@ export function filterNflEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, getDurationMinutes("football", "standard"))
+      isEventPast(competition.date, getDurationMinutes("football"))
     ) {
       return false;
     }
