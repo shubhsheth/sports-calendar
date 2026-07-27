@@ -2,7 +2,7 @@ import { getDurationMinutes, type SportFormat } from "../sports/formats.ts";
 
 /**
  * ESPN identifies race-weekend sessions by numeric `competition.type.id`, so
- * they need translating to racing formats before a duration can be looked up.
+ * they need translating to named formats before a duration can be looked up.
  * That translation is a detail of ESPN's F1 feed rather than a fact about the
  * sport, which is why it lives here and not in the shared sports module.
  *
@@ -10,7 +10,7 @@ import { getDurationMinutes, type SportFormat } from "../sports/formats.ts";
  * then requires the caller to handle an id that isn't listed, instead of the
  * fallback below looking like dead code.
  */
-const SESSION_FORMATS: Record<string, SportFormat<"racing"> | undefined> = {
+const SESSION_FORMATS: Record<string, SportFormat<"f1"> | undefined> = {
   "1": "practice", // FP1 / FP2 / FP3
   "2": "qualifying",
   "3": "race",
@@ -33,5 +33,5 @@ export function getF1SessionMinutes(sessionTypeId: string): number {
   const format = SESSION_FORMATS[sessionTypeId];
   return format === undefined
     ? UNKNOWN_F1_SESSION_MINUTES
-    : getDurationMinutes("racing", format);
+    : getDurationMinutes("f1", format);
 }

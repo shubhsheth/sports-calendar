@@ -6,10 +6,18 @@
  * IPL fixture. Keying by sport states that once, and a new league of a sport
  * already listed here needs no entry at all.
  *
- * Sport names follow the taxonomy already used for ESPN's Core API paths (see
+ * Names follow the taxonomy already used for ESPN's Core API paths (see
  * `CORE_PATHS` in `client/api/calendar/fetchPinnedEventDetails.ts`), so there is
  * only one naming scheme in the codebase. Per that convention `football` is
  * American football and `soccer` is the association game.
+ *
+ * `f1` is the deliberate exception to keying by sport. Motorsport session
+ * structure and length are properties of the series, not of racing: a sprint
+ * qualifying session is an F1 invention, MotoGP's sprints run to different
+ * lengths, and NASCAR races in stages. A single `racing` entry would therefore
+ * be claiming something false about every series that isn't F1, so the series
+ * is the honest granularity here. Note this is the *duration* key only — ESPN's
+ * API path segment for F1 is still `racing` (see `shared/src/f1/fetch.ts`).
  *
  * These are nominal, not measured: they answer "how long should we assume this
  * runs?" for live/past checks and calendar spans, not "how long did it run".
@@ -24,7 +32,7 @@ export const SPORT_FORMATS = {
   basketball: { standard: 150 },
   football: { standard: 210 },
   soccer: { standard: 120 },
-  racing: {
+  f1: {
     practice: 60,
     qualifying: 60,
     race: 120,

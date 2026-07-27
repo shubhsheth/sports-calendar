@@ -18,23 +18,25 @@ describe("SPORT_FORMATS", () => {
     ["cricket", "odi", 480],
     ["cricket", "t20", 240],
     ["cricket", "other", 240],
-    ["racing", "practice", 60],
-    ["racing", "qualifying", 60],
-    ["racing", "race", 120],
-    ["racing", "sprintQualifying", 45],
-    ["racing", "sprint", 30],
+    ["f1", "practice", 60],
+    ["f1", "qualifying", 60],
+    ["f1", "race", 120],
+    ["f1", "sprintQualifying", 45],
+    ["f1", "sprint", 30],
   ] as const)("holds %s/%s at %i minutes", (sport, format, expected) => {
     expect(DURATIONS[sport][format]).toBe(expected);
   });
 
-  it("keys by sport, never by league", () => {
-    // The point of the module: a league is not a unit of duration, so adding a
-    // league of an existing sport must require no change here.
+  it("keys by sport, with f1 as the documented exception", () => {
+    // Duration is a property of the game, so a new league of an existing sport
+    // needs no entry here. Motorsport is the exception: session lengths are
+    // series-specific, so keying it by sport would assert something false
+    // about every series that is not F1.
     expect(Object.keys(SPORT_FORMATS).sort()).toEqual([
       "basketball",
       "cricket",
+      "f1",
       "football",
-      "racing",
       "soccer",
     ]);
   });
@@ -52,7 +54,7 @@ describe("SPORT_FORMATS", () => {
 describe("getDurationMinutes", () => {
   it("resolves a typed pair, one per sport", () => {
     expect(getDurationMinutes("cricket", "test")).toBe(7200);
-    expect(getDurationMinutes("racing", "race")).toBe(120);
+    expect(getDurationMinutes("f1", "race")).toBe(120);
   });
 
   it("lets a single-format sport omit the format name", () => {
