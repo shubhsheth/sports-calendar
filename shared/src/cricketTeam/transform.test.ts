@@ -25,7 +25,9 @@ describe("transformCricketTeamEventsToIcs", () => {
     });
   });
 
-  it("spans a Test from date to endDate instead of a duration", () => {
+  it("spans a Test by its nominal duration, ignoring endDate", () => {
+    // endDate is padded to a day boundary and occasionally precedes the start,
+    // so the ICS span comes from the format duration like every other match.
     const [ics] = transformCricketTeamEventsToIcs([
       makeCricketTeamEvent({
         format: "test",
@@ -37,12 +39,28 @@ describe("transformCricketTeamEventsToIcs", () => {
     expect(ics).toMatchObject({
       title: "Sri Lanka v India — 1st Test",
       start: [2026, 8, 15, 4, 30],
-      end: [2026, 8, 20, 23, 59],
+      duration: { hours: 120, minutes: 0 },
     });
-    expect(ics).not.toHaveProperty("duration");
+    expect(ics).not.toHaveProperty("end");
   });
 
-  it("falls back to the nominal duration for a Test without endDate", () => {
+  it("is unaffected by an endDate that precedes the start", () => {
+    // Real ESPN data: IND v AUS starts 2027-02-27 with endDate 2027-02-04.
+    const [ics] = transformCricketTeamEventsToIcs([
+      makeCricketTeamEvent({
+        format: "test",
+        formatDetail: "5th Test",
+        date: "2027-02-27T04:00Z",
+        endDate: "2027-02-04T23:59Z",
+      }),
+    ]);
+    expect(ics).toMatchObject({
+      start: [2027, 2, 27, 4, 0],
+      duration: { hours: 120, minutes: 0 },
+    });
+  });
+
+  it("spans a Test with no endDate identically", () => {
     const [ics] = transformCricketTeamEventsToIcs([
       makeCricketTeamEvent({
         format: "test",

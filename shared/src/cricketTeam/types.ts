@@ -19,23 +19,13 @@ export type CricketTeamEvent = IplEvent & {
   seriesName: string; // e.g. "India tour of Sri Lanka 2026"
   format: CricketMatchFormat;
   formatDetail: string; // e.g. "2nd T20I" (competition description; may be "")
-  endDate?: string; // ISO 8601; Tests span multiple days (e.g. five)
-};
-
-/**
- * Nominal duration per format, used for live/past checks and as the ICS
- * duration of single-day formats. Tests are multi-day: the value here is a
- * fallback for the rare Test missing `endDate` — when `endDate` is present it
- * wins (both for "is past" checks and the ICS span).
- */
-export const CRICKET_FORMAT_DURATION_MINUTES: Record<
-  CricketMatchFormat,
-  number
-> = {
-  test: 5 * 24 * 60,
-  odi: 480,
-  t20i: 240,
-  other: 240,
+  /**
+   * ISO 8601, as reported by ESPN. Retained as upstream data but **not** used
+   * to decide when a match ends — it is padded to a day boundary and sometimes
+   * precedes the start. See `isCricketEventPast`. Durations come from
+   * `shared/src/sports/formats.ts`.
+   */
+  endDate?: string;
 };
 
 export type CricketTeamFilters = {

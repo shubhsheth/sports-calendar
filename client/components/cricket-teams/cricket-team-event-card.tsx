@@ -1,5 +1,5 @@
 import type { CricketTeamEvent } from "@sports-calendar/shared";
-import { isCricketEventPast } from "@sports-calendar/shared";
+import { getDurationMinutes, isEventLive } from "@sports-calendar/shared";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
@@ -21,10 +21,12 @@ function CricketTeamEventCard({ event }: CricketTeamEventCardProps) {
   const awayCompetitor = event.competitors.find(c => c.homeAway === "away");
 
   const eventDate = dayjs(event.date).format("MMM D, h:mm A");
-  // Live = started but not yet past; the past check is endDate-aware, so a
-  // Test stays live across all its days.
-  const isLive =
-    dayjs().isAfter(dayjs(event.date)) && !isCricketEventPast(event);
+  // Same live check every other sport's card uses: started, and inside the
+  // format's nominal window.
+  const isLive = isEventLive(
+    event.date,
+    getDurationMinutes("cricket", event.format)
+  );
   const formatLabel = event.formatDetail || event.format.toUpperCase();
 
   return (

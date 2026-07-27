@@ -1,6 +1,5 @@
 import type { CricketTeamEvent, CricketTeamFilters } from "./types.ts";
-import { CRICKET_FORMAT_DURATION_MINUTES } from "./types.ts";
-import dayjs from "dayjs";
+import { getDurationMinutes } from "../sports/formats.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 export function filterCricketTeamEvents(
@@ -31,13 +30,17 @@ export function filterCricketTeamEvent(
 }
 
 /**
- * A cricket match is past once its `endDate` has passed (multi-day Tests stay
- * current across all their days); without one, fall back to the format's
- * nominal duration like other leagues do.
+ * A cricket match is past once its format's nominal duration has elapsed — the
+ * same rule every other sport uses.
+ *
+ * ESPN's `endDate` is deliberately not consulted. It is present on every match,
+ * not just Tests, and is padded to a `23:59` day boundary one or two days out:
+ * measured across 137 matches, a T20I's `endDate` sits a median 39.7h after the
+ * start for a game lasting about 3.5h. Preferring it left finished matches
+ * badged live for over a day. It is also not always sane — one Test carries an
+ * `endDate` 23 days *before* its start, which under the old rule made the match
+ * disappear three weeks before it was played.
  */
 export function isCricketEventPast(event: CricketTeamEvent): boolean {
-  if (event.endDate) {
-    return dayjs().isAfter(dayjs(event.endDate));
-  }
-  return isEventPast(event.date, CRICKET_FORMAT_DURATION_MINUTES[event.format]);
+  return isEventPast(event.date, getDurationMinutes("cricket", event.format));
 }

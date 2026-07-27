@@ -79,7 +79,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
     the five session ids resolves to its previous duration and an unknown id
     still yields 60.
 
-- [ ] **T7: Migrate cricket and correct live/past**
+- [x] **T7: Migrate cricket and correct live/past**
   - Remove `CRICKET_FORMAT_DURATION_MINUTES` from
     `shared/src/cricketTeam/types.ts`.
   - `shared/src/cricketTeam/filters.ts`: compute past from the format duration
@@ -101,7 +101,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Verify: `npx vitest run shared/src/cricketTeam client/components/cricket-teams`
     green; a T20I started more than 240 minutes ago is past and not live.
 
-- [ ] **T8: Confirm full removal**
+- [x] **T8: Confirm full removal**
   - Grep the repo for all six removed constant names; expect zero definitions
     and zero consumers outside the spec folder.
   - Remove any import left orphaned by T2–T7.
