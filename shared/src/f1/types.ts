@@ -31,15 +31,6 @@ export type F1EventFilters = {
   types: string[];
 };
 
-/** Duration in minutes per F1 session type ID */
-export const F1_SESSION_DURATIONS: Record<string, number> = {
-  "1": 60, // Practice (FP1 / FP2 / FP3)
-  "2": 60, // Qualifying
-  "3": 120, // Race
-  "5": 45, // Sprint Qualifying (Sprint Shootout)
-  "6": 30, // Sprint Race
-};
-
 /**
  * F1 `competition.type.id` identifies the session within a race weekend. Known
  * IDs and their API abbreviations:

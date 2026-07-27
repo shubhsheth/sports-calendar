@@ -69,7 +69,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Verify: `npx vitest run shared/src/ipl client/components/ipl` green; no
     remaining reference to `IPL_DURATION_MINUTES`.
 
-- [ ] **T6: Migrate F1 (racing, per session)**
+- [x] **T6: Migrate F1 (racing, per session)**
   - Remove `F1_SESSION_DURATIONS` from `shared/src/f1/types.ts`.
   - Update `shared/src/f1/filters.ts`, `shared/src/f1/transform.ts`, and
     `client/components/f1/f1-event-card.tsx` to go through the session-id map,
