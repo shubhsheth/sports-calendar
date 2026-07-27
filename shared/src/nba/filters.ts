@@ -1,5 +1,5 @@
 import type { NbaEvent, NbaEventFilters } from "./types.ts";
-import { NBA_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 function getTeamIdFromRef(ref: string): string | undefined {
@@ -22,7 +22,10 @@ export function filterNbaEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, NBA_DURATION_MINUTES)
+      isEventPast(
+        competition.date,
+        getDurationMinutes("basketball", "standard")
+      )
     ) {
       return false;
     }

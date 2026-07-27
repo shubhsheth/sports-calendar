@@ -1,17 +1,18 @@
 import type { NbaEvent } from "./types.ts";
-import { NBA_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
 /**
  * Builds one ICS event per NBA game. Title: `NBA: {shortName}`; duration is
- * `NBA_DURATION_MINUTES` (see `shared/src/nba/types.ts`).
+ * basketball's nominal length (see `shared/src/sports/formats.ts`).
  *
  * @param events - The NBA events to convert.
  * @returns One ICS event attribute object per game.
  */
 export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
+  const durationMinutes = getDurationMinutes("basketball", "standard");
 
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {
@@ -30,8 +31,8 @@ export function transformNbaEventsToIcs(events: NbaEvent[]): EventAttributes[] {
           start.minute(),
         ],
         duration: {
-          hours: Math.floor(NBA_DURATION_MINUTES / 60),
-          minutes: NBA_DURATION_MINUTES % 60,
+          hours: Math.floor(durationMinutes / 60),
+          minutes: durationMinutes % 60,
         },
         location: competition.venue?.fullName,
       });

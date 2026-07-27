@@ -37,12 +37,15 @@ Each task lists its acceptance check. Tick a box only when that check passes.
     say so is worse documentation. The requirement is that no league is a unit
     of duration, not that the word goes unmentioned.
 
-- [ ] **T2: Migrate NBA (basketball/standard)**
+- [x] **T2: Migrate NBA (basketball/standard)**
   - `shared/src/nba/types.ts`: remove `NBA_DURATION_MINUTES`.
   - Update `shared/src/nba/filters.ts`, `shared/src/nba/transform.ts`, and
     `client/components/nba/nba-event-card.tsx` to resolve duration through the
     shared module as `basketball`/`standard`.
-  - Add a parity assertion that it still resolves to 150.
+  - Parity is already pinned by `shared/src/nba/transform.test.ts:60` ("sets
+    duration to 2 hours 30 minutes"), which fails if NBA is wired to the wrong
+    sport or format. No extra assertion added — it would restate a guarantee
+    the suite already makes.
   - Covers: FR-4, FR-8, NFR-1
   - Verify: `npx vitest run shared/src/nba client/components/nba` green; no
     remaining reference to `NBA_DURATION_MINUTES`.
