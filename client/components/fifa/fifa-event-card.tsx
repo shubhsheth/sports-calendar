@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterFifaEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive, FIFA_DURATION_MINUTES } from "@sports-calendar/shared";
+import { isEventLive, getDurationMinutes } from "@sports-calendar/shared";
 
 type FifaEventCardProps = {
   league: string;
@@ -47,7 +47,10 @@ function FifaEventCard({ eventRef, filters }: FifaEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
-  const isLive = isEventLive(mainCompetition.date, FIFA_DURATION_MINUTES);
+  const isLive = isEventLive(
+    mainCompetition.date,
+    getDurationMinutes("soccer", "standard")
+  );
 
   return (
     <Card className="w-full">
