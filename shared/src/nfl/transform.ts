@@ -1,17 +1,18 @@
 import type { NflEvent } from "./types.ts";
-import { NFL_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
 /**
  * Builds one ICS event per NFL game. Title: `NFL: {shortName}`; duration is
- * `NFL_DURATION_MINUTES` (see `shared/src/nfl/types.ts`).
+ * the sport's nominal length (see `shared/src/sports/formats.ts`).
  *
  * @param events - The NFL events to convert.
  * @returns One ICS event attribute object per game.
  */
 export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
+  const durationMinutes = getDurationMinutes("football", "standard");
 
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {
@@ -30,8 +31,8 @@ export function transformNflEventsToIcs(events: NflEvent[]): EventAttributes[] {
           start.minute(),
         ],
         duration: {
-          hours: Math.floor(NFL_DURATION_MINUTES / 60),
-          minutes: NFL_DURATION_MINUTES % 60,
+          hours: Math.floor(durationMinutes / 60),
+          minutes: durationMinutes % 60,
         },
         location: competition.venue?.fullName,
       });

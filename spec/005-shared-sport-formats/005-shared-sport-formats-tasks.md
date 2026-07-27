@@ -50,7 +50,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Verify: `npx vitest run shared/src/nba client/components/nba` green; no
     remaining reference to `NBA_DURATION_MINUTES`.
 
-- [ ] **T3: Migrate NFL (football/standard)**
+- [x] **T3: Migrate NFL (football/standard)**
   - Same shape as T2, resolving as `football`/`standard` (210).
   - Covers: FR-4, FR-8, NFR-1
   - Verify: `npx vitest run shared/src/nfl client/components/nfl` green; no

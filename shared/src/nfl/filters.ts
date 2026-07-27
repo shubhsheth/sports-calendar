@@ -1,5 +1,5 @@
 import type { NflEvent, NflEventFilters } from "./types.ts";
-import { NFL_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 function getTeamIdFromRef(ref: string): string | undefined {
@@ -22,7 +22,7 @@ export function filterNflEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, NFL_DURATION_MINUTES)
+      isEventPast(competition.date, getDurationMinutes("football", "standard"))
     ) {
       return false;
     }
