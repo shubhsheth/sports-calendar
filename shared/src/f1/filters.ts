@@ -1,5 +1,5 @@
 import type { F1Event, F1EventFilters } from "./types.ts";
-import { F1_SESSION_DURATIONS } from "./types.ts";
+import { getF1SessionMinutes } from "./sessions.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 export function filterF1Events(events: F1Event[], filters: F1EventFilters) {
@@ -17,7 +17,7 @@ export function filterF1Event(
   filters: F1EventFilters
 ): F1Event | null {
   const filteredCompetitions = event.competitions.filter(competition => {
-    const durationMin = F1_SESSION_DURATIONS[competition.type.id] ?? 60;
+    const durationMin = getF1SessionMinutes(competition.type.id);
     if (!filters.showPastEvents && isEventPast(competition.date, durationMin)) {
       return false;
     }

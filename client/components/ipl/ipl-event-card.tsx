@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import dayjs from "dayjs";
 import { filterIplEvent } from "@sports-calendar/shared";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive, IPL_DURATION_MINUTES } from "@sports-calendar/shared";
+import { isEventLive, getDurationMinutes } from "@sports-calendar/shared";
 
 type IplEventCardProps = {
   event: IplEvent;
@@ -19,7 +19,10 @@ function IplEventCard({ event, filters }: IplEventCardProps) {
   const awayCompetitor = filtered.competitors.find(c => c.homeAway === "away");
 
   const eventDate = dayjs(filtered.date).format("MMM D, h:mm A");
-  const isLive = isEventLive(filtered.date, IPL_DURATION_MINUTES);
+  const isLive = isEventLive(
+    filtered.date,
+    getDurationMinutes("cricket", "t20")
+  );
 
   return (
     <Card className="w-full">

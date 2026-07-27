@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterNflEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive, NFL_DURATION_MINUTES } from "@sports-calendar/shared";
+import { isEventLive, getDurationMinutes } from "@sports-calendar/shared";
 
 type NflEventCardProps = {
   league: string;
@@ -47,7 +47,10 @@ function NflEventCard({ eventRef, filters }: NflEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
-  const isLive = isEventLive(mainCompetition.date, NFL_DURATION_MINUTES);
+  const isLive = isEventLive(
+    mainCompetition.date,
+    getDurationMinutes("football")
+  );
 
   return (
     <Card className="w-full">

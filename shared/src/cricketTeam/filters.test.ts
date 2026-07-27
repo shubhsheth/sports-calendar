@@ -1,8 +1,13 @@
 import { filterCricketTeamEvents, isCricketEventPast } from "./filters.ts";
 import { makeCricketTeamEvent } from "./testEvent.ts";
+import { isEventLive } from "../eventStatus.ts";
+import { getCricketMatchMinutes } from "./types.ts";
 
 const daysFromNow = (days: number) =>
   new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+const hoursFromNow = (hours: number) =>
+  new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
 const showAll = { showPastEvents: true, formats: [] };
 
@@ -49,23 +54,57 @@ describe("filterCricketTeamEvents", () => {
 });
 
 describe("isCricketEventPast", () => {
-  it("uses endDate when present: an in-progress Test is not past", () => {
+  it("ignores endDate, which ESPN pads well past the real end", () => {
+    // A T20I lasts ~4h but ESPN's endDate sits a median ~40h out. Under the
+    // old endDate-first rule this match stayed "live" for another day.
+    const finishedT20i = makeCricketTeamEvent({
+      format: "t20i",
+      date: hoursFromNow(-5),
+      endDate: daysFromNow(1),
+    });
+    expect(isCricketEventPast(finishedT20i)).toBe(true);
+    expect(isEventLive(finishedT20i.date, getCricketMatchMinutes("t20i"))).toBe(
+      false
+    );
+  });
+
+  it("keeps a match inside its window live", () => {
+    const runningOdi = makeCricketTeamEvent({
+      format: "odi",
+      date: hoursFromNow(-2),
+    });
+    expect(isCricketEventPast(runningOdi)).toBe(false);
+    expect(isEventLive(runningOdi.date, getCricketMatchMinutes("odi"))).toBe(
+      true
+    );
+  });
+
+  it("is unaffected by an endDate preceding the start", () => {
+    // Real ESPN data: IND v AUS starts 2027-02-27 with endDate 2027-02-04.
+    // The old rule read that as already finished and hid the match.
+    const upcomingTest = makeCricketTeamEvent({
+      format: "test",
+      date: daysFromNow(30),
+      endDate: daysFromNow(7),
+    });
+    expect(isCricketEventPast(upcomingTest)).toBe(false);
+  });
+
+  it("keeps a Test current across its five-day window", () => {
     const ongoingTest = makeCricketTeamEvent({
       format: "test",
       date: daysFromNow(-2),
-      endDate: daysFromNow(2),
     });
     expect(isCricketEventPast(ongoingTest)).toBe(false);
 
     const finishedTest = makeCricketTeamEvent({
       format: "test",
       date: daysFromNow(-6),
-      endDate: daysFromNow(-1),
     });
     expect(isCricketEventPast(finishedTest)).toBe(true);
   });
 
-  it("falls back to the format duration without endDate", () => {
+  it("uses the format duration", () => {
     // A T20I (240 min) that started 5 hours ago is over…
     const doneT20i = makeCricketTeamEvent({
       format: "t20i",

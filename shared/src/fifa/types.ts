@@ -1,8 +1,5 @@
 import type { BaseEvent } from "../espn/fetchEventDetails.ts";
 
-/** Typical duration of a soccer match in minutes (incl. halftime) */
-export const FIFA_DURATION_MINUTES = 120;
-
 export type FifaEvent = BaseEvent & {
   competitions: FifaEventCompetition[];
 };

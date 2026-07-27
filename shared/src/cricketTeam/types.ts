@@ -1,4 +1,5 @@
 import type { IplEvent } from "../ipl/types.ts";
+import { getDurationMinutes, type SportFormat } from "../sports/formats.ts";
 
 /**
  * Match formats, mapped from the Site API's
@@ -19,24 +20,37 @@ export type CricketTeamEvent = IplEvent & {
   seriesName: string; // e.g. "India tour of Sri Lanka 2026"
   format: CricketMatchFormat;
   formatDetail: string; // e.g. "2nd T20I" (competition description; may be "")
-  endDate?: string; // ISO 8601; Tests span multiple days (e.g. five)
+  /**
+   * ISO 8601, as reported by ESPN. Retained as upstream data but **not** used
+   * to decide when a match ends — it is padded to a day boundary and sometimes
+   * precedes the start. See `isCricketEventPast`. Durations come from
+   * `shared/src/sports/formats.ts`.
+   */
+  endDate?: string;
 };
 
 /**
- * Nominal duration per format, used for live/past checks and as the ICS
- * duration of single-day formats. Tests are multi-day: the value here is a
- * fallback for the rare Test missing `endDate` — when `endDate` is present it
- * wins (both for "is past" checks and the ICS span).
+ * ESPN's match classes onto cricket's sport formats. Only `t20i` needs
+ * translating: internationals and franchise T20s are one format as far as
+ * duration goes, so the sport map carries a single `t20`. The distinction
+ * survives here rather than in the map because `t20i` is a persisted value —
+ * a feed query param, a filter-pill id, and stored in saved subscriptions —
+ * so it cannot be renamed without breaking existing feeds.
  */
-export const CRICKET_FORMAT_DURATION_MINUTES: Record<
+const SPORT_FORMAT_BY_MATCH_FORMAT: Record<
   CricketMatchFormat,
-  number
+  SportFormat<"cricket">
 > = {
-  test: 5 * 24 * 60,
-  odi: 480,
-  t20i: 240,
-  other: 240,
+  test: "test",
+  odi: "odi",
+  t20i: "t20",
+  other: "other",
 };
+
+/** Nominal duration of a cricket match, in minutes. */
+export function getCricketMatchMinutes(format: CricketMatchFormat): number {
+  return getDurationMinutes("cricket", SPORT_FORMAT_BY_MATCH_FORMAT[format]);
+}
 
 export type CricketTeamFilters = {
   showPastEvents: boolean;

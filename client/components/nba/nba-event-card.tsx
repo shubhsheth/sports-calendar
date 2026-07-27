@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { filterNbaEvent } from "@sports-calendar/shared";
 import { fetchTeamDetails } from "@/api/espn/fetchTeamDetails";
 import { LiveBadge } from "@/components/ui/live-badge";
-import { isEventLive, NBA_DURATION_MINUTES } from "@sports-calendar/shared";
+import { isEventLive, getDurationMinutes } from "@sports-calendar/shared";
 
 type NbaEventCardProps = {
   league: string;
@@ -47,7 +47,10 @@ function NbaEventCard({ eventRef, filters }: NbaEventCardProps) {
   );
 
   const eventDate = dayjs(mainCompetition.date).format("MMM D, h:mm A");
-  const isLive = isEventLive(mainCompetition.date, NBA_DURATION_MINUTES);
+  const isLive = isEventLive(
+    mainCompetition.date,
+    getDurationMinutes("basketball")
+  );
 
   return (
     <Card className="w-full">

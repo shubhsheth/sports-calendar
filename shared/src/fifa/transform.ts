@@ -1,5 +1,5 @@
 import type { FifaEvent } from "./types.ts";
-import { FIFA_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import dayjs from "dayjs";
 import type { EventAttributes } from "ics";
 
@@ -7,6 +7,7 @@ export function transformFifaEventsToIcs(
   events: FifaEvent[]
 ): EventAttributes[] {
   const icsEvents: EventAttributes[] = [];
+  const durationMinutes = getDurationMinutes("soccer");
 
   for (const mainEvent of events) {
     for (const competition of mainEvent.competitions) {
@@ -25,8 +26,8 @@ export function transformFifaEventsToIcs(
           start.minute(),
         ],
         duration: {
-          hours: Math.floor(FIFA_DURATION_MINUTES / 60),
-          minutes: FIFA_DURATION_MINUTES % 60,
+          hours: Math.floor(durationMinutes / 60),
+          minutes: durationMinutes % 60,
         },
         location: competition.venue?.fullName,
       });

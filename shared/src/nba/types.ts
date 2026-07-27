@@ -1,8 +1,5 @@
 import type { BaseEvent } from "../espn/fetchEventDetails.ts";
 
-/** Typical duration of an NBA game in minutes */
-export const NBA_DURATION_MINUTES = 150;
-
 export type NbaEvent = BaseEvent & {
   competitions: NbaEventCompetition[];
 };

@@ -1,5 +1,5 @@
 import type { FifaEvent, FifaEventFilters } from "./types.ts";
-import { FIFA_DURATION_MINUTES } from "./types.ts";
+import { getDurationMinutes } from "../sports/formats.ts";
 import { isEventPast } from "../eventStatus.ts";
 
 function getTeamIdFromRef(ref: string): string | undefined {
@@ -25,7 +25,7 @@ export function filterFifaEvent(
   const filteredCompetitions = event.competitions.filter(competition => {
     if (
       !filters.showPastEvents &&
-      isEventPast(competition.date, FIFA_DURATION_MINUTES)
+      isEventPast(competition.date, getDurationMinutes("soccer"))
     ) {
       return false;
     }
