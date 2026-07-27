@@ -219,8 +219,12 @@ describe("fetchAllCricketTeamEvents", () => {
   it("rejects on an ESPN error status rather than parsing the error page", async () => {
     server.use(
       http.get(HEADER_URL, () => HttpResponse.json(headerFixture)),
+      // Parseable body, so only the status check can reject this.
       http.get(SCOREBOARD_URL, () =>
-        HttpResponse.text("<html>Bad Gateway</html>", { status: 502 })
+        HttpResponse.json(
+          { leagues: seriesFixture.leagues, events: [] },
+          { status: 502 }
+        )
       )
     );
     await expect(fetchAllCricketTeamEvents("6", NOW)).rejects.toThrow(
