@@ -1,0 +1,43 @@
+name: PR Tests
+
+on:
+  pull_request:
+
+jobs:
+  vitest:
+    name: Client and shared tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test
+        run: npm run test:run
+
+  deno:
+    name: Calendar function tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # vitest excludes supabase/functions/calendar/** (see vite.config.ts), so
+      # these run here instead. `deno test` also typechecks, which is the only
+      # typecheck the function graph gets.
+      - name: Test
+        run: deno test --allow-all --unstable-sloppy-imports calendar/
+        working-directory: supabase/functions
