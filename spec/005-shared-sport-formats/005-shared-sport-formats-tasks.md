@@ -109,7 +109,7 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Verify: `npm run test:run` green; the Deno suite green; `npm run lint` shows
     no new problems; `npm run format:check` clean.
 
-- [ ] **T9: Verify against live data**
+- [x] **T9: Verify against live data**
   - Re-run the cricket status probe used during investigation against live ESPN
     for at least two teams; confirm no match past its nominal duration reports
     as live, and that the `IND v AUS` Test with the inverted `endDate` still
@@ -117,10 +117,10 @@ Each task lists its acceptance check. Tick a box only when that check passes.
   - Covers: Success Criteria 1, 2, 3, 8
   - Verify: probe output shows no false LIVE rows.
 
-- [ ] **T10: File the Test-match issue**
+- [x] **T10: File the Test-match issue**
   - Open a GitHub issue describing why a flat five-day Test window is crude,
     what the upstream `endDate` data actually looks like (universal, padded to a
     day boundary, occasionally inverted), and what would make a better end-time
     signal trustworthy.
   - Covers: FR-13, Success Criterion 10
-  - Verify: issue exists and is linked from the PR.
+  - Verify: issue exists and is linked from the PR. Filed as #65.
