@@ -89,7 +89,27 @@ describe("discoverTeamSeriesIds", () => {
     expect(series).toEqual([]);
   });
 
-  it("skips failed requests instead of failing the scan", async () => {
+  it("retries a transient failure and keeps the scan complete", async () => {
+    const flakyDate = getDiscoveryQueries(NOW).dailyDates[0];
+    let failuresLeft = 2;
+    server.use(
+      http.get(HEADER_URL, ({ request }) => {
+        const date = record(request);
+        if (date === flakyDate && failuresLeft > 0) {
+          failuresLeft--;
+          return HttpResponse.error();
+        }
+        return HttpResponse.json(headerFixture);
+      })
+    );
+    const series = await discoverTeamSeriesIds("6", NOW);
+    expect(series).toEqual([INDIA_ZIM_SERIES]);
+    expect(requestedParams.filter(p => p === flakyDate)).toHaveLength(3);
+  });
+
+  it("fails the scan when a request never lands", async () => {
+    // Silently skipping it would leave that day unscanned, which is
+    // indistinguishable from "no cricket that day".
     const failingDate = getDiscoveryQueries(NOW).dailyDates[0];
     server.use(
       http.get(HEADER_URL, ({ request }) => {
@@ -98,18 +118,31 @@ describe("discoverTeamSeriesIds", () => {
         return HttpResponse.json(headerFixture);
       })
     );
-    const series = await discoverTeamSeriesIds("6", NOW);
-    expect(series).toEqual([INDIA_ZIM_SERIES]);
+    await expect(discoverTeamSeriesIds("6", NOW)).rejects.toThrow(
+      /failed after 4 attempts/
+    );
   });
 
-  it("skips malformed responses", async () => {
+  it("fails the scan on a persistently malformed response", async () => {
     server.use(
       http.get(HEADER_URL, () =>
         HttpResponse.text("<html>Access Denied</html>")
       )
     );
-    const series = await discoverTeamSeriesIds("6", NOW);
-    expect(series).toEqual([]);
+    await expect(discoverTeamSeriesIds("6", NOW)).rejects.toThrow(
+      /failed after 4 attempts/
+    );
+  });
+
+  it("fails the scan on an error status, rather than parsing the error page", async () => {
+    server.use(
+      http.get(HEADER_URL, () =>
+        HttpResponse.json(emptyHeader, { status: 503 })
+      )
+    );
+    await expect(discoverTeamSeriesIds("6", NOW)).rejects.toThrow(
+      /failed after 4 attempts/
+    );
   });
 
   it("retries an empty month once (cold ESPN cache)", async () => {

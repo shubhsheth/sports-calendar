@@ -194,48 +194,53 @@ export async function buildCombinedIcsEvents(
       calendar.pinnedEvents.some(p => p.league === league)
   );
 
-  const cricketPromise = buildCricketTeamIcsEvents(calendar);
-  const perLeague = await Promise.all(
-    involved.map(async league => {
-      const pipe = PIPELINES[league];
+  // Cricket and the leagues run concurrently, awaited together so that a
+  // rejection from either always has a handler attached — an unhandled one
+  // takes down the isolate instead of returning a 500.
+  const [cricketIcsEvents, perLeague] = await Promise.all([
+    buildCricketTeamIcsEvents(calendar),
+    Promise.all(
+      involved.map(async league => {
+        const pipe = PIPELINES[league];
 
-      // Validate stored filters before fetching, so a league referenced only
-      // by an invalid subscription costs no ESPN round trip.
-      const subscription = calendar.subscriptions.find(
-        s => s.league === league
-      );
-      let filters: unknown = null;
-      if (subscription) {
-        const parsed = pipe.parseFilters(filtersToQuery(subscription.filters));
-        if (parsed.ok) {
-          filters = parsed.value;
-        } else {
-          console.error(`Skipping ${league} subscription: ${parsed.error}`);
+        // Validate stored filters before fetching, so a league referenced only
+        // by an invalid subscription costs no ESPN round trip.
+        const subscription = calendar.subscriptions.find(
+          s => s.league === league
+        );
+        let filters: unknown = null;
+        if (subscription) {
+          const parsed = pipe.parseFilters(
+            filtersToQuery(subscription.filters)
+          );
+          if (parsed.ok) {
+            filters = parsed.value;
+          } else {
+            console.error(`Skipping ${league} subscription: ${parsed.error}`);
+          }
         }
-      }
-      const pinnedIds = new Set(
-        calendar.pinnedEvents
-          .filter(p => p.league === league)
-          .map(p => p.espnEventId)
-      );
-      if (filters === null && pinnedIds.size === 0) return [];
+        const pinnedIds = new Set(
+          calendar.pinnedEvents
+            .filter(p => p.league === league)
+            .map(p => p.espnEventId)
+        );
+        if (filters === null && pinnedIds.size === 0) return [];
 
-      const events = await pipe.fetchEvents();
-      const selected = new Map<string, AnyEvent>();
-      if (filters !== null) {
-        for (const event of pipe.filterEvents(events, filters)) {
-          selected.set(event.id, event);
+        const events = await pipe.fetchEvents();
+        const selected = new Map<string, AnyEvent>();
+        if (filters !== null) {
+          for (const event of pipe.filterEvents(events, filters)) {
+            selected.set(event.id, event);
+          }
         }
-      }
-      for (const event of events) {
-        if (pinnedIds.has(event.id)) selected.set(event.id, event);
-      }
+        for (const event of events) {
+          if (pinnedIds.has(event.id)) selected.set(event.id, event);
+        }
 
-      return pipe.transformToIcs([...selected.values()]);
-    })
-  );
-
-  const cricketIcsEvents = await cricketPromise;
+        return pipe.transformToIcs([...selected.values()]);
+      })
+    ),
+  ]);
 
   const seenUids = new Set<string>();
   const combined: EventAttributes[] = [];

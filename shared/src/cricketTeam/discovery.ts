@@ -1,4 +1,5 @@
 import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
+import { fetchEspnJson } from "./fetchJson.ts";
 import { CRICKET_TEAM_DISCOVERY } from "./types.ts";
 
 const FETCH_CONCURRENCY = 8;
@@ -78,18 +79,15 @@ export function getDiscoveryQueries(now: Date = new Date()): {
 
 /**
  * Fetches the scoreboard header for one `dates` param (`YYYYMMDD` or
- * `YYYYMM`), returning the series active in that span. Errors and malformed
- * responses yield `[]` so one bad response can't sink the whole scan.
+ * `YYYYMM`), returning the series active in that span. Transport failures are
+ * retried and then thrown (see {@link fetchEspnJson}) — a query that never
+ * lands leaves its span of the calendar unscanned, which would look exactly
+ * like "no cricket in that span".
  */
 async function fetchHeaderLeagues(dateParam: string): Promise<HeaderLeague[]> {
   const url = `https://site.web.api.espn.com/apis/personalized/v2/scoreboard/header?sport=cricket&dates=${dateParam}`;
-  try {
-    const response = await fetch(url);
-    const data = (await response.json()) as HeaderResponse;
-    return data.sports?.[0]?.leagues ?? [];
-  } catch {
-    return [];
-  }
+  const data = await fetchEspnJson<HeaderResponse>(url);
+  return data.sports?.[0]?.leagues ?? [];
 }
 
 function leagueHasTeam(league: HeaderLeague, teamId: string): boolean {
@@ -113,12 +111,16 @@ function leagueHasTeam(league: HeaderLeague, teamId: string): boolean {
  * month responses truncate long event lists — a national side is never in the
  * dense domestic leagues that get truncated, and its own bilateral series /
  * ICC events are short enough that at least one of their matches always lands
- * in a daily query or the head of a month response. The only repair kept is a
- * single retry for a month that returns empty on a cold ESPN cache.
+ * in a daily query or the head of a month response. The only coverage repair
+ * kept is a single retry for a month that returns empty on a cold ESPN cache —
+ * an empty response is valid (fully past months always return empty), so it is
+ * distinct from the transport failures {@link fetchEspnJson} retries.
  *
  * @param teamId - ESPN cricket team id (see `CRICKET_NATIONAL_TEAMS`).
  * @param now - The reference "today" for the window; defaults to current time.
  * @returns The team's series, deduped, in discovery order.
+ * @throws If any discovery query fails every attempt, rather than returning a
+ * scan with an unscanned hole in it.
  */
 export async function discoverTeamSeriesIds(
   teamId: string,
