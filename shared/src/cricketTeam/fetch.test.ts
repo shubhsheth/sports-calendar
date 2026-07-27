@@ -47,6 +47,20 @@ describe("fetchSeriesCalendar", () => {
       "20260827",
     ]);
   });
+
+  it("retries a transient failure before giving up", async () => {
+    let failuresLeft = 2;
+    server.use(
+      http.get(SCOREBOARD_URL, () => {
+        if (failuresLeft > 0) {
+          failuresLeft--;
+          return HttpResponse.error();
+        }
+        return HttpResponse.json(seriesFixture);
+      })
+    );
+    await expect(fetchSeriesCalendar("24567")).resolves.toHaveLength(10);
+  });
 });
 
 describe("fetchSeriesEventsByDate", () => {
@@ -169,5 +183,48 @@ describe("fetchAllCricketTeamEvents", () => {
     server.use(http.get(HEADER_URL, () => HttpResponse.json(headerFixture)));
     const events = await fetchAllCricketTeamEvents("2", NOW); // Australia: no series
     expect(events).toEqual([]);
+  });
+
+  it("retries a transient series failure and still returns the full schedule", async () => {
+    let failuresLeft = 2;
+    server.use(
+      http.get(HEADER_URL, () => HttpResponse.json(headerFixture)),
+      http.get(SCOREBOARD_URL, () => {
+        if (failuresLeft > 0) {
+          failuresLeft--;
+          return HttpResponse.error();
+        }
+        return HttpResponse.json({
+          leagues: seriesFixture.leagues,
+          events: [...seriesFixture.events, ...odiFixture.events],
+        });
+      })
+    );
+    const events = await fetchAllCricketTeamEvents("6", NOW);
+    expect(events.map(e => e.id)).toEqual(["1544001", "1529227"]);
+  });
+
+  it("rejects instead of returning a schedule missing a series", async () => {
+    // A year-sized request is a whole tour; returning [] for it would hand the
+    // caller a short schedule that looks complete.
+    server.use(
+      http.get(HEADER_URL, () => HttpResponse.json(headerFixture)),
+      http.get(SCOREBOARD_URL, () => HttpResponse.error())
+    );
+    await expect(fetchAllCricketTeamEvents("6", NOW)).rejects.toThrow(
+      /failed after 4 attempts/
+    );
+  });
+
+  it("rejects on an ESPN error status rather than parsing the error page", async () => {
+    server.use(
+      http.get(HEADER_URL, () => HttpResponse.json(headerFixture)),
+      http.get(SCOREBOARD_URL, () =>
+        HttpResponse.text("<html>Bad Gateway</html>", { status: 502 })
+      )
+    );
+    await expect(fetchAllCricketTeamEvents("6", NOW)).rejects.toThrow(
+      /failed after 4 attempts/
+    );
   });
 });

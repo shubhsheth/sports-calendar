@@ -2,6 +2,7 @@ import type { CricketMatchFormat, CricketTeamEvent } from "./types.ts";
 import { CRICKET_TEAM_DISCOVERY } from "./types.ts";
 import { mapWithConcurrency } from "../espn/mapWithConcurrency.ts";
 import { discoverTeamSeriesIds, type CricketSeriesRef } from "./discovery.ts";
+import { fetchEspnJson } from "./fetchJson.ts";
 
 const FETCH_CONCURRENCY = 8;
 
@@ -137,8 +138,7 @@ function normalizeEvent(
  */
 export async function fetchSeriesCalendar(seriesId: string): Promise<string[]> {
   const url = `https://site.api.espn.com/apis/site/v2/sports/cricket/${seriesId}/scoreboard`;
-  const response = await fetch(url);
-  const data = (await response.json()) as SeriesScoreboardResponse;
+  const data = await fetchEspnJson<SeriesScoreboardResponse>(url);
   const calendar = data.leagues?.[0]?.calendar ?? [];
   const days = calendar.map(iso => iso.slice(0, 10).replaceAll("-", ""));
   return [...new Set(days)];
@@ -157,22 +157,19 @@ export async function fetchSeriesCalendar(seriesId: string): Promise<string[]> {
  * @param series - The series to fetch (id + display name).
  * @param datesParam - `YYYYMMDD` (one day) or `YYYY` (a whole year).
  * @returns The slice's matches; empty if there are none.
+ * @throws If the request fails every attempt. A year-sized slice is an entire
+ * tour, so swallowing the failure would silently drop every match in it.
  */
 export async function fetchSeriesEvents(
   series: CricketSeriesRef,
   datesParam: string
 ): Promise<CricketTeamEvent[]> {
   const url = `https://site.api.espn.com/apis/site/v2/sports/cricket/${series.id}/scoreboard?dates=${datesParam}`;
-  try {
-    const response = await fetch(url);
-    const data = (await response.json()) as SeriesScoreboardResponse;
-    const name = data.leagues?.[0]?.name ?? series.name;
-    return (data.events ?? []).map(e =>
-      normalizeEvent(e, { id: series.id, name })
-    );
-  } catch {
-    return []; // a failed series slice shouldn't sink the whole schedule
-  }
+  const data = await fetchEspnJson<SeriesScoreboardResponse>(url);
+  const name = data.leagues?.[0]?.name ?? series.name;
+  return (data.events ?? []).map(e =>
+    normalizeEvent(e, { id: series.id, name })
+  );
 }
 
 /** @deprecated Prefer {@link fetchSeriesEvents}; kept for pinned-match lookup. */
@@ -207,6 +204,8 @@ function windowYears(now: Date): string[] {
  * @param teamId - ESPN cricket team id (see `CRICKET_NATIONAL_TEAMS`).
  * @param now - The reference "today" for the window; defaults to current time.
  * @returns The team's matches across all discovered series, in date order.
+ * @throws If discovery or any series fetch fails every attempt. Callers get an
+ * error they can retry instead of a schedule that is quietly missing matches.
  */
 export async function fetchAllCricketTeamEvents(
   teamId: string,
