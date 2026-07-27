@@ -83,14 +83,37 @@ T7 rather than leaving them to mislead the next reader:
 `shared/src/sports/formats.ts`. Keep it a plain const map plus a lookup — no
 class, no registry, no per-sport config objects. The map *is* the abstraction.
 
+Keyed by **sport, not league**. NBA, NFL, FIFA, F1 and IPL are competitions; a
+duration belongs to the game. The clearest evidence is IPL: it is franchise T20
+cricket, so its 240 minutes and an international T20's 240 minutes are the same
+fact recorded twice under today's league keying. Sport keying states it once.
+
+Sport names come from the taxonomy already in the repo at
+`client/api/calendar/fetchPinnedEventDetails.ts:18` — `basketball`, `football`,
+`racing`, `soccer` — plus `cricket` from the cricket API paths. Do not invent a
+second naming scheme. `football` means American football here; that reads oddly
+beside `soccer`, but it is ESPN's convention and already load-bearing in
+`CORE_PATHS`.
+
 ```ts
 export const SPORT_FORMATS = {
-  nba: { regular: 150 },
-  nfl: { regular: 210 },
-  fifa: { group: 120 },
-  ipl: { league: 240 },
-  cricket: { test: 5 * 24 * 60, odi: 480, t20i: 240, other: 240 },
-  f1: { practice: 60, qualifying: 60, race: 120, sprintQualifying: 45, sprint: 30 },
+  cricket: {
+    test: 5 * 24 * 60,
+    odi: 480,
+    t20i: 240, // international
+    t20: 240, // domestic / franchise, e.g. IPL
+    other: 240,
+  },
+  basketball: { standard: 150 },
+  football: { standard: 210 },
+  soccer: { standard: 120 },
+  racing: {
+    practice: 60,
+    qualifying: 60,
+    race: 120,
+    sprintQualifying: 45,
+    sprint: 30,
+  },
 } as const;
 
 export type Sport = keyof typeof SPORT_FORMATS;
@@ -101,14 +124,24 @@ export type SportFormat<S extends Sport> = keyof (typeof SPORT_FORMATS)[S];
 to type. Derive the format-name type from the map rather than declaring a
 parallel union — a parallel union will drift.
 
+**No league → sport map.** Each call site already knows which league it is, so it
+names its sport and format directly (`getDurationMinutes("basketball",
+"standard")`). Adding a lookup table from league to sport would reintroduce the
+league keying this change exists to remove, for no benefit.
+
+**`t20` and `t20i` are both 240 and that is not redundancy to collapse.** They
+are different competition classes that happen to share a duration. Merging them
+would either misname IPL as international or force renaming `t20i`, which is a
+persisted value — see the warning below.
+
 Cricket's existing `CricketMatchFormat` (`"test" | "odi" | "t20i" | "other"`)
-already matches its format keys exactly, so `event.format` indexes the new map
-directly with no translation.
+matches its format keys exactly, so `event.format` indexes the new map directly
+with no translation. `t20` is additive and used only by IPL.
 
 F1 needs an id → name map because ESPN identifies sessions numerically:
 
 ```ts
-export const F1_SESSION_FORMATS: Record<string, SportFormat<"f1">> = {
+export const F1_SESSION_FORMATS: Record<string, SportFormat<"racing">> = {
   "1": "practice",
   "2": "qualifying",
   "3": "race",
@@ -120,6 +153,19 @@ export const F1_SESSION_FORMATS: Record<string, SportFormat<"f1">> = {
 The three F1 call sites resolve id → name → minutes, falling back to 60 when the
 id is unknown. Keep that fallback explicit and commented — it exists because
 ESPN occasionally emits session ids the app has never seen.
+
+## Do not rename cricket's format strings
+
+`test`, `odi`, `t20i`, `other` are not internal identifiers. They are:
+
+- validated query-param values — `supabase/functions/_shared/params.ts:70`
+- filter-pill ids — `client/components/cricket-teams/utils/filterState.ts:12`
+- stored in `calendar_subscriptions.filters` for every saved cricket subscription
+
+Renaming any of them silently breaks existing feed URLs and saved subscriptions —
+the feed would 400, or filter to nothing, for users who did not change anything.
+This is why IPL gets a new `t20` key rather than the cricket formats being
+reshaped around it.
 
 ## Sequencing
 
