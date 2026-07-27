@@ -58,17 +58,19 @@ shared/                          # @sports-calendar/shared — logic reused by c
     │   ├── fetchEventDetails.ts # Full event details by ref URL (defines BaseEvent)
     │   └── mapWithConcurrency.ts# Concurrency-capped async map (max N in flight)
     ├── eventStatus.ts           # isEventLive() / isEventPast() helpers
+    ├── sports/formats.ts        # SPORT_FORMATS + getDurationMinutes (by sport, not league)
     ├── nba/ nfl/ f1/ ipl/ fifa/ # Per-league modules, each with:
     │   ├── types.ts             #   league event/team/filter types
     │   ├── filters.ts           #   filter<League>Events
     │   ├── fetch.ts             #   fetchAll<League>Events (full-season fetch)
-    │   └── transform.ts         #   transform<League>EventsToIcs
+    │   ├── transform.ts         #   transform<League>EventsToIcs
+    │   └── sessions.ts          #   (f1 only) ESPN session id → format → duration
     ├── cricketTeam/             # Cricket teams dimension (cross-series)
-    │   ├── types.ts             #   event/filter types, CRICKET_NATIONAL_TEAMS, durations
+    │   ├── types.ts             #   event/filter types, CRICKET_NATIONAL_TEAMS
     │   ├── discovery.ts         #   discoverTeamSeriesIds (header-endpoint scan)
     │   ├── fetch.ts             #   fetchAllCricketTeamEvents (series calendars → days)
-    │   ├── filters.ts           #   format filter + endDate-aware past check
-    │   └── transform.ts         #   ICS transform (multi-day Tests span DTSTART→DTEND)
+    │   ├── filters.ts           #   format filter + nominal-duration past check
+    │   └── transform.ts         #   ICS transform (spans the format's nominal duration)
     └── index.ts                 # Barrel re-exporting everything above
 
 client/                          # @sports-calendar/client — the React SPA
