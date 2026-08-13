@@ -265,11 +265,19 @@ Deno.test(
       assert(res.status === 200, `expected 200, got ${res.status}`);
       const body = await res.text();
       const uids = uidsOf(body).sort();
+      // The Test splits into five daily events, joined by the NBA pin.
+      const expected = [
+        "1544001-day1@sports-calendar",
+        "1544001-day2@sports-calendar",
+        "1544001-day3@sports-calendar",
+        "1544001-day4@sports-calendar",
+        "1544001-day5@sports-calendar",
+        "401@sports-calendar",
+      ];
       assert(
-        uids.length === 2 &&
-          uids[0] === "1544001@sports-calendar" &&
-          uids[1] === "401@sports-calendar",
-        `expected [1544001, 401]@sports-calendar, got [${uids.join(", ")}]`
+        uids.length === expected.length &&
+          expected.every((uid, i) => uids[i] === uid),
+        `expected ${expected.join(", ")}, got [${uids.join(", ")}]`
       );
       assert(
         body.includes("India tour of Sri Lanka 2026"),

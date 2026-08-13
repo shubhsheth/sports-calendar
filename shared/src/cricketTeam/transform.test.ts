@@ -1,5 +1,6 @@
 import { transformCricketTeamEventsToIcs } from "./transform.ts";
 import { makeCricketTeamEvent } from "./testEvent.ts";
+import dayjs from "dayjs";
 
 describe("transformCricketTeamEventsToIcs", () => {
   it("maps a T20I to a fixed-duration event with title, series description, and uid", () => {
@@ -25,10 +26,11 @@ describe("transformCricketTeamEventsToIcs", () => {
     });
   });
 
-  it("spans a Test by its nominal duration, ignoring endDate", () => {
+  it("splits a Test into five daily 8-hour events, one per day", () => {
     // endDate is padded to a day boundary and occasionally precedes the start,
-    // so the ICS span comes from the format duration like every other match.
-    const [ics] = transformCricketTeamEventsToIcs([
+    // so the daily spans come from the format like every other match.
+    const local = dayjs("2026-08-15T04:30Z");
+    const events = transformCricketTeamEventsToIcs([
       makeCricketTeamEvent({
         format: "test",
         formatDetail: "1st Test",
@@ -36,41 +38,46 @@ describe("transformCricketTeamEventsToIcs", () => {
         endDate: "2026-08-20T23:59Z",
       }),
     ]);
-    expect(ics).toMatchObject({
-      title: "Sri Lanka v India — 1st Test",
-      start: [2026, 8, 15, 4, 30],
-      duration: { hours: 120, minutes: 0 },
+    expect(events).toHaveLength(5);
+    events.forEach((ics, i) => {
+      const day = local.add(i, "day");
+      expect(ics).toMatchObject({
+        uid: `1544001-day${i + 1}@sports-calendar`,
+        title: `Sri Lanka v India — 1st Test (Day ${i + 1})`,
+        start: [
+          day.year(),
+          day.month() + 1,
+          day.date(),
+          day.hour(),
+          day.minute(),
+        ],
+        duration: { hours: 8, minutes: 0 },
+        location: "Galle International Stadium",
+      });
+      expect(ics).not.toHaveProperty("end");
     });
-    expect(ics).not.toHaveProperty("end");
   });
 
-  it("is unaffected by an endDate that precedes the start", () => {
-    // Real ESPN data: IND v AUS starts 2027-02-27 with endDate 2027-02-04.
-    const [ics] = transformCricketTeamEventsToIcs([
-      makeCricketTeamEvent({
-        format: "test",
-        formatDetail: "5th Test",
-        date: "2027-02-27T04:00Z",
-        endDate: "2027-02-04T23:59Z",
-      }),
+  it("gives each Test day a distinct uid so they survive dedupe", () => {
+    const events = transformCricketTeamEventsToIcs([
+      makeCricketTeamEvent({ format: "test", formatDetail: "1st Test" }),
     ]);
-    expect(ics).toMatchObject({
-      start: [2027, 2, 27, 4, 0],
-      duration: { hours: 120, minutes: 0 },
-    });
+    const uids = events.map(e => e.uid);
+    expect(new Set(uids).size).toBe(5);
   });
 
-  it("spans a Test with no endDate identically", () => {
-    const [ics] = transformCricketTeamEventsToIcs([
+  it("splits a Test with no endDate identically", () => {
+    const events = transformCricketTeamEventsToIcs([
       makeCricketTeamEvent({
         format: "test",
         formatDetail: "Only Test",
         endDate: undefined,
       }),
     ]);
-    expect(ics).toMatchObject({
-      title: "Sri Lanka v India — Only Test",
-      duration: { hours: 120, minutes: 0 },
+    expect(events).toHaveLength(5);
+    expect(events[0]).toMatchObject({
+      title: "Sri Lanka v India — Only Test (Day 1)",
+      duration: { hours: 8, minutes: 0 },
     });
   });
 

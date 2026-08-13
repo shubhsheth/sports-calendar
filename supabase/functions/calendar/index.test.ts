@@ -162,18 +162,20 @@ Deno.test("cricket-team route returns the team's matches across its series", asy
     assert(body.includes("Sri Lanka v India"), "missing match title");
     assert(body.includes("1st Test"), "missing format detail in title");
     assert(body.includes("India tour of Sri Lanka 2026"), "missing series name");
-    // Every match, Tests included, spans its format's nominal duration —
-    // ESPN's endDate is padded to a day boundary and sometimes precedes the
-    // start, so it is not used. A Test is five days, which ics emits as
-    // DURATION:PT120H.
+    // A Test is played over five days but only a session a day, so it becomes
+    // five separate 8-hour events rather than one 120-hour block that would wall
+    // off the calendar overnight. ESPN's endDate is padded to a day boundary and
+    // sometimes precedes the start, so it is not used (no DTEND).
     assert(
-      body.includes("DURATION:PT120H"),
-      "Test should span its 5-day nominal duration"
+      body.includes("DURATION:PT8H"),
+      "Test days should each span 8 hours"
     );
     assert(!body.includes("DTEND"), "Test should not use DTEND");
-    // The series calendar repeats the Test's match days; dedupe → one VEVENT.
+    assert(body.includes("(Day 1)") && body.includes("(Day 5)"), "missing day labels");
+    // The series calendar repeats the Test's match days; dedupe keeps one match,
+    // which splits into five daily VEVENTs.
     const vevents = body.split("BEGIN:VEVENT").length - 1;
-    assert(vevents === 1, `expected 1 VEVENT after dedupe, got ${vevents}`);
+    assert(vevents === 5, `expected 5 daily VEVENTs after dedupe, got ${vevents}`);
   } finally {
     restoreFetch();
   }

@@ -70,7 +70,7 @@ shared/                          # @sports-calendar/shared — logic reused by c
     │   ├── discovery.ts         #   discoverTeamSeriesIds (header-endpoint scan)
     │   ├── fetch.ts             #   fetchAllCricketTeamEvents (series calendars → days)
     │   ├── filters.ts           #   format filter + nominal-duration past check
-    │   └── transform.ts         #   ICS transform (spans the format's nominal duration)
+    │   └── transform.ts         #   ICS transform (Tests → 5 daily events; else one span)
     └── index.ts                 # Barrel re-exporting everything above
 
 client/                          # @sports-calendar/client — the React SPA
