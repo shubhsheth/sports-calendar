@@ -304,10 +304,19 @@ Deno.test(
       const res = await app.request(`/calendar/my/${TOKEN}.ics`);
       assert(res.status === 200, `expected 200, got ${res.status}`);
       const body = await res.text();
-      const uids = uidsOf(body);
+      const uids = uidsOf(body).sort();
+      // The pinned Test splits into five daily events, all from the one match.
+      const expected = [
+        "1544001-day1@sports-calendar",
+        "1544001-day2@sports-calendar",
+        "1544001-day3@sports-calendar",
+        "1544001-day4@sports-calendar",
+        "1544001-day5@sports-calendar",
+      ];
       assert(
-        uids.length === 1 && uids[0] === "1544001@sports-calendar",
-        `expected only the pinned match, got [${uids.join(", ")}]`
+        uids.length === expected.length &&
+          expected.every((uid, i) => uids[i] === uid),
+        `expected only the pinned match's days, got [${uids.join(", ")}]`
       );
       assert(
         mock.headerCalls() === 0,
@@ -340,10 +349,20 @@ Deno.test(
       const res = await app.request(`/calendar/my/${TOKEN}.ics`);
       assert(res.status === 200, `expected 200, got ${res.status}`);
       const body = await res.text();
-      const uids = uidsOf(body);
+      const uids = uidsOf(body).sort();
+      // Pin and subscription resolve to one match, which splits into five daily
+      // events with no duplicates — that is what "appears once" means here.
+      const expected = [
+        "1544001-day1@sports-calendar",
+        "1544001-day2@sports-calendar",
+        "1544001-day3@sports-calendar",
+        "1544001-day4@sports-calendar",
+        "1544001-day5@sports-calendar",
+      ];
       assert(
-        uids.length === 1 && uids[0] === "1544001@sports-calendar",
-        `expected the deduped match only, got [${uids.join(", ")}]`
+        uids.length === expected.length &&
+          expected.every((uid, i) => uids[i] === uid),
+        `expected the deduped match's days only, got [${uids.join(", ")}]`
       );
     } finally {
       restoreFetch();
