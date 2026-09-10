@@ -8,7 +8,7 @@ import type { NbaEvent } from "./types.ts";
 
 const SPORT = "basketball";
 const LEAGUE = "nba";
-const SEASON = "2026"; // ESPN season id = calendar year the season starts
+const SEASON = "2027"; // ESPN season id = calendar year the season ends ("2026-27")
 const PAGE_SIZE = 30;
 // Phases fetched and merged: 2 = regular season, 3 = postseason.
 const SEASON_TYPE_IDS = [2, 3];

@@ -8,7 +8,7 @@ import type { NflEvent } from "./types.ts";
 
 const SPORT = "football";
 const LEAGUE = "nfl";
-const SEASON = "2025"; // ESPN season id = calendar year the season starts
+const SEASON = "2026"; // ESPN season id = calendar year the season starts
 const PAGE_SIZE = 30;
 // Phases fetched and merged: 1 = preseason, 2 = regular season, 3 = postseason.
 const SEASON_TYPE_IDS = [1, 2, 3];
