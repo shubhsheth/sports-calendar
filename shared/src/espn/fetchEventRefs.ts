@@ -20,7 +20,7 @@ export type FetchEventRefsResponse = {
  *
  * @param sportId - ESPN sport slug (e.g. `basketball`).
  * @param leagueId - ESPN league slug (e.g. `nba`).
- * @param seasonId - Season id (the calendar year the season starts).
+ * @param seasonId - Season id (a calendar year; which end of a cross-year season it names is league-specific — see each league's `SEASON`).
  * @param pagination - Optional `seasonTypeId` (default `2`, regular season), `pageSize` (default `30`), and `pageNumber` (default `1`).
  * @returns One page: `{ items, pageCount, pageIndex }`.
  */
